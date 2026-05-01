@@ -12,9 +12,9 @@
 | US-003 | 创建数据库工具函数 | **DONE** | utils/db.js |
 | US-004 | 初始化默认分类数据 | **DONE** | utils/init-data.js |
 | US-005 | 初始化默认账户数据 | **DONE** | utils/init-data.js |
-| US-006 | 创建金额键盘组件 | pending | |
-| US-007 | 创建分类选择器组件 | pending | |
-| US-008 | 创建记账页面 | pending | |
+| US-006 | 创建金额键盘组件 | **DONE** | components/amount-keyboard.vue | |
+| US-007 | 创建分类选择器组件 | **DONE** | components/category-picker.vue | |
+| US-008 | 创建记账页面 | **DONE** | pages/add/add.vue | |
 | US-009 | 创建快捷模板功能 | pending | |
 | US-010 | 创建环形图组件 | pending | |
 | US-011 | 创建统计卡片组件 | pending | |
@@ -33,14 +33,6 @@
 ## Completed
 - US-001: 初始化项目结构和数据库表
 - US-002: 初始化 Pinia stores
-- US-006: 创建金额键盘组件
-- US-004: 初始化默认分类数据
-- US-005: 初始化默认账户数据
-
-## Current
-- US-006: 创建金额键盘组件
-
-## Progress Report
 
 ## 2026-05-02 02:35 - US-001
 - What was implemented: 创建了完整的 uni-app 项目结构，包括页面目录、组件目录、store 目录、utils 目录
@@ -102,3 +94,19 @@
 - 使用 storage.js 工具函数封装 getStorage/setStorage/removeStorage
 - 默认数据在 App.vue onLaunch 时通过 init-data.js 初始化
 - stores 之间可以相互引用（如 budget store 引用 bill store）
+
+
+## 2026-05-02 03:30 - US-006/US-007/US-008
+- What was implemented: Enhanced components and created add page
+- Files changed:
+  - components/amount-keyboard/amount-keyboard.vue (修改 - Vue3 Composition API 重构)
+  - components/category-picker/category-picker.vue (修改 - Vue3 Composition API 重构)
+  - pages/add/add.vue (修改 - 创建完整记账页面)
+  - scripts/ralph/prd.json (修改 - 标记 US-006, US-007, US-008 完成)
+- **Learnings for future iterations:**
+  - uni-app 组件使用 Vue3 Composition API 时需要使用 setup() 语法
+  - amount-keyboard 事件命名为 onInput/onDelete/onClear/onConfirm 避免与原生事件冲突
+  - category-picker 使用 v-model 模式与父组件通信
+  - 记账页面需要验证金额、分类、账户选择后才允许保存
+  - 使用 store 的 loadCategories()/loadAccounts() 初始化数据
+---
