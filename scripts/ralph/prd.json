@@ -166,8 +166,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Ring chart component with conic-gradient, shows used/total ratio, color changes at 80%/100% thresholds"
     },
     {
       "id": "US-011",
@@ -182,8 +182,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Stat card component with title, amount display, and optional compare text, supports expense/income/balance types"
     },
     {
       "id": "US-012",
@@ -201,8 +201,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Bill item component shows category icon, name, remark, time, and amount with color coding for expense/income"
     },
     {
       "id": "US-013",
@@ -242,8 +242,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created records page with month selector, stats overview, grouped records by date, delete confirmation, and edit support"
     },
     {
       "id": "US-015",
@@ -259,8 +259,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Pie chart component with conic-gradient, legend with percentages, and click events"
     },
     {
       "id": "US-016",
@@ -275,8 +275,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Line chart component with data points visualization and x-axis labels"
     },
     {
       "id": "US-017",
@@ -293,8 +293,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created stats page with month selector, overview cards (income/expense/balance), pie-chart for category breakdown, and line-chart for daily expense trend"
     },
     {
       "id": "US-018",
@@ -311,8 +311,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created budget page with month selector, budget input/slider/presets, progress bar with color coding, alert banners, and daily available suggestion"
     },
     {
       "id": "US-019",
@@ -330,8 +330,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created my page with profile section, account management, budget setting, data export, sync status, and about info"
     },
     {
       "id": "US-020",
@@ -348,8 +348,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: store/sync.js implements sync status management, offline queue, and cloud sync operations"
     },
     {
       "id": "US-021",
