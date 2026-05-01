@@ -1,0 +1,145 @@
+/**
+ * Category Store - 分类管理
+ * 随手记 - 个人记账小程序
+ */
+
+import { defineStore } from 'pinia'
+import { getStorage, setStorage } from '@/utils/storage'
+import {
+  EXPENSE_CATEGORY_CODES,
+  INCOME_CATEGORY_CODES
+} from '@/utils/schema'
+
+// 存储键名
+const STORAGE_KEY = 'ssj_categories'
+
+// 默认支出分类
+const DEFAULT_EXPENSE_CATEGORIES = [
+  { code: EXPENSE_CATEGORY_CODES.FOOD, name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 1, sort: 1, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.TRANSPORT, name: '交通', icon: '🚗', color: '#4ECDC4', type: 1, sort: 2, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.SHOPPING, name: '购物', icon: '🛒', color: '#45B7D1', type: 1, sort: 3, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.ENTERTAINMENT, name: '娱乐', icon: '🎮', color: '#96CEB4', type: 1, sort: 4, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.LIVING, name: '居住', icon: '🏠', color: '#DDA0DD', type: 1, sort: 5, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.MEDICAL, name: '医疗', icon: '💊', color: '#98D8C8', type: 1, sort: 6, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.EDUCATION, name: '教育', icon: '📚', color: '#F7DC6F', type: 1, sort: 7, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.COMMUNICATION, name: '通讯', icon: '📱', color: '#85C1E9', type: 1, sort: 8, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.OTHER, name: '其他', icon: '📦', color: '#BB8FCE', type: 1, sort: 9, is_default: 1 }
+]
+
+// 默认收入分类
+const DEFAULT_INCOME_CATEGORIES = [
+  { code: INCOME_CATEGORY_CODES.SALARY, name: '工资', icon: '💰', color: '#27AE60', type: 2, sort: 1, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.SIDE_JOB, name: '副业', icon: '💼', color: '#3498DB', type: 2, sort: 2, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.INVESTMENT, name: '投资', icon: '📈', color: '#E74C3C', type: 2, sort: 3, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.OTHER_INCOME, name: '其他', icon: '💵', color: '#95A5A6', type: 2, sort: 4, is_default: 1 }
+]
+
+// 初始化分类数据
+function initCategories() {
+  return [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES]
+}
+
+export const useCategoryStore = defineStore('category', {
+  state: () => ({
+    categories: []
+  }),
+
+  getters: {
+    // 获取所有分类
+    allCategories: (state) => state.categories,
+
+    // 获取支出分类
+    expenseCategories(state) {
+      return state.categories.filter(c => c.type === 1).sort((a, b) => a.sort - b.sort)
+    },
+
+    // 获取收入分类
+    incomeCategories(state) {
+      return state.categories.filter(c => c.type === 2).sort((a, b) => a.sort - b.sort)
+    },
+
+    // 按编码获取分类
+    getCategoryByCode: (state) => (code) => {
+      return state.categories.find(c => c.code === code)
+    },
+
+    // 按类型获取分类
+    getCategoriesByType: (state) => (type) => {
+      return state.categories.filter(c => c.type === type).sort((a, b) => a.sort - b.sort)
+    }
+  },
+
+  actions: {
+    // 加载分类
+    loadCategories() {
+      const data = getStorage(STORAGE_KEY)
+      if (!data || data.length === 0) {
+        // 初始化默认分类
+        this.categories = initCategories()
+        this.saveCategories()
+      } else {
+        this.categories = data
+      }
+      return this.categories
+    },
+
+    // 添加分类
+    addCategory(category) {
+      const now = Date.now()
+      const newCategory = {
+        id: now.toString(),
+        code: category.code || '',
+        name: category.name || '',
+        icon: category.icon || '📦',
+        color: category.color || '#999999',
+        type: category.type || 1,
+        sort: category.sort || 0,
+        is_default: 0
+      }
+      this.categories.push(newCategory)
+      this.saveCategories()
+      return newCategory
+    },
+
+    // 更新分类
+    updateCategory(code, updates) {
+      const index = this.categories.findIndex(c => c.code === code)
+      if (index !== -1) {
+        this.categories[index] = {
+          ...this.categories[index],
+          ...updates
+        }
+        this.saveCategories()
+        return this.categories[index]
+      }
+      return null
+    },
+
+    // 删除分类
+    deleteCategory(code) {
+      const index = this.categories.findIndex(c => c.code === code)
+      if (index !== -1) {
+        // 检查是否为默认分类
+        if (this.categories[index].is_default === 1) {
+          console.warn('Cannot delete default category')
+          return false
+        }
+        this.categories.splice(index, 1)
+        this.saveCategories()
+        return true
+      }
+      return false
+    },
+
+    // 保存到本地存储
+    saveCategories() {
+      setStorage(STORAGE_KEY, this.categories)
+    },
+
+    // 重置分类为默认
+    resetCategories() {
+      this.categories = initCategories()
+      this.saveCategories()
+    }
+  }
+})

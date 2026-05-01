@@ -1,7 +1,11 @@
 <script>
+	import { initAllData } from './utils/init-data'
+
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			// 初始化默认数据
+			initAllData()
 		},
 		onShow: function() {
 			console.log('App Show')
