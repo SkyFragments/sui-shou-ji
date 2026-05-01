@@ -1,0 +1,37 @@
+# Ralph Progress - 随手记 MVP
+
+## Project: 随手记
+## Branch: ralph/sui-shou-ji-mvp
+## Total Stories: 22
+
+## Progress
+| # | Story | Status | Notes |
+|---|-------|--------|-------|
+| US-001 | 初始化项目结构和数据库表 | pending | |
+| US-002 | 初始化 Pinia stores | pending | |
+| US-003 | 创建数据库工具函数 | pending | |
+| US-004 | 初始化默认分类数据 | pending | |
+| US-005 | 初始化默认账户数据 | pending | |
+| US-006 | 创建金额键盘组件 | pending | |
+| US-007 | 创建分类选择器组件 | pending | |
+| US-008 | 创建记账页面 | pending | |
+| US-009 | 创建快捷模板功能 | pending | |
+| US-010 | 创建环形图组件 | pending | |
+| US-011 | 创建统计卡片组件 | pending | |
+| US-012 | 创建账单项组件 | pending | |
+| US-013 | 创建首页 | pending | |
+| US-014 | 创建账单列表页面 | pending | |
+| US-015 | 创建饼图组件 | pending | |
+| US-016 | 创建折线图组件 | pending | |
+| US-017 | 创建统计页面 | pending | |
+| US-018 | 创建预算页面 | pending | |
+| US-019 | 创建我的页面 | pending | |
+| US-020 | 实现云端同步功能 | pending | |
+| US-021 | 实现数据导出功能 | pending | |
+| US-022 | 配置底部导航栏和页面路由 | pending | |
+
+## Completed
+- (none yet)
+
+## Current
+- (none)
