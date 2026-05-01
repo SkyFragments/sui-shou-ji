@@ -1,6 +1,7 @@
 /**
  * 分类选择器组件
  * 显示分类图标网格，支持切换支出/收入分类
+ * 支出显示9个分类图标，收入显示4个分类图标
  */
 <template>
 	<view class="category-picker">
@@ -38,62 +39,63 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useCategoryStore } from '@/store/category'
+
 export default {
 	name: 'CategoryPicker',
 	props: {
 		type: {
 			type: Number,
 			default: 1
-		}
-	},
-	data() {
-		return {
-			currentType: this.type,
-			selectedCode: ''
-		}
-	},
-	computed: {
-		displayCategories() {
-			if (this.currentType === 1) {
-				return this.expenseCategories
-			}
-			return this.incomeCategories
-		}
-	},
-	setup() {
-		// 支出分类
-		const expenseCategories = [
-			{ code: 'FOOD', name: '餐饮', icon: '🍜', color: '#FF6B6B' },
-			{ code: 'TRANSPORT', name: '交通', icon: '🚌', color: '#4ECDC4' },
-			{ code: 'SHOPPING', name: '购物', icon: '🛒', color: '#FFE66D' },
-			{ code: 'ENTERTAINMENT', name: '娱乐', icon: '🎮', color: '#95E1D3' },
-			{ code: 'LIVING', name: '居住', icon: '🏠', color: '#F38181' },
-			{ code: 'MEDICAL', name: '医疗', icon: '🏥', color: '#AA96DA' },
-			{ code: 'EDUCATION', name: '教育', icon: '📚', color: '#FCBAD3' },
-			{ code: 'COMMUNICATION', name: '通讯', icon: '📱', color: '#A8D8EA' },
-			{ code: 'OTHER', name: '其他', icon: '📦', color: '#C9B1FF' }
-		]
-		// 收入分类
-		const incomeCategories = [
-			{ code: 'SALARY', name: '工资', icon: '💰', color: '#4CAF50' },
-			{ code: 'SIDE_JOB', name: '副业', icon: '💼', color: '#2196F3' },
-			{ code: 'INVESTMENT', name: '投资', icon: '📈', color: '#FF9800' },
-			{ code: 'OTHER_INCOME', name: '其他', icon: '💵', color: '#9C27B0' }
-		]
-		return { expenseCategories, incomeCategories }
-	},
-	methods: {
-		switchType(type) {
-			this.currentType = type
-			this.selectedCode = ''
 		},
-		selectCategory(category) {
-			this.selectedCode = category.code
-			this.$emit('select', {
-				type: this.currentType,
+		modelValue: {
+			type: String,
+			default: ''
+		}
+	},
+	emits: ['update:modelValue', 'select'],
+	setup(props, { emit }) {
+		const categoryStore = useCategoryStore()
+
+		// 初始化加载分类
+		categoryStore.loadCategories()
+
+		const currentType = computed(() => props.type)
+		const selectedCode = computed({
+			get: () => props.modelValue,
+			set: (val) => emit('update:modelValue', val)
+		})
+
+		const displayCategories = computed(() => {
+			if (currentType.value === 1) {
+				return categoryStore.expenseCategories
+			}
+			return categoryStore.incomeCategories
+		})
+
+		const switchType = (type) => {
+			emit('update:modelValue', '')
+			emit('select', { type, code: '', name: '' })
+		}
+
+		const selectCategory = (category) => {
+			selectedCode.value = category.code
+			emit('select', {
+				type: currentType.value,
 				code: category.code,
-				name: category.name
+				name: category.name,
+				icon: category.icon,
+				color: category.color
 			})
+		}
+
+		return {
+			currentType,
+			selectedCode,
+			displayCategories,
+			switchType,
+			selectCategory
 		}
 	}
 }
@@ -107,27 +109,29 @@ export default {
 .type-tabs {
 	display: flex;
 	justify-content: center;
-	margin-bottom: 20rpx;
+	margin-bottom: 24rpx;
+	gap: 24rpx;
 }
 
 .tab {
-	padding: 10rpx 40rpx;
-	margin: 0 10rpx;
-	border-radius: 30rpx;
+	padding: 12rpx 48rpx;
+	border-radius: 40rpx;
 	font-size: 28rpx;
 	color: #666;
 	background-color: #f0f0f0;
+	transition: all 0.2s;
 }
 
 .tab.active {
 	color: #ffffff;
-	background-color: #007AFF;
+	background-color: #07c160;
 }
 
 .category-grid {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-start;
+	padding: 0 10rpx;
 }
 
 .category-item {
@@ -135,11 +139,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding: 15rpx 0;
-}
-
-.category-item.selected .category-icon {
-	border: 2px solid #007AFF;
+	padding: 12rpx 0;
 }
 
 .category-icon {
@@ -149,12 +149,19 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 40rpx;
+	font-size: 44rpx;
+	border: 3rpx solid transparent;
+	transition: border-color 0.2s;
+}
+
+.category-item.selected .category-icon {
+	border-color: #333;
 }
 
 .category-name {
 	font-size: 24rpx;
 	color: #666;
 	margin-top: 8rpx;
+	text-align: center;
 }
 </style>

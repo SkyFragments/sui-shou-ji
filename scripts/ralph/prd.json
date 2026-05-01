@@ -95,8 +95,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Enhanced amount-keyboard with Vue3 Composition API, 4x4 layout, decimal support, max 999999.99, clear/confirm buttons"
     },
     {
       "id": "US-007",
@@ -113,8 +113,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Enhanced category-picker with Vue3 Composition API, integrates with category store, shows 9 expense/4 income categories with icons"
     },
     {
       "id": "US-008",
@@ -135,8 +135,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created pages/add/add.vue with amount display, type switch, category-picker, account picker, date picker, remark input, and amount-keyboard integration"
     },
     {
       "id": "US-009",
