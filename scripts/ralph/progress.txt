@@ -1,0 +1,100 @@
+# Ralph Progress - 随手记 MVP
+
+## Project: 随手记
+## Branch: ralph/sui-shou-ji-mvp
+## Total Stories: 22
+
+## Progress
+| # | Story | Status | Notes |
+|---|-------|--------|-------|
+| US-001 | 初始化项目结构和数据库表 | **DONE** | |
+| US-002 | 初始化 Pinia stores | **DONE** | |
+| US-003 | 创建数据库工具函数 | pending | |
+| US-004 | 初始化默认分类数据 | pending | |
+| US-005 | 初始化默认账户数据 | pending | |
+| US-006 | 创建金额键盘组件 | pending | |
+| US-007 | 创建分类选择器组件 | pending | |
+| US-008 | 创建记账页面 | pending | |
+| US-009 | 创建快捷模板功能 | pending | |
+| US-010 | 创建环形图组件 | pending | |
+| US-011 | 创建统计卡片组件 | pending | |
+| US-012 | 创建账单项组件 | pending | |
+| US-013 | 创建首页 | pending | |
+| US-014 | 创建账单列表页面 | pending | |
+| US-015 | 创建饼图组件 | pending | |
+| US-016 | 创建折线图组件 | pending | |
+| US-017 | 创建统计页面 | pending | |
+| US-018 | 创建预算页面 | pending | |
+| US-019 | 创建我的页面 | pending | |
+| US-020 | 实现云端同步功能 | pending | |
+| US-021 | 实现数据导出功能 | pending | |
+| US-022 | 配置底部导航栏和页面路由 | pending | |
+
+## Completed
+- US-001: 初始化项目结构和数据库表
+
+## Current
+- US-003: 创建数据库工具函数
+
+## Progress Report
+
+## 2026-05-02 02:35 - US-001
+- What was implemented: 创建了完整的 uni-app 项目结构，包括页面目录、组件目录、store 目录、utils 目录
+- Files changed:
+  - main.js (修改 - 添加 Pinia 初始化)
+  - pages.json (修改 - 添加路由和 tabBar 配置)
+  - pages/index/index.vue (修改 - 更新首页)
+  - store/index.js (新增 - Pinia store 入口)
+  - utils/schema.js (新增 - 数据库表结构定义)
+  - components/amount-keyboard/amount-keyboard.vue (新增 - 金额键盘组件)
+  - components/category-picker/category-picker.vue (新增 - 分类选择器组件)
+  - components/ring-chart/ring-chart.vue (新增 - 环形图组件)
+  - components/stat-card/stat-card.vue (新增 - 统计卡片组件)
+  - components/bill-item/bill-item.vue (新增 - 账单项组件)
+  - components/pie-chart/pie-chart.vue (新增 - 饼图组件)
+  - components/line-chart/line-chart.vue (新增 - 折线图组件)
+  - pages/add/add.vue (新增)
+  - pages/records/records.vue (新增)
+  - pages/stats/stats.vue (新增)
+  - pages/budget/budget.vue (新增)
+  - pages/my/my.vue (新增)
+- **Learnings for future iterations:**
+  - uni-app 使用条件编译 #ifndef VUE3 / #ifdef VUE3 来区分 Vue2 和 Vue3
+  - uni-app 的 storage API 使用 uni.getStorageSync/uni.setStorageSync
+  - pages.json 中的 tabBar.iconPath 和 selectedIconPath 需要实际的图片文件
+  - Pinia 在 uni-app 中的初始化需要在 main.js 中配置
+- **Notes:**
+  - 本次实现包含了部分 UI 组件（US-006 到 US-012），因为它们在创建页面时作为占位符一起创建
+  - 数据库表结构定义在 utils/schema.js，但实际数据存储使用 uni storage 而非真正的 SQLite
+---
+
+## 2026-05-02 03:00 - US-002
+- What was implemented: 创建了所有 Pinia stores 用于状态管理
+- Files changed:
+  - store/bill.js (新增 - 账单 store)
+  - store/category.js (新增 - 分类 store)
+  - store/account.js (新增 - 账户 store)
+  - store/budget.js (新增 - 预算 store)
+  - store/sync.js (新增 - 同步 store)
+  - store/index.js (修改 - 导出所有 store)
+  - utils/storage.js (新增 - 本地存储工具)
+  - utils/init-data.js (新增 - 默认数据初始化)
+  - utils/db.js (修改 - 数据库工具函数已存在)
+  - main.js (修改 - 注册 stores 和初始化方法)
+  - App.vue (修改 - 启动时初始化默认数据)
+- **Learnings for future iterations:**
+  - Pinia stores 在 uni-app 中需要在 main.js 中初始化
+  - 使用 getStorage/setStorage 工具函数封装 uni.getStorageSync/JSON.parse
+  - budget store 使用 getter 调用 bill store 获取已用金额
+  - sync store 实现了云端同步状态管理和离线数据队列
+  - init-data.js 在 App.vue onLaunch 时调用初始化默认分类和账户
+---
+
+## Codebase Patterns
+- uni-app 项目结构：pages/（页面）、components/（组件）、store/（状态管理）、utils/（工具）
+- 数据库使用 uni.getStorageSync/JSON.stringify 模拟 SQLite 本地存储
+- 组件命名使用 PascalCase，样式使用 scoped 属性隔离
+- Pinia stores 使用 defineStore 创建，支持 state/getters/actions
+- 使用 storage.js 工具函数封装 getStorage/setStorage/removeStorage
+- 默认数据在 App.vue onLaunch 时通过 init-data.js 初始化
+- stores 之间可以相互引用（如 budget store 引用 bill store）
