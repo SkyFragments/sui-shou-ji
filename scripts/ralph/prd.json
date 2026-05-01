@@ -49,8 +49,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created utils/db.js with full CRUD operations, initDatabase(), insertRecord(), getRecords(), updateRecord(), deleteRecord(), getRecordsByMonth(), getRecordsByDateRange(), getCategoryStats(), getMonthStats()"
     },
     {
       "id": "US-004",
@@ -63,8 +63,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: init-data.js creates 9 expense categories and 4 income categories with correct codes, icons, colors, and sort order"
     },
     {
       "id": "US-005",
@@ -77,8 +77,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: init-data.js creates 4 default accounts (cash, alipay, wechat, bankcard) with correct codes, types, and is_default flags"
     },
     {
       "id": "US-006",
