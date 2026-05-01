@@ -9,9 +9,9 @@
 |---|-------|--------|-------|
 | US-001 | 初始化项目结构和数据库表 | **DONE** | |
 | US-002 | 初始化 Pinia stores | **DONE** | |
-| US-003 | 创建数据库工具函数 | pending | |
-| US-004 | 初始化默认分类数据 | pending | |
-| US-005 | 初始化默认账户数据 | pending | |
+| US-003 | 创建数据库工具函数 | **DONE** | utils/db.js |
+| US-004 | 初始化默认分类数据 | **DONE** | utils/init-data.js |
+| US-005 | 初始化默认账户数据 | **DONE** | utils/init-data.js |
 | US-006 | 创建金额键盘组件 | pending | |
 | US-007 | 创建分类选择器组件 | pending | |
 | US-008 | 创建记账页面 | pending | |
@@ -32,9 +32,13 @@
 
 ## Completed
 - US-001: 初始化项目结构和数据库表
+- US-002: 初始化 Pinia stores
+- US-006: 创建金额键盘组件
+- US-004: 初始化默认分类数据
+- US-005: 初始化默认账户数据
 
 ## Current
-- US-003: 创建数据库工具函数
+- US-006: 创建金额键盘组件
 
 ## Progress Report
 
