@@ -1,42 +1,600 @@
+/**
+ * 首页
+ * 显示今日概况和快速入口
+ */
 <template>
-	<view class="container">
-		<text class="title">随手记</text>
-		<text class="subtitle">个人记账小程序</text>
+	<view class="index-page">
+		<!-- 头部概况 -->
+		<view class="overview-section">
+			<view class="overview-header">
+				<text class="date">{{ todayDate }}</text>
+				<text class="greeting">今天</text>
+			</view>
+
+			<view class="stats-row">
+				<view class="stat-item expense">
+					<text class="stat-label">支出</text>
+					<text class="stat-amount">-{{ todayExpense.toFixed(2) }}</text>
+				</view>
+				<view class="stat-item income">
+					<text class="stat-label">收入</text>
+					<text class="stat-amount">+{{ todayIncome.toFixed(2) }}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 预算进度 -->
+		<view class="budget-section" v-if="budgetStore.currentBudget">
+			<ring-chart
+				:used="monthUsed"
+				:total="budgetStore.currentBudget"
+				label="本月已用"
+			/>
+			<view class="budget-info">
+				<view class="budget-item">
+					<text class="budget-label">预算</text>
+					<text class="budget-value">¥{{ budgetStore.currentBudget.toFixed(2) }}</text>
+				</view>
+				<view class="budget-item">
+					<text class="budget-label">剩余</text>
+					<text class="budget-value" :class="remainingClass">
+						¥{{ remaining.toFixed(2) }}
+					</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 超支提醒 -->
+		<view class="alert-banner" :class="alertClass" v-if="alertMessage">
+			<text>{{ alertMessage }}</text>
+		</view>
+
+		<!-- 快捷模板 -->
+		<view class="templates-section">
+			<view class="section-title">快捷记账</view>
+			<view class="templates-grid">
+				<view
+					class="template-item"
+					v-for="template in templates"
+					:key="template.id"
+					@click="quickAdd(template)"
+				>
+					<view class="template-icon" :style="{ backgroundColor: template.color }">
+						<text>{{ template.icon }}</text>
+					</view>
+					<text class="template-name">{{ template.name }}</text>
+					<text class="template-amount">¥{{ template.amount }}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 今日账单 -->
+		<view class="records-section">
+			<view class="section-header">
+				<text class="section-title">今日账单</text>
+				<text class="more" @click="goToRecords">查看全部</text>
+			</view>
+			<view class="records-list" v-if="todayRecords.length > 0">
+				<view
+					class="record-item"
+					v-for="record in recentRecords"
+					:key="record.id"
+					@click="editRecord(record)"
+				>
+					<view class="record-icon" :style="{ backgroundColor: getCategoryColor(record.category_code) }">
+						<text>{{ getCategoryIcon(record.category_code) }}</text>
+					</view>
+					<view class="record-info">
+						<text class="record-category">{{ record.category_name }}</text>
+						<text class="record-time">{{ formatTime(record.create_time) }}</text>
+					</view>
+					<text class="record-amount" :class="record.type === 1 ? 'expense' : 'income'">
+						{{ record.type === 1 ? '-' : '+' }}{{ record.amount.toFixed(2) }}
+					</text>
+				</view>
+			</view>
+			<view class="empty-state" v-else>
+				<text>暂无账单记录</text>
+			</view>
+		</view>
+
+		<!-- 记一笔按钮 -->
+		<view class="add-btn" @click="goToAdd">
+			<text class="add-icon">+</text>
+			<text class="add-text">记一笔</text>
+		</view>
+
+		<!-- 底部导航 -->
+		<view class="tabbar">
+			<view class="tab-item active">
+				<text>首页</text>
+			</view>
+			<view class="tab-item" @click="goToRecords">
+				<text>账单</text>
+			</view>
+			<view class="tab-item add-tab" @click="goToAdd">
+				<text class="add-tab-icon">+</text>
+			</view>
+			<view class="tab-item" @click="goToStats">
+				<text>分析</text>
+			</view>
+			<view class="tab-item" @click="goToMy">
+				<text>我的</text>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue'
+import { useBillStore } from '@/store/bill'
+import { useBudgetStore } from '@/store/budget'
+import { useCategoryStore } from '@/store/category'
+import RingChart from '@/components/ring-chart/ring-chart.vue'
+
 export default {
-	data() {
-		return {
-			title: '随手记',
-			subtitle: '个人记账小程序'
-		}
+	components: {
+		RingChart
 	},
-	onLoad() {
-		console.log('Index page loaded')
+	setup() {
+		const billStore = useBillStore()
+		const budgetStore = useBudgetStore()
+		const categoryStore = useCategoryStore()
+
+		// 快捷模板
+		const templates = [
+			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
+			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
+			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: '🚗', color: '#4ECDC4' },
+			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: '🚌', color: '#4ECDC4' },
+			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: '☕', color: '#FF6B6B' },
+			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: '🎬', color: '#96CEB4' }
+		]
+
+		// 初始化数据
+		onMounted(() => {
+			billStore.loadRecords()
+			budgetStore.loadBudget()
+			categoryStore.loadCategories()
+		})
+
+		// 计算属性
+		const todayDate = computed(() => {
+			const now = new Date()
+			const month = now.getMonth() + 1
+			const day = now.getDate()
+			const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][now.getDay()]
+			return `${month}月${day}日 ${weekDay}`
+		})
+
+		const todayRecords = computed(() => billStore.todayRecords)
+		const recentRecords = computed(() => todayRecords.value.slice(0, 5))
+		const todayExpense = computed(() => billStore.todayExpense)
+		const todayIncome = computed(() => billStore.todayIncome)
+
+		const monthUsed = computed(() => {
+			const now = new Date()
+			const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+			return billStore.getMonthStats(yearMonth).expense
+		})
+
+		const remaining = computed(() => {
+			if (!budgetStore.currentBudget) return 0
+			return Math.max(0, budgetStore.currentBudget - monthUsed.value)
+		})
+
+		const percentage = computed(() => {
+			if (!budgetStore.currentBudget) return 0
+			return (monthUsed.value / budgetStore.currentBudget) * 100
+		})
+
+		const alertClass = computed(() => {
+			if (percentage.value >= 120) return 'alert-danger'
+			if (percentage.value >= 100) return 'alert-warning'
+			if (percentage.value >= 80) return 'alert-caution'
+			return ''
+		})
+
+		const alertMessage = computed(() => {
+			if (percentage.value >= 120) return '⚠️ 已超支120%，注意控制支出！'
+			if (percentage.value >= 100) return '⚠️ 已超支，请调整消费计划'
+			if (percentage.value >= 80) return '⚠️ 预算已用80%，注意控制'
+			return ''
+		})
+
+		const remainingClass = computed(() => {
+			if (percentage.value >= 100) return 'text-danger'
+			if (percentage.value >= 80) return 'text-warning'
+			return ''
+		})
+
+		// 方法
+		const getCategoryColor = (code) => {
+			const category = categoryStore.getCategoryByCode(code)
+			return category?.color || '#999'
+		}
+
+		const getCategoryIcon = (code) => {
+			const category = categoryStore.getCategoryByCode(code)
+			return category?.icon || '📦'
+		}
+
+		const formatTime = (timestamp) => {
+			const date = new Date(timestamp)
+			return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+		}
+
+		const quickAdd = async (template) => {
+			const record = {
+				type: 1, // 支出
+				amount: template.amount,
+				category_code: template.category_code,
+				category_name: template.name,
+				account_code: 'cash',
+				remark: '',
+				record_date: new Date().toISOString().split('T')[0]
+			}
+			try {
+				await billStore.addRecord(record)
+				uni.showToast({ title: '已添加', icon: 'success' })
+			} catch (e) {
+				uni.showToast({ title: '添加失败', icon: 'none' })
+			}
+		}
+
+		const goToAdd = () => {
+			uni.navigateTo({ url: '/pages/add/add' })
+		}
+
+		const goToRecords = () => {
+			uni.switchTab({ url: '/pages/records/records' })
+		}
+
+		const goToStats = () => {
+			uni.switchTab({ url: '/pages/stats/stats' })
+		}
+
+		const goToMy = () => {
+			uni.switchTab({ url: '/pages/my/my' })
+		}
+
+		const editRecord = (record) => {
+			// TODO: 编辑账单
+		}
+
+		return {
+			templates,
+			todayDate,
+			todayRecords,
+			recentRecords,
+			todayExpense,
+			todayIncome,
+			monthUsed,
+			remaining,
+			percentage,
+			alertClass,
+			alertMessage,
+			remainingClass,
+			budgetStore,
+			getCategoryColor,
+			getCategoryIcon,
+			formatTime,
+			quickAdd,
+			goToAdd,
+			goToRecords,
+			goToStats,
+			goToMy,
+			editRecord
+		}
 	}
 }
 </script>
 
 <style scoped>
-.container {
+.index-page {
+	min-height: 100vh;
+	background-color: #f5f5f5;
+	padding-bottom: 120rpx;
+}
+
+.overview-section {
+	background-color: #07c160;
+	padding: 30rpx 30rpx 40rpx;
+	color: #fff;
+}
+
+.overview-header {
+	margin-bottom: 20rpx;
+}
+
+.date {
+	font-size: 28rpx;
+	opacity: 0.9;
+}
+
+.greeting {
+	font-size: 40rpx;
+	font-weight: bold;
+	display: block;
+	margin-top: 8rpx;
+}
+
+.stats-row {
+	display: flex;
+	justify-content: space-around;
+	margin-top: 20rpx;
+}
+
+.stat-item {
+	text-align: center;
+}
+
+.stat-label {
+	font-size: 26rpx;
+	opacity: 0.85;
+}
+
+.stat-amount {
+	font-size: 44rpx;
+	font-weight: bold;
+	display: block;
+	margin-top: 8rpx;
+}
+
+.budget-section {
+	display: flex;
+	align-items: center;
+	background-color: #ffffff;
+	margin: 20rpx;
+	border-radius: 16rpx;
+	padding: 30rpx;
+	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.budget-info {
+	flex: 1;
+	margin-left: 30rpx;
+}
+
+.budget-item {
+	display: flex;
+	justify-content: space-between;
+	padding: 10rpx 0;
+}
+
+.budget-label {
+	font-size: 26rpx;
+	color: #666;
+}
+
+.budget-value {
+	font-size: 28rpx;
+	color: #333;
+	font-weight: 500;
+}
+
+.text-danger {
+	color: #dd524d;
+}
+
+.text-warning {
+	color: #ff9500;
+}
+
+.alert-banner {
+	margin: 0 20rpx 20rpx;
+	padding: 20rpx 24rpx;
+	border-radius: 12rpx;
+	font-size: 26rpx;
+	text-align: center;
+}
+
+.alert-caution {
+	background-color: #fff3e0;
+	color: #ff9500;
+}
+
+.alert-warning {
+	background-color: #fff0e0;
+	color: #ff6b00;
+}
+
+.alert-danger {
+	background-color: #ffebee;
+	color: #dd524d;
+}
+
+.templates-section {
+	background-color: #ffffff;
+	margin: 0 20rpx 20rpx;
+	border-radius: 16rpx;
+	padding: 24rpx;
+}
+
+.section-title {
+	font-size: 30rpx;
+	font-weight: bold;
+	color: #333;
+	margin-bottom: 20rpx;
+}
+
+.templates-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
+.template-item {
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 16rpx 0;
+}
+
+.template-icon {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 40rpx;
+}
+
+.template-name {
+	font-size: 24rpx;
+	color: #333;
+	margin-top: 10rpx;
+}
+
+.template-amount {
+	font-size: 22rpx;
+	color: #666;
+	margin-top: 4rpx;
+}
+
+.records-section {
+	background-color: #ffffff;
+	margin: 0 20rpx;
+	border-radius: 16rpx;
+	padding: 24rpx;
+}
+
+.section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20rpx;
+}
+
+.more {
+	font-size: 26rpx;
+	color: #999;
+}
+
+.records-list {
+	border-top: 1rpx solid #f0f0f0;
+}
+
+.record-item {
+	display: flex;
+	align-items: center;
+	padding: 20rpx 0;
+	border-bottom: 1rpx solid #f5f5f5;
+}
+
+.record-item:last-child {
+	border-bottom: none;
+}
+
+.record-icon {
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 36rpx;
+	margin-right: 20rpx;
+}
+
+.record-info {
+	flex: 1;
+}
+
+.record-category {
+	font-size: 28rpx;
+	color: #333;
+	display: block;
+}
+
+.record-time {
+	font-size: 24rpx;
+	color: #999;
+	margin-top: 4rpx;
+}
+
+.record-amount {
+	font-size: 32rpx;
+	font-weight: 500;
+}
+
+.record-amount.expense {
+	color: #dd524d;
+}
+
+.record-amount.income {
+	color: #07c160;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 60rpx 0;
+	color: #999;
+	font-size: 28rpx;
+}
+
+.add-btn {
+	position: fixed;
+	right: 30rpx;
+	bottom: 150rpx;
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+	background-color: #07c160;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 100rpx;
+	box-shadow: 0 4rpx 20rpx rgba(7, 193, 96, 0.4);
 }
 
-.title {
+.add-icon {
 	font-size: 48rpx;
-	font-weight: bold;
-	color: #007AFF;
-	margin-bottom: 20rpx;
+	color: #fff;
+	line-height: 1;
 }
 
-.subtitle {
-	font-size: 28rpx;
+.add-text {
+	font-size: 22rpx;
+	color: #fff;
+	margin-top: 4rpx;
+}
+
+.tabbar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 100rpx;
+	background-color: #ffffff;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	border-top: 1rpx solid #f0f0f0;
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-item {
+	flex: 1;
+	text-align: center;
+	font-size: 22rpx;
 	color: #999;
+}
+
+.tab-item.active {
+	color: #07c160;
+}
+
+.add-tab {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.add-tab-icon {
+	font-size: 56rpx;
+	color: #07c160;
 }
 </style>

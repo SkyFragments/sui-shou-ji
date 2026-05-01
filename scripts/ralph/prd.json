@@ -150,8 +150,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Added templates grid to index page with 6 quick-add templates (breakfast, lunch, taxi, subway, coffee, movie)"
     },
     {
       "id": "US-010",
@@ -224,8 +224,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Created full index page with today stats, budget progress ring-chart, alert banners, quick templates, recent records list, add button, and tabbar navigation"
     },
     {
       "id": "US-014",
