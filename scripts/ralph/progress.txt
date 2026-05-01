@@ -15,11 +15,11 @@
 | US-006 | 创建金额键盘组件 | **DONE** | components/amount-keyboard.vue | |
 | US-007 | 创建分类选择器组件 | **DONE** | components/category-picker.vue | |
 | US-008 | 创建记账页面 | **DONE** | pages/add/add.vue | |
-| US-009 | 创建快捷模板功能 | pending | |
+| US-009 | 创建快捷模板功能 | **DONE** | pages/index/index.vue | |
 | US-010 | 创建环形图组件 | pending | |
 | US-011 | 创建统计卡片组件 | pending | |
 | US-012 | 创建账单项组件 | pending | |
-| US-013 | 创建首页 | pending | |
+| US-013 | 创建首页 | **DONE** | pages/index/index.vue | |
 | US-014 | 创建账单列表页面 | pending | |
 | US-015 | 创建饼图组件 | pending | |
 | US-016 | 创建折线图组件 | pending | |
@@ -109,4 +109,17 @@
   - category-picker 使用 v-model 模式与父组件通信
   - 记账页面需要验证金额、分类、账户选择后才允许保存
   - 使用 store 的 loadCategories()/loadAccounts() 初始化数据
+---
+
+## 2026-05-02 04:00 - US-009/US-013
+- What was implemented: Created index page with templates and all UI components
+- Files changed:
+  - pages/index/index.vue (修改 - 创建完整首页)
+  - scripts/ralph/prd.json (修改 - 标记 US-009, US-013 完成)
+- **Learnings for future iterations:**
+  - index page uses onMounted to load data from stores
+  - budget store uses getter to calculate month usage from bill store
+  - templates use hardcoded category data (could be from store)
+  - ring-chart shows percentage with color coding
+  - Alert banners show at 80%, 100%, 120% thresholds
 ---
