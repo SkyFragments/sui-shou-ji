@@ -1,17 +1,85 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "随手记"
+			}
+		},
+		{
+			"path": "pages/add/add",
+			"style": {
+				"navigationBarTitleText": "记账"
+			}
+		},
+		{
+			"path": "pages/records/records",
+			"style": {
+				"navigationBarTitleText": "账单"
+			}
+		},
+		{
+			"path": "pages/stats/stats",
+			"style": {
+				"navigationBarTitleText": "统计"
+			}
+		},
+		{
+			"path": "pages/budget/budget",
+			"style": {
+				"navigationBarTitleText": "预算"
+			}
+		},
+		{
+			"path": "pages/my/my",
+			"style": {
+				"navigationBarTitleText": "我的"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
+		"navigationBarTitleText": "随手记",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#999999",
+		"selectedColor": "#007AFF",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-active.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/records/records",
+				"iconPath": "static/tabbar/list.png",
+				"selectedIconPath": "static/tabbar/list-active.png",
+				"text": "账单"
+			},
+			{
+				"pagePath": "pages/add/add",
+				"iconPath": "static/tabbar/add.png",
+				"selectedIconPath": "static/tabbar/add-active.png",
+				"text": "记账"
+			},
+			{
+				"pagePath": "pages/stats/stats",
+				"iconPath": "static/tabbar/stats.png",
+				"selectedIconPath": "static/tabbar/stats-active.png",
+				"text": "分析"
+			},
+			{
+				"pagePath": "pages/my/my",
+				"iconPath": "static/tabbar/my.png",
+				"selectedIconPath": "static/tabbar/my-active.png",
+				"text": "我的"
+			}
+		]
 	},
 	"uniIdRouter": {}
 }
