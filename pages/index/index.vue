@@ -154,7 +154,7 @@ export default {
 		// 初始化数据
 		onMounted(() => {
 			billStore.loadRecords()
-			budgetStore.loadBudget()
+			budgetStore.loadBudgets()
 			categoryStore.loadCategories()
 		})
 
