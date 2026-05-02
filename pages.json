@@ -43,43 +43,5 @@
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
-	"tabBar": {
-		"color": "#999999",
-		"selectedColor": "#007AFF",
-		"backgroundColor": "#FFFFFF",
-		"borderStyle": "black",
-		"list": [
-			{
-				"pagePath": "pages/index/index",
-				"iconPath": "static/tabbar/home.png",
-				"selectedIconPath": "static/tabbar/home-active.png",
-				"text": "首页"
-			},
-			{
-				"pagePath": "pages/records/records",
-				"iconPath": "static/tabbar/list.png",
-				"selectedIconPath": "static/tabbar/list-active.png",
-				"text": "账单"
-			},
-			{
-				"pagePath": "pages/add/add",
-				"iconPath": "static/tabbar/add.png",
-				"selectedIconPath": "static/tabbar/add-active.png",
-				"text": "记账"
-			},
-			{
-				"pagePath": "pages/stats/stats",
-				"iconPath": "static/tabbar/stats.png",
-				"selectedIconPath": "static/tabbar/stats-active.png",
-				"text": "分析"
-			},
-			{
-				"pagePath": "pages/my/my",
-				"iconPath": "static/tabbar/my.png",
-				"selectedIconPath": "static/tabbar/my-active.png",
-				"text": "我的"
-			}
-		]
-	},
 	"uniIdRouter": {}
 }

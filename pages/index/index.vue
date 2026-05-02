@@ -104,7 +104,25 @@
 			<text class="add-text">记一笔</text>
 		</view>
 
+		<!-- 底部导航 -->
+		<view class="tabbar">
+			<view class="tab-item active">
+				<text>首页</text>
 			</view>
+			<view class="tab-item" @click="goToRecords">
+				<text>账单</text>
+			</view>
+			<view class="tab-item add-tab" @click="goToAdd">
+				<text class="add-tab-icon">+</text>
+			</view>
+			<view class="tab-item" @click="goToStats">
+				<text>分析</text>
+			</view>
+			<view class="tab-item" @click="goToMy">
+				<text>我的</text>
+			</view>
+		</view>
+	</view>
 </template>
 
 <script>
@@ -276,6 +294,7 @@ export default {
 .index-page {
 	min-height: 100vh;
 	background-color: #f5f5f5;
+	padding-bottom: 120rpx;
 }
 
 .overview-section {
@@ -541,5 +560,41 @@ export default {
 	font-size: 22rpx;
 	color: #fff;
 	margin-top: 4rpx;
+}
+
+.tabbar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 100rpx;
+	background-color: #ffffff;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	border-top: 1rpx solid #f0f0f0;
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-item {
+	flex: 1;
+	text-align: center;
+	font-size: 22rpx;
+	color: #999;
+}
+
+.tab-item.active {
+	color: #07c160;
+}
+
+.add-tab {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.add-tab-icon {
+	font-size: 56rpx;
+	color: #07c160;
 }
 </style>
