@@ -92,14 +92,23 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useSyncStore } from '@/store/sync'
+import { useBillStore } from '@/store/bill'
+import { useCategoryStore } from '@/store/category'
+import { useAccountStore } from '@/store/account'
 
 export default {
 	setup() {
 		const syncStore = useSyncStore()
+		const billStore = useBillStore()
+		const categoryStore = useCategoryStore()
+		const accountStore = useAccountStore()
 		const userId = ref('******')
 
 		onMounted(() => {
 			syncStore.loadSyncStatus()
+			billStore.loadRecords()
+			categoryStore.loadCategories()
+			accountStore.loadAccounts()
 		})
 
 		const syncStatusText = computed(() => {
@@ -132,8 +141,7 @@ export default {
 		}
 
 		const goToAccountManage = () => {
-			// TODO: Navigate to account management page
-			uni.showToast({ title: '功能开发中', icon: 'none' })
+			uni.navigateTo({ url: '/pages/account/account' })
 		}
 
 		const goToBudget = () => {
@@ -141,11 +149,51 @@ export default {
 		}
 
 		const onExport = () => {
+			const now = new Date()
+			const year = now.getFullYear()
+			const month = now.getMonth() + 1
+			const startMonth = `${year}-${String(month).padStart(2, '0')}-01`
+			const endDay = new Date(year, month, 0).getDate()
+			const endMonth = `${year}-${String(month).padStart(2, '0')}-${endDay}`
+
 			uni.showModal({
 				title: '数据导出',
-				content: '选择导出月份范围',
-				success: () => {
-					uni.showToast({ title: '功能开发中', icon: 'none' })
+				content: `确定导出 ${startMonth} 至 ${endMonth} 的账单数据吗？`,
+				success: async (res) => {
+					if (res.confirm) {
+						const billStore = useBillStore()
+						const records = billStore.getRecordsByDateRange(startMonth, endMonth)
+
+						if (records.length === 0) {
+							uni.showToast({ title: '该月无账单数据', icon: 'none' })
+							return
+						}
+
+						const { exportToCSV, generateExportFileName } = require('@/utils/export.js')
+						const categoryStore = useCategoryStore()
+						const accountStore = useAccountStore()
+
+						const categoryMap = {}
+						categoryStore.categories.forEach(c => {
+							categoryMap[c.code] = c.name
+						})
+
+						const accountMap = {}
+						accountStore.accounts.forEach(a => {
+							accountMap[a.code] = a.name
+						})
+
+						const csvContent = exportToCSV(records, { categoryMap, accountMap })
+						const fileName = generateExportFileName(startMonth, endMonth)
+
+						// 在小程序环境中显示导出内容
+						uni.showModal({
+							title: '导出数据预览',
+							content: csvContent.substring(0, 500) + (csvContent.length > 500 ? '...' : ''),
+							showCancel: false,
+							confirmText: '确定'
+						})
+					}
 				}
 			})
 		}

@@ -31,7 +31,13 @@
 			}
 		},
 		{
-			"path": "pages/my/my",
+			"path": "pages/account/account",
+			"style": {
+				"navigationBarTitleText": "账户管理"
+			}
+		},
+		{
+			path": "pages/my/my",
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
