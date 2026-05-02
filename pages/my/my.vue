@@ -116,11 +116,11 @@ export default {
 		})
 
 		const goToIndex = () => {
-			uni.switchTab({ url: '/pages/index/index' })
+			uni.reLaunch({ url: '/pages/index/index' })
 		}
 
 		const goToRecords = () => {
-			uni.switchTab({ url: '/pages/records/records' })
+			uni.reLaunch({ url: '/pages/records/records' })
 		}
 
 		const goToAdd = () => {
@@ -128,7 +128,7 @@ export default {
 		}
 
 		const goToStats = () => {
-			uni.switchTab({ url: '/pages/stats/stats' })
+			uni.reLaunch({ url: '/pages/stats/stats' })
 		}
 
 		const goToAccountManage = () => {

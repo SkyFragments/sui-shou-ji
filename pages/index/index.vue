@@ -247,15 +247,15 @@ export default {
 		}
 
 		const goToRecords = () => {
-			uni.switchTab({ url: '/pages/records/records' })
+			uni.reLaunch({ url: '/pages/records/records' })
 		}
 
 		const goToStats = () => {
-			uni.switchTab({ url: '/pages/stats/stats' })
+			uni.reLaunch({ url: '/pages/stats/stats' })
 		}
 
 		const goToMy = () => {
-			uni.switchTab({ url: '/pages/my/my' })
+			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
 		const editRecord = (record) => {
