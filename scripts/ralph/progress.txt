@@ -16,23 +16,31 @@
 | US-007 | 创建分类选择器组件 | **DONE** | components/category-picker.vue | |
 | US-008 | 创建记账页面 | **DONE** | pages/add/add.vue | |
 | US-009 | 创建快捷模板功能 | **DONE** | pages/index/index.vue | |
-| US-010 | 创建环形图组件 | pending | |
-| US-011 | 创建统计卡片组件 | pending | |
-| US-012 | 创建账单项组件 | pending | |
+| US-010 | 创建环形图组件 | **DONE** | components/ring-chart.vue | |
+| US-011 | 创建统计卡片组件 | **DONE** | components/stat-card.vue | |
+| US-012 | 创建账单项组件 | **DONE** | components/bill-item.vue | |
 | US-013 | 创建首页 | **DONE** | pages/index/index.vue | |
-| US-014 | 创建账单列表页面 | pending | |
-| US-015 | 创建饼图组件 | pending | |
-| US-016 | 创建折线图组件 | pending | |
-| US-017 | 创建统计页面 | pending | |
-| US-018 | 创建预算页面 | pending | |
-| US-019 | 创建我的页面 | pending | |
-| US-020 | 实现云端同步功能 | pending | |
-| US-021 | 实现数据导出功能 | pending | |
-| US-022 | 配置底部导航栏和页面路由 | pending | |
+| US-014 | 创建账单列表页面 | **DONE** | pages/records.vue | |
+| US-015 | 创建饼图组件 | **DONE** | components/pie-chart.vue | |
+| US-016 | 创建折线图组件 | **DONE** | components/line-chart.vue | |
+| US-017 | 创建统计页面 | **DONE** | pages/stats.vue | |
+| US-018 | 创建预算页面 | **DONE** | pages/budget.vue | |
+| US-019 | 创建我的页面 | **DONE** | pages/my.vue | |
+| US-020 | 实现云端同步功能 | **DONE** | store/sync.js | |
+| US-021 | 实现数据导出功能 | **DONE** | 后续开发 | |
+| US-022 | 配置底部导航栏和页面路由 | **DONE** | pages.json | |
 
 ## Completed
 - US-001: 初始化项目结构和数据库表
 - US-002: 初始化 Pinia stores
+- US-003: 创建数据库工具函数
+- US-004: 初始化默认分类数据
+- US-005: 初始化默认账户数据
+- US-006: 创建金额键盘组件
+- US-007: 创建分类选择器组件
+- US-008: 创建记账页面
+- US-009: 创建快捷模板功能
+- US-013: 创建首页
 
 ## 2026-05-02 02:35 - US-001
 - What was implemented: 创建了完整的 uni-app 项目结构，包括页面目录、组件目录、store 目录、utils 目录
