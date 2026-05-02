@@ -37,7 +37,7 @@
 			}
 		},
 		{
-			path": "pages/my/my",
+			"path": "pages/my/my",
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
