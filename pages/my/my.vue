@@ -7,7 +7,7 @@
 		<!-- 用户信息 -->
 		<view class="profile-section">
 			<view class="profile-avatar">
-				<text class="avatar-icon">👤</text>
+				<text class="avatar-icon">我</text>
 			</view>
 			<view class="profile-info">
 				<text class="profile-name">随手记用户</text>
@@ -20,7 +20,7 @@
 			<!-- 账户管理 -->
 			<view class="menu-item" @click="goToAccountManage">
 				<view class="menu-left">
-					<text class="menu-icon">💳</text>
+					<text class="menu-icon">账</text>
 					<text class="menu-text">账户管理</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -29,7 +29,7 @@
 			<!-- 分类管理 -->
 			<view class="menu-item" @click="goToCategoryManage">
 				<view class="menu-left">
-					<text class="menu-icon">📂</text>
+					<text class="menu-icon">类</text>
 					<text class="menu-text">分类管理</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -38,7 +38,7 @@
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
-					<text class="menu-icon">💰</text>
+					<text class="menu-icon">预</text>
 					<text class="menu-text">预算设置</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -47,7 +47,7 @@
 			<!-- 数据导出 -->
 			<view class="menu-item" @click="onExport">
 				<view class="menu-left">
-					<text class="menu-icon">📤</text>
+					<text class="menu-icon">出</text>
 					<text class="menu-text">数据导出</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -56,7 +56,7 @@
 			<!-- 同步状态 -->
 			<view class="menu-item sync-item" @click="onSync">
 				<view class="menu-left">
-					<text class="menu-icon">🔄</text>
+					<text class="menu-icon">同</text>
 					<text class="menu-text">同步</text>
 				</view>
 				<view class="sync-status">
@@ -70,7 +70,7 @@
 		<view class="menu-section">
 			<view class="menu-item">
 				<view class="menu-left">
-					<text class="menu-icon">ℹ️</text>
+					<text class="menu-icon">关于</text>
 					<text class="menu-text">关于</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
@@ -205,7 +205,7 @@ export default {
 
 						uni.showModal({
 							title: `导出成功 - ${fileName}`,
-							content: `📊 数据统计\n• 支出记录：${records.filter(r => r.type === 1).length} 条\n• 收入记录：${records.filter(r => r.type === 2).length} 条\n• 支出总额：¥${totalExpense.toFixed(2)}\n• 收入总额：¥${totalIncome.toFixed(2)}\n\n📄 CSV 预览（前 500 字符）：\n${csvContent.substring(0, 500)}${csvContent.length > 500 ? '\n...' : ''}`,
+							content: `数据统计\n• 支出记录：${records.filter(r => r.type === 1).length} 条\n• 收入记录：${records.filter(r => r.type === 2).length} 条\n• 支出总额：¥${totalExpense.toFixed(2)}\n• 收入总额：¥${totalIncome.toFixed(2)}\n\nCSV 预览（前 500 字符）：\n${csvContent.substring(0, 500)}${csvContent.length > 500 ? '\n...' : ''}`,
 							showCancel: false,
 							confirmText: '确定'
 						})
@@ -235,7 +235,7 @@ export default {
 
 				uni.showModal({
 					title: '同步成功',
-					content: `✅ 数据同步完成\n\n📱 设备信息\n• 记录数量：${syncSummary.records} 条\n• 分类数量：${syncSummary.categories} 条\n• 账户数量：${syncSummary.accounts} 条\n\n🕐 同步时间：${syncSummary.timestamp}\n\n💡 提示：当前为演示模式，实际云同步需接入微信云开发环境`,
+					content: `数据同步完成\n\n设备信息\n• 记录数量：${syncSummary.records} 条\n• 分类数量：${syncSummary.categories} 条\n• 账户数量：${syncSummary.accounts} 条\n\n同步时间：${syncSummary.timestamp}\n\n提示：当前为演示模式，实际云同步需接入微信云开发环境`,
 					showCancel: false,
 					confirmText: '确定'
 				})
@@ -321,6 +321,11 @@ export default {
 	justify-content: space-between;
 	padding: 28rpx 24rpx;
 	border-bottom: 1rpx solid #f0f0f0;
+	transition: background-color 0.15s ease-out;
+}
+
+.menu-item:active {
+	background-color: #f8f8f8;
 }
 
 .menu-item:last-child {

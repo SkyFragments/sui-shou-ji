@@ -44,9 +44,12 @@
 			</view>
 		</view>
 
-		<!-- 超支提醒 -->
+		<!-- 超支提醒 - 使用 CSS dot 替代 emoji -->
 		<view class="alert-banner" :class="alertClass" v-if="alertMessage">
-			<text>{{ alertMessage }}</text>
+			<view class="alert-icon-wrapper">
+				<text class="alert-icon">!</text>
+			</view>
+			<text class="alert-text">{{ alertMessage }}</text>
 		</view>
 
 		<!-- 快捷模板 -->
@@ -141,14 +144,14 @@ export default {
 		const budgetStore = useBudgetStore()
 		const categoryStore = useCategoryStore()
 
-		// 快捷模板
+		// 快捷模板 - 使用文字首字母代替 emoji (UX 优化)
 		const templates = [
-			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
-			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
-			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: '🚗', color: '#4ECDC4' },
-			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: '🚌', color: '#4ECDC4' },
-			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: '☕', color: '#FF6B6B' },
-			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: '🎬', color: '#96CEB4' }
+			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: '早', color: '#FF6B6B' },
+			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: '午', color: '#FF6B6B' },
+			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: '车', color: '#4ECDC4' },
+			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: '地', color: '#4ECDC4' },
+			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: '咖', color: '#FF6B6B' },
+			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: '影', color: '#96CEB4' }
 		]
 
 		// 初始化数据
@@ -195,10 +198,11 @@ export default {
 			return ''
 		})
 
+		// 优化：移除 emoji 使用纯文字提示
 		const alertMessage = computed(() => {
-			if (percentage.value >= 120) return '⚠️ 已超支120%，注意控制支出！'
-			if (percentage.value >= 100) return '⚠️ 已超支，请调整消费计划'
-			if (percentage.value >= 80) return '⚠️ 预算已用80%，注意控制'
+			if (percentage.value >= 120) return '已超支120%，注意控制支出！'
+			if (percentage.value >= 100) return '已超支，请调整消费计划'
+			if (percentage.value >= 80) return '预算已用80%，注意控制'
 			return ''
 		})
 
@@ -216,7 +220,11 @@ export default {
 
 		const getCategoryIcon = (code) => {
 			const category = categoryStore.getCategoryByCode(code)
-			return category?.icon || '📦'
+			// 优化：使用首字母代替 emoji
+			if (category?.name) {
+				return category.name.charAt(0)
+			}
+			return '?'
 		}
 
 		const formatTime = (timestamp) => {
@@ -383,12 +391,36 @@ export default {
 	color: #ff9500;
 }
 
+/* 优化：超支提醒 Banner 样式 */
 .alert-banner {
 	margin: 0 20rpx 20rpx;
 	padding: 20rpx 24rpx;
 	border-radius: 12rpx;
 	font-size: 26rpx;
-	text-align: center;
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+}
+
+.alert-icon-wrapper {
+	width: 40rpx;
+	height: 40rpx;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.alert-icon {
+	font-size: 28rpx;
+	font-weight: bold;
+	color: inherit;
+}
+
+.alert-text {
+	flex: 1;
 }
 
 .alert-caution {
@@ -426,12 +458,19 @@ export default {
 	justify-content: flex-start;
 }
 
+/* 优化：添加触摸反馈动画 */
 .template-item {
 	width: 25%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	padding: 16rpx 0;
+	transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+
+.template-item:active {
+	transform: scale(0.95);
+	opacity: 0.8;
 }
 
 .template-icon {
@@ -441,7 +480,9 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 40rpx;
+	font-size: 36rpx;
+	color: #fff;
+	font-weight: 500;
 }
 
 .template-name {
@@ -484,6 +525,12 @@ export default {
 	align-items: center;
 	padding: 20rpx 0;
 	border-bottom: 1rpx solid #f5f5f5;
+	transition: background-color 0.15s ease-out;
+}
+
+/* 优化：记录项触摸反馈 */
+.record-item:active {
+	background-color: #f8f8f8;
 }
 
 .record-item:last-child {
@@ -497,7 +544,9 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 36rpx;
+	font-size: 32rpx;
+	color: #fff;
+	font-weight: 500;
 	margin-right: 20rpx;
 }
 
@@ -550,6 +599,13 @@ export default {
 	align-items: center;
 	justify-content: center;
 	box-shadow: 0 4rpx 20rpx rgba(7, 193, 96, 0.4);
+	transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+/* 优化：记一笔按钮触摸反馈 */
+.add-btn:active {
+	transform: scale(0.95);
+	box-shadow: 0 2rpx 10rpx rgba(7, 193, 96, 0.3);
 }
 
 .add-icon {
@@ -583,6 +639,7 @@ export default {
 	text-align: center;
 	font-size: 22rpx;
 	color: #999;
+	transition: color 0.15s ease-out;
 }
 
 .tab-item.active {
