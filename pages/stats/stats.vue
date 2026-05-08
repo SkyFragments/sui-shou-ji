@@ -52,6 +52,35 @@
 			</view>
 		</view>
 
+		<!-- 分类详情弹窗 -->
+		<view class="modal" v-if="showCategoryModal">
+			<view class="modal-mask" @click="closeCategoryModal"></view>
+			<view class="modal-content">
+				<view class="modal-header">
+					<text class="modal-title">{{ selectedCategory?.name || '' }} 详情</text>
+				</view>
+				<view class="modal-body">
+					<view class="detail-row">
+						<text class="detail-label">支出金额</text>
+						<text class="detail-value expense">¥{{ selectedCategory?.value?.toFixed(2) || '0.00' }}</text>
+					</view>
+					<view class="detail-row">
+						<text class="detail-label">占比</text>
+						<text class="detail-value">{{ selectedCategory?.percentage || '0' }}%</text>
+					</view>
+					<view class="detail-row">
+						<text class="detail-label">交易笔数</text>
+						<text class="detail-value">{{ getCategoryCount(selectedCategory?.code) }} 笔</text>
+					</view>
+				</view>
+				<view class="modal-footer">
+					<view class="btn confirm-btn" @click="closeCategoryModal">
+						<text>确定</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
 		<!-- 日支出趋势 -->
 		<view class="chart-section">
 			<view class="section-title">日支出趋势</view>
@@ -104,6 +133,8 @@ export default {
 		const categoryStore = useCategoryStore()
 
 		const currentYearMonth = ref(getCurrentYearMonth())
+		const showCategoryModal = ref(false)
+		const selectedCategory = ref(null)
 
 		onMounted(() => {
 			billStore.loadRecords()
@@ -185,7 +216,20 @@ export default {
 		}
 
 		const onCategoryClick = (item) => {
-			// TODO: Show category details
+			const categoryWithPercentage = categoryStats.value.find(c => c.code === item.code)
+			selectedCategory.value = categoryWithPercentage || item
+			showCategoryModal.value = true
+		}
+
+		const closeCategoryModal = () => {
+			showCategoryModal.value = false
+			selectedCategory.value = null
+		}
+
+		const getCategoryCount = (code) => {
+			if (!code) return 0
+			const records = billStore.getRecordsByMonth(currentYearMonth.value)
+			return records.filter(r => r.category_code === code && r.type === 1).length
 		}
 
 		const goToIndex = () => {
@@ -215,9 +259,13 @@ export default {
 			categoryStats,
 			dailyExpense,
 			xLabels,
+			showCategoryModal,
+			selectedCategory,
 			prevMonth,
 			nextMonth,
 			onCategoryClick,
+			closeCategoryModal,
+			getCategoryCount,
 			goToIndex,
 			goToRecords,
 			goToAdd,
@@ -326,6 +374,85 @@ function getCurrentYearMonth() {
 	padding: 60rpx 0;
 	color: #999;
 	font-size: 28rpx;
+}
+
+/* Modal */
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 999;
+}
+
+.modal-mask {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 600rpx;
+	background-color: #ffffff;
+	border-radius: 16rpx;
+	overflow: hidden;
+}
+
+.modal-header {
+	padding: 30rpx;
+	border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #333;
+}
+
+.modal-body {
+	padding: 30rpx;
+}
+
+.detail-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 20rpx 0;
+	border-bottom: 1rpx solid #f0f0f0;
+}
+
+.detail-row:last-child {
+	border-bottom: none;
+}
+
+.detail-label {
+	font-size: 28rpx;
+	color: #666;
+}
+
+.detail-value {
+	font-size: 28rpx;
+	color: #333;
+	font-weight: 500;
+}
+
+.modal-footer {
+	border-top: 1rpx solid #f0f0f0;
+}
+
+.btn {
+	text-align: center;
+	padding: 30rpx;
+	font-size: 28rpx;
+}
+
+.confirm-btn {
+	color: #07c160;
 }
 
 .tabbar {

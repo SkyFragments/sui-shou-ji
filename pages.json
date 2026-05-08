@@ -37,6 +37,12 @@
 			}
 		},
 		{
+			"path": "pages/category/category",
+			"style": {
+				"navigationBarTitleText": "分类管理"
+			}
+		},
+		{
 			"path": "pages/my/my",
 			"style": {
 				"navigationBarTitleText": "我的"

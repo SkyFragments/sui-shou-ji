@@ -1,104 +1,57 @@
-# Ralph Agent Instructions
+# CLAUDE.md
 
-You are an autonomous coding agent working on a software project.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Your Task
+## Project Overview
 
-1. Read the PRD at `prd.json` (in the same directory as this file)
-2. Read the progress log at `progress.txt` (check Codebase Patterns section first)
-3. Check you're on the correct branch from PRD `branchName`. If not, check it out or create from main.
-4. Pick the **highest priority** user story where `passes: false`
-5. Implement that single user story
-6. Run quality checks (e.g., typecheck, lint, test - use whatever your project requires)
-7. Update CLAUDE.md files if you discover reusable patterns (see below)
-8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
-9. Update the PRD to set `passes: true` for the completed story
-10. Append your progress to `progress.txt`
+随手记 (SuiShouJi) - 个人记账小程序，基于 UniApp + Vue3 + Pinia构建，使用 LocalStorage 模拟数据持久化。
 
-## Progress Report Format
+## Storage Key Convention
 
-APPEND to progress.txt (never replace, always append):
-```
-## [Date/Time] - [Story ID]
-- What was implemented
-- Files changed
-- **Learnings for future iterations:**
-  - Patterns discovered (e.g., "this codebase uses X for Y")
-  - Gotchas encountered (e.g., "don't forget to update Z when changing W")
-  - Useful context (e.g., "the evaluation panel is in component X")
----
-```
+**所有存储键必须使用复数形式：**
+- `ssj_records` (NOT `ssj_record`)
+- `ssj_categories` (NOT `ssj_category`)
+- `ssj_accounts` (NOT `ssj_account`)
+- `ssj_budgets` (NOT `ssj_budget`)
+- `ssj_users` (NOT `ssj_user`)
 
-The learnings section is critical - it helps future iterations avoid repeating mistakes and understand the codebase better.
+修改 `utils/db.js`、`utils/init-data.js`、`utils/schema.js` 中的 TABLE_NAMES 和 `store/sync.js` 中的 mergeFromCloud 时必须遵循此规范。
 
-## Consolidate Patterns
+## Field Naming
 
-If you discover a **reusable pattern** that future iterations should know, add it to the `## Codebase Patterns` section at the TOP of progress.txt (create it if it doesn't exist). This section should consolidate the most important learnings:
+所有字段名必须与 `utils/schema.js` 中定义一致：
+- **record**: id, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status
+- **category**: id, code, name, icon, color, type, sort, is_default
+- **account**: id, code, name, type, balance, sort, is_default, create_time, update_time
+- **budget**: id, year_month, total_budget, create_time, update_time
 
-```
-## Codebase Patterns
-- Example: Use `sql<number>` template for aggregations
-- Example: Always use `IF NOT EXISTS` for migrations
-- Example: Export types from actions.ts for UI components
-```
+## Architecture
 
-Only add patterns that are **general and reusable**, not story-specific details.
+### Stores (Pinia)
+- `store/bill.js` - 账单记录管理
+- `store/category.js` - 分类管理
+- `store/account.js` - 账户管理
+- `store/budget.js` - 预算管理
+- `store/sync.js` - 云端同步（使用 `setStorage`/`getStorage` 工具函数）
 
-## Update CLAUDE.md Files
+### Pages
+每个页面都包含自定义底部导航栏(tabbar)，通过 `uni.reLaunch` 实现页面跳转。编辑模式通过URL参数 `?recordId=xxx` 传递。
 
-Before committing, check if any edited files have learnings worth preserving in nearby CLAUDE.md files:
+### Components
+- `components/category-picker/` - 分类选择器
+- `components/amount-keyboard/` - 金额键盘
+- `components/pie-chart/` - 饼图
+- `components/line-chart/` - 折线图
+- `components/ring-chart/` - 环形图
 
-1. **Identify directories with edited files** - Look at which directories you modified
-2. **Check for existing CLAUDE.md** - Look for CLAUDE.md in those directories or parent directories
-3. **Add valuable learnings** - If you discovered something future developers/agents should know:
-   - API patterns or conventions specific to that module
-   - Gotchas or non-obvious requirements
-   - Dependencies between files
-   - Testing approaches for that area
-   - Configuration or environment requirements
+## Navigation Pattern
 
-**Examples of good CLAUDE.md additions:**
-- "When modifying X, also update Y to keep them in sync"
-- "This module uses pattern Z for all API calls"
-- "Tests require the dev server running on PORT 3000"
-- "Field names must match the template exactly"
+- 底部导航主要页面: 使用 `uni.reLaunch`
+- 子页面/编辑页面: 使用 `uni.navigateTo`
+- 首页快捷记账: 使用 `uni.navigateTo` 带 `?recordId` 参数
 
-**Do NOT add:**
-- Story-specific implementation details
-- Temporary debugging notes
-- Information already in progress.txt
+## Key Patterns
 
-Only update CLAUDE.md if you have **genuinely reusable knowledge** that would help future work in that directory.
-
-## Quality Requirements
-
-- ALL commits must pass your project's quality checks (typecheck, lint, test)
-- Do NOT commit broken code
-- Keep changes focused and minimal
-- Follow existing code patterns
-
-## Browser Testing (If Available)
-
-For any story that changes UI, verify it works in the browser if you have browser testing tools configured (e.g., via MCP):
-
-1. Navigate to the relevant page
-2. Verify the UI changes work as expected
-3. Take a screenshot if helpful for the progress log
-
-If no browser tools are available, note in your progress report that manual browser verification is needed.
-
-## Stop Condition
-
-After completing a user story, check if ALL stories have `passes: true`.
-
-If ALL stories are complete and passing, reply with:
-<promise>COMPLETE</promise>
-
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
-
-## Important
-
-- Work on ONE story per iteration
-- Commit frequently
-- Keep CI green
-- Read the Codebase Patterns section in progress.txt before starting
+1. **预算存储**: `store/budget.js` 内部存储 `{year_month, total_budget, update_time}` 对象，但 `getBudget()` 返回 `total_budget` 数值
+2. **分类类型**: `type=1` 表示支出，`type=2` 表示收入
+3. **账单类型**: `type=1` 表示支出，`type=2` 表示收入

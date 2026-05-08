@@ -224,7 +224,9 @@ export default {
 		}
 
 		const editRecord = (record) => {
-			// TODO: Navigate to edit page
+			uni.navigateTo({
+				url: `/pages/add/add?recordId=${record.id}`
+			})
 		}
 
 		const loadMore = () => {

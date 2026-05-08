@@ -149,16 +149,16 @@ export const useSyncStore = defineStore('sync', {
     // 从云端合并数据
     mergeFromCloud(cloudData) {
       if (cloudData.records) {
-        setStorage('ssj_record', cloudData.records)
+        setStorage('ssj_records', cloudData.records)
       }
       if (cloudData.categories) {
-        setStorage('ssj_category', cloudData.categories)
+        setStorage('ssj_categories', cloudData.categories)
       }
       if (cloudData.accounts) {
-        setStorage('ssj_account', cloudData.accounts)
+        setStorage('ssj_accounts', cloudData.accounts)
       }
       if (cloudData.budgets) {
-        setStorage('ssj_budget', cloudData.budgets)
+        setStorage('ssj_budgets', cloudData.budgets)
       }
     },
 

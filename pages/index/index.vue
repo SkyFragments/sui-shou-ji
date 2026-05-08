@@ -259,7 +259,9 @@ export default {
 		}
 
 		const editRecord = (record) => {
-			// TODO: 编辑账单
+			uni.navigateTo({
+				url: `/pages/add/add?recordId=${record.id}`
+			})
 		}
 
 		return {

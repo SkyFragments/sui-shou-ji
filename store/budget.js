@@ -71,14 +71,20 @@ export const useBudgetStore = defineStore('budget', {
 
     // 设置月度预算
     setBudget(yearMonth, amount) {
-      this.budgets[yearMonth] = amount
+      // 存储为对象以匹配 schema: { year_month, total_budget }
+      this.budgets[yearMonth] = {
+        year_month: yearMonth,
+        total_budget: amount,
+        update_time: Date.now()
+      }
       this.saveBudgets()
       return this.budgets[yearMonth]
     },
 
     // 获取月度预算
     getBudget(yearMonth) {
-      return this.budgets[yearMonth] || DEFAULT_BUDGET
+      const budget = this.budgets[yearMonth]
+      return budget?.total_budget || DEFAULT_BUDGET
     },
 
     // 计算预算使用情况

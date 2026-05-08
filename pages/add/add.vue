@@ -1,9 +1,18 @@
 /**
  * 记账页面
  * 输入金额、选择分类、选择账户、添加备注后保存账单
+ * 支持编辑模式：通过 url 参数传入 recordId
  */
 <template>
 	<view class="add-page">
+		<!-- 页面标题 -->
+		<view class="page-header">
+			<text class="page-title">{{ isEdit ? '编辑账单' : '记一笔' }}</text>
+			<view class="delete-btn" v-if="isEdit" @click="onDelete">
+				<text>删除</text>
+			</view>
+		</view>
+
 		<!-- 金额显示 -->
 		<view class="amount-display">
 			<view class="amount-label">{{ recordType === 1 ? '支出' : '收入' }}</view>
@@ -111,7 +120,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onLoad } from '@dcloudio/uni-app'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
@@ -132,6 +141,10 @@ export default {
 		categoryStore.loadCategories()
 		accountStore.loadAccounts()
 
+		// 编辑模式状态
+		const isEdit = ref(false)
+		const editingRecordId = ref(null)
+
 		// 状态
 		const recordType = ref(1)
 		const amount = ref('')
@@ -140,6 +153,29 @@ export default {
 		const selectedAccountCode = ref('')
 		const recordDate = ref(getToday())
 		const remark = ref('')
+
+		// 页面加载时检查是否编辑模式
+		onLoad((options) => {
+			if (options.recordId) {
+				isEdit.value = true
+				editingRecordId.value = options.recordId
+				loadRecord(options.recordId)
+			}
+		})
+
+		// 加载编辑的账单
+		const loadRecord = (recordId) => {
+			const record = billStore.records.find(r => r.id === recordId)
+			if (record) {
+				recordType.value = record.type
+				amount.value = record.amount.toString()
+				selectedCategoryCode.value = record.category_code
+				selectedCategory.value = categoryStore.getCategoryByCode(record.category_code)
+				selectedAccountCode.value = record.account_code
+				recordDate.value = record.record_date
+				remark.value = record.remark || ''
+			}
+		}
 
 		// 计算属性
 		const displayAmount = computed(() => {
@@ -214,6 +250,23 @@ export default {
 			amount.value = ''
 		}
 
+		const onDeleteRecord = () => {
+			if (!editingRecordId.value) return
+			uni.showModal({
+				title: '确认删除',
+				content: '确定要删除这条账单吗？',
+				success: async (res) => {
+					if (res.confirm) {
+						await billStore.deleteRecord(editingRecordId.value)
+						uni.showToast({ title: '已删除', icon: 'success' })
+						setTimeout(() => {
+							uni.navigateBack()
+						}, 1500)
+					}
+				}
+			})
+		}
+
 		const onSave = async () => {
 			// 验证金额
 			const numAmount = parseFloat(amount.value)
@@ -235,7 +288,7 @@ export default {
 			}
 
 			// 保存账单
-			const record = {
+			const recordData = {
 				type: recordType.value,
 				amount: numAmount,
 				category_code: selectedCategoryCode.value,
@@ -246,14 +299,15 @@ export default {
 			}
 
 			try {
-				await billStore.addRecord(record)
-				uni.showToast({ title: '保存成功', icon: 'success' })
-
-				// 重置表单
-				amount.value = ''
-				selectedCategoryCode.value = ''
-				selectedCategory.value = null
-				remark.value = ''
+				if (isEdit.value && editingRecordId.value) {
+					// 更新账单
+					await billStore.updateRecord(editingRecordId.value, recordData)
+					uni.showToast({ title: '已更新', icon: 'success' })
+				} else {
+					// 添加账单
+					await billStore.addRecord(recordData)
+					uni.showToast({ title: '保存成功', icon: 'success' })
+				}
 
 				// 返回上一页
 				setTimeout(() => {
@@ -281,6 +335,7 @@ export default {
 		}
 
 		return {
+			isEdit,
 			recordType,
 			amount,
 			displayAmount,
@@ -298,6 +353,7 @@ export default {
 			onInput,
 			onDelete,
 			onClear,
+			onDelete: onDeleteRecord,
 			onSave,
 			goToIndex,
 			goToRecords,
@@ -321,6 +377,32 @@ function getToday() {
 	min-height: 100vh;
 	background-color: #f5f5f5;
 	padding-bottom: 120rpx;
+}
+
+.page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20rpx 30rpx;
+	background-color: #ffffff;
+	border-bottom: 1rpx solid #f0f0f0;
+}
+
+.page-title {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #333;
+}
+
+.delete-btn {
+	padding: 10rpx 24rpx;
+	background-color: #fff0f0;
+	border-radius: 8rpx;
+}
+
+.delete-btn text {
+	font-size: 26rpx;
+	color: #dd524d;
 }
 
 .amount-display {

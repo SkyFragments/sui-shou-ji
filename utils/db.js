@@ -41,7 +41,7 @@ function createTables() {
 // ========== Record 表操作 ==========
 
 export function insertRecord(record) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   const newRecord = {
     id: generateId(),
     type: record.type,
@@ -56,16 +56,16 @@ export function insertRecord(record) {
     sync_status: 0
   }
   records.push(newRecord)
-  uni.setStorageSync('ssj_record', JSON.stringify(records))
+  uni.setStorageSync('ssj_records', JSON.stringify(records))
   return newRecord
 }
 
 export function getRecords() {
-  return JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  return JSON.parse(uni.getStorageSync('ssj_records') || '[]')
 }
 
 export function updateRecord(id, data) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   const index = records.findIndex(r => r.id === id)
   if (index === -1) return null
   records[index] = {
@@ -74,37 +74,37 @@ export function updateRecord(id, data) {
     update_time: Date.now(),
     sync_status: 0
   }
-  uni.setStorageSync('ssj_record', JSON.stringify(records))
+  uni.setStorageSync('ssj_records', JSON.stringify(records))
   return records[index]
 }
 
 export function deleteRecord(id) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   const filtered = records.filter(r => r.id !== id)
   if (filtered.length === records.length) return false
-  uni.setStorageSync('ssj_record', JSON.stringify(filtered))
+  uni.setStorageSync('ssj_records', JSON.stringify(filtered))
   return true
 }
 
 export function getRecordsByMonth(yearMonth) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   return records.filter(r => r.record_date.startsWith(yearMonth))
 }
 
 export function getRecordsByDateRange(startDate, endDate) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   return records.filter(r => r.record_date >= startDate && r.record_date <= endDate)
 }
 
 export function getRecordsByDate(date) {
-  const records = JSON.parse(uni.getStorageSync('ssj_record') || '[]')
+  const records = JSON.parse(uni.getStorageSync('ssj_records') || '[]')
   return records.filter(r => r.record_date === date)
 }
 
 // ========== Category 表操作 ==========
 
 export function insertCategory(category) {
-  const categories = JSON.parse(uni.getStorageSync('ssj_category') || '[]')
+  const categories = JSON.parse(uni.getStorageSync('ssj_categories') || '[]')
   const newCategory = {
     id: generateId(),
     code: category.code,
@@ -116,12 +116,12 @@ export function insertCategory(category) {
     is_default: category.is_default || 0
   }
   categories.push(newCategory)
-  uni.setStorageSync('ssj_category', JSON.stringify(categories))
+  uni.setStorageSync('ssj_categories', JSON.stringify(categories))
   return newCategory
 }
 
 export function getCategories() {
-  return JSON.parse(uni.getStorageSync('ssj_category') || '[]')
+  return JSON.parse(uni.getStorageSync('ssj_categories') || '[]')
 }
 
 export function insertCategories(categories) {
@@ -131,7 +131,7 @@ export function insertCategories(categories) {
 // ========== Account 表操作 ==========
 
 export function insertAccount(account) {
-  const accounts = JSON.parse(uni.getStorageSync('ssj_account') || '[]')
+  const accounts = JSON.parse(uni.getStorageSync('ssj_accounts') || '[]')
   const newAccount = {
     id: generateId(),
     code: account.code,
@@ -144,12 +144,12 @@ export function insertAccount(account) {
     update_time: Date.now()
   }
   accounts.push(newAccount)
-  uni.setStorageSync('ssj_account', JSON.stringify(accounts))
+  uni.setStorageSync('ssj_accounts', JSON.stringify(accounts))
   return newAccount
 }
 
 export function getAccounts() {
-  return JSON.parse(uni.getStorageSync('ssj_account') || '[]')
+  return JSON.parse(uni.getStorageSync('ssj_accounts') || '[]')
 }
 
 export function insertAccounts(accounts) {
@@ -159,7 +159,7 @@ export function insertAccounts(accounts) {
 // ========== Budget 表操作 ==========
 
 export function upsertBudget(budget) {
-  const budgets = JSON.parse(uni.getStorageSync('ssj_budget') || '[]')
+  const budgets = JSON.parse(uni.getStorageSync('ssj_budgets') || '[]')
   const index = budgets.findIndex(b => b.year_month === budget.year_month)
   const now = Date.now()
   if (index !== -1) {
@@ -173,28 +173,28 @@ export function upsertBudget(budget) {
       update_time: now
     })
   }
-  uni.setStorageSync('ssj_budget', JSON.stringify(budgets))
+  uni.setStorageSync('ssj_budgets', JSON.stringify(budgets))
   return budgets[index !== -1 ? index : budgets.length - 1]
 }
 
 export function getBudgetByMonth(yearMonth) {
-  const budgets = JSON.parse(uni.getStorageSync('ssj_budget') || '[]')
+  const budgets = JSON.parse(uni.getStorageSync('ssj_budgets') || '[]')
   return budgets.find(b => b.year_month === yearMonth) || null
 }
 
 export function getBudgets() {
-  return JSON.parse(uni.getStorageSync('ssj_budget') || '[]')
+  return JSON.parse(uni.getStorageSync('ssj_budgets') || '[]')
 }
 
 // ========== User 表操作 ==========
 
 export function getUser() {
-  const users = JSON.parse(uni.getStorageSync('ssj_user') || '[]')
+  const users = JSON.parse(uni.getStorageSync('ssj_users') || '[]')
   return users[0] || null
 }
 
 export function saveUser(user) {
-  const users = JSON.parse(uni.getStorageSync('ssj_user') || '[]')
+  const users = JSON.parse(uni.getStorageSync('ssj_users') || '[]')
   if (users.length > 0) {
     users[0] = { ...users[0], ...user, update_time: Date.now() }
   } else {
@@ -206,7 +206,7 @@ export function saveUser(user) {
       create_time: Date.now()
     })
   }
-  uni.setStorageSync('ssj_user', JSON.stringify(users))
+  uni.setStorageSync('ssj_users', JSON.stringify(users))
   return users[0]
 }
 

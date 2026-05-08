@@ -26,6 +26,15 @@
 				<text class="menu-arrow">▶</text>
 			</view>
 
+			<!-- 分类管理 -->
+			<view class="menu-item" @click="goToCategoryManage">
+				<view class="menu-left">
+					<text class="menu-icon">📂</text>
+					<text class="menu-text">分类管理</text>
+				</view>
+				<text class="menu-arrow">▶</text>
+			</view>
+
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
@@ -144,6 +153,10 @@ export default {
 			uni.navigateTo({ url: '/pages/account/account' })
 		}
 
+		const goToCategoryManage = () => {
+			uni.navigateTo({ url: '/pages/category/category' })
+		}
+
 		const goToBudget = () => {
 			uni.navigateTo({ url: '/pages/budget/budget' })
 		}
@@ -217,6 +230,7 @@ export default {
 			goToAdd,
 			goToStats,
 			goToAccountManage,
+			goToCategoryManage,
 			goToBudget,
 			onExport,
 			onSync

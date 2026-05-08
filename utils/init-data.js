@@ -65,15 +65,15 @@ export function initAccounts() {
  * 初始化所有默认数据
  */
 export function initAllData() {
-  const existingCategories = getStorage('ssj_category')
+  const existingCategories = getStorage('ssj_categories')
   if (!existingCategories || existingCategories.length === 0) {
     const allCategories = [...initExpenseCategories(), ...initIncomeCategories()]
-    setStorage('ssj_category', allCategories)
+    setStorage('ssj_categories', allCategories)
   }
 
-  const existingAccounts = getStorage('ssj_account')
+  const existingAccounts = getStorage('ssj_accounts')
   if (!existingAccounts || existingAccounts.length === 0) {
-    setStorage('ssj_account', initAccounts())
+    setStorage('ssj_accounts', initAccounts())
   }
 }
 

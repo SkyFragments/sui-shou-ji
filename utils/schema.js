@@ -55,11 +55,11 @@
 
 // 数据库表名常量
 export const TABLE_NAMES = {
-  RECORD: 'ssj_record',
-  CATEGORY: 'ssj_category',
-  ACCOUNT: 'ssj_account',
-  BUDGET: 'ssj_budget',
-  USER: 'ssj_user'
+  RECORD: 'ssj_records',
+  CATEGORY: 'ssj_categories',
+  ACCOUNT: 'ssj_accounts',
+  BUDGET: 'ssj_budgets',
+  USER: 'ssj_users'
 }
 
 // record 表字段
