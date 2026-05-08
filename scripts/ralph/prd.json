@@ -349,7 +349,7 @@
       ],
       "priority": 20,
       "passes": true,
-      "notes": "Completed: store/sync.js implements sync status management, offline queue, and cloud sync operations"
+      "notes": "Completed: store/sync.js implements sync status management, offline queue, and cloud sync operations. ⚠️ PLACEHOLDER: Cloud sync UI is functional but requires WeChat Cloud Development environment (uni.cloud.database()) to be connected to a real cloud database for actual data synchronization across devices."
     },
     {
       "id": "US-021",
@@ -367,7 +367,7 @@
       ],
       "priority": 21,
       "passes": true,
-      "notes": "Marked as complete - export functionality noted as future enhancement"
+      "notes": "Completed: utils/export.js provides full CSV export functionality with recordToCsvRow, exportToCSV, generateExportFileName, and downloadCSVFile. ⚠️ PLACEHOLDER: Export UI shows data preview in modal, actual file download requires WeChat file API integration or web download."
     },
     {
       "id": "US-022",

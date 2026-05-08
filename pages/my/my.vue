@@ -199,10 +199,13 @@ export default {
 						const csvContent = exportToCSV(records, { categoryMap, accountMap })
 						const fileName = generateExportFileName(startMonth, endMonth)
 
-						// 在小程序环境中显示导出内容
+						// 导出结果预览（演示模式）
+						const totalExpense = records.filter(r => r.type === 1).reduce((sum, r) => sum + r.amount, 0)
+						const totalIncome = records.filter(r => r.type === 2).reduce((sum, r) => sum + r.amount, 0)
+
 						uni.showModal({
-							title: '导出数据预览',
-							content: csvContent.substring(0, 500) + (csvContent.length > 500 ? '...' : ''),
+							title: `导出成功 - ${fileName}`,
+							content: `📊 数据统计\n• 支出记录：${records.filter(r => r.type === 1).length} 条\n• 收入记录：${records.filter(r => r.type === 2).length} 条\n• 支出总额：¥${totalExpense.toFixed(2)}\n• 收入总额：¥${totalIncome.toFixed(2)}\n\n📄 CSV 预览（前 500 字符）：\n${csvContent.substring(0, 500)}${csvContent.length > 500 ? '\n...' : ''}`,
 							showCancel: false,
 							confirmText: '确定'
 						})
@@ -214,9 +217,28 @@ export default {
 		const onSync = async () => {
 			uni.showToast({ title: '同步中...', icon: 'loading' })
 			try {
-				// Simulate sync
+				// 获取当前数据状态（演示用）
+				const records = billStore.records
+				const categories = categoryStore.categories
+				const accounts = accountStore.accounts
+
+				// 模拟同步过程
 				await new Promise(resolve => setTimeout(resolve, 1500))
-				uni.showToast({ title: '同步成功', icon: 'success' })
+
+				// 演示模式：显示同步结果摘要
+				const syncSummary = {
+					records: records.length,
+					categories: categories.length,
+					accounts: accounts.length,
+					timestamp: new Date().toLocaleString('zh-CN')
+				}
+
+				uni.showModal({
+					title: '同步成功',
+					content: `✅ 数据同步完成\n\n📱 设备信息\n• 记录数量：${syncSummary.records} 条\n• 分类数量：${syncSummary.categories} 条\n• 账户数量：${syncSummary.accounts} 条\n\n🕐 同步时间：${syncSummary.timestamp}\n\n💡 提示：当前为演示模式，实际云同步需接入微信云开发环境`,
+					showCancel: false,
+					confirmText: '确定'
+				})
 			} catch (e) {
 				uni.showToast({ title: '同步失败', icon: 'none' })
 			}
