@@ -140,12 +140,12 @@ export default {
 
 		const getAccountIcon = (type) => {
 			const icons = {
-				cash: '💵',
-				alipay: '💳',
-				wechat: '💬',
-				bankcard: '🏦'
+				cash: '现',
+				alipay: '支',
+				wechat: '微',
+				bankcard: '银'
 			}
-			return icons[type] || '💰'
+			return icons[type] || '钱'
 		}
 
 		const getAccountColor = (type) => {

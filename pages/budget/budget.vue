@@ -168,9 +168,9 @@ export default {
 		})
 
 		const alertMessage = computed(() => {
-			if (percentage.value >= 120) return '⚠️ 已超支120%，注意控制支出！'
-			if (percentage.value >= 100) return '⚠️ 已超支，请调整消费计划'
-			if (percentage.value >= 80) return '⚠️ 预算已用80%，注意控制'
+			if (percentage.value >= 120) return '已超支120%，注意控制支出！'
+			if (percentage.value >= 100) return '已超支，请调整消费计划'
+			if (percentage.value >= 80) return '预算已用80%，注意控制'
 			return ''
 		})
 
@@ -364,6 +364,12 @@ function getCurrentYearMonth() {
 	background-color: #f0f0f0;
 	font-size: 26rpx;
 	color: #666;
+	transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+
+.preset-btn:active {
+	transform: scale(0.95);
+	opacity: 0.8;
 }
 
 .progress-section {

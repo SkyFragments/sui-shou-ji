@@ -388,6 +388,11 @@ function getCurrentYearMonth() {
 .record-item {
 	position: relative;
 	overflow: hidden;
+	transition: background-color 0.15s ease-out;
+}
+
+.record-item:active {
+	background-color: #f8f8f8;
 }
 
 .swipe-container {
