@@ -1,0 +1,153 @@
+/**
+ * 公共工具类
+ * 随手记 - 通用布局和交互样式
+ */
+
+/* ============================================
+ * 弹性布局
+ * ============================================ */
+
+.flex {
+	display: flex;
+}
+
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.flex-between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.flex-around {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.flex-column {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-wrap {
+	flex-wrap: wrap;
+}
+
+.flex-1 {
+	flex: 1;
+}
+
+/* ============================================
+ * 文字对齐
+ * ============================================ */
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-right {
+	text-align: right;
+}
+
+/* ============================================
+ * 文字截断
+ * ============================================ */
+
+.text-ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.text-ellipsis-2 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+/* ============================================
+ * 卡片样式
+ * ============================================ */
+
+.card {
+	background-color: #ffffff;
+	border-radius: 16rpx;
+	padding: 24rpx;
+	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-sm {
+	padding: 16rpx;
+	border-radius: 12rpx;
+}
+
+/* ============================================
+ * 按钮基础
+ * ============================================ */
+
+.btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20rpx 32rpx;
+	border-radius: 40rpx;
+	font-size: 28rpx;
+	transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+
+.btn:active {
+	transform: scale(0.95);
+	opacity: 0.8;
+}
+
+.btn-primary {
+	background-color: #07c160;
+	color: #ffffff;
+}
+
+.btn-danger {
+	background-color: #dd524d;
+	color: #ffffff;
+}
+
+.btn-outline {
+	border: 1rpx solid #ddd;
+	background-color: #ffffff;
+	color: #666;
+}
+
+/* ============================================
+ * 触摸反馈
+ * ============================================ */
+
+.touch-feedback {
+	transition: background-color 0.15s ease-out;
+}
+
+.touch-feedback:active {
+	background-color: #f8f8f8;
+}
+
+/* ============================================
+ * 分割线
+ * ============================================ */
+
+.divider {
+	height: 1rpx;
+	background-color: #f0f0f0;
+}
+
+.divider-space {
+	height: 20rpx;
+}

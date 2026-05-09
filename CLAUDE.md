@@ -44,6 +44,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `components/line-chart/` - 折线图
 - `components/ring-chart/` - 环形图
 
+### Common Styles
+- `common/style.scss` - 全局样式变量（颜色、字体、间距、圆角、阴影、动画、z-index）
+- `common/flex.scss` - 通用工具类（弹性布局、文字对齐、文字截断、卡片、按钮、触摸反馈）
+
 ## Navigation Pattern
 
 - 底部导航主要页面: 使用 `uni.reLaunch`

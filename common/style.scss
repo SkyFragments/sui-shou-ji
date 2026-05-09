@@ -1,0 +1,96 @@
+/**
+ * 公共样式
+ * 随手记 - 全局样式变量和工具类
+ */
+
+/* ============================================
+ * 颜色系统 - 与 uni.scss 保持一致
+ * ============================================ */
+
+/* 主色调 */
+$primary-color: #07c160;
+$primary-light: #4ecdc4;
+
+/* 功能色 */
+$expense-color: #dd524d;
+$income-color: #07c160;
+$warning-color: #ff9500;
+$danger-color: #dd524d;
+$info-color: #666;
+
+/* 中性色 */
+$text-primary: #333;
+$text-secondary: #666;
+$text-placeholder: #999;
+$text-disabled: #c0c0c0;
+
+$bg-page: #f5f5f5;
+$bg-card: #ffffff;
+$bg-hover: #f1f1f1;
+
+$border-color: #f0f0f0;
+$divider-color: #eee;
+
+/* ============================================
+ * 字体系统
+ * ============================================ */
+
+$font-size-xs: 22rpx;
+$font-size-sm: 24rpx;
+$font-size-base: 26rpx;
+$font-size-md: 28rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-xxl: 44rpx;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 600;
+
+/* ============================================
+ * 间距系统 - 8dp基准
+ * ============================================ */
+
+$spacing-xs: 8rpx;
+$spacing-sm: 12rpx;
+$spacing-base: 16rpx;
+$spacing-md: 20rpx;
+$spacing-lg: 24rpx;
+$spacing-xl: 30rpx;
+$spacing-xxl: 40rpx;
+
+/* ============================================
+ * 圆角系统
+ * ============================================ */
+
+$radius-sm: 8rpx;
+$radius-base: 12rpx;
+$radius-lg: 16rpx;
+$radius-xl: 24rpx;
+$radius-full: 50%;
+
+/* ============================================
+ * 阴影系统
+ * ============================================ */
+
+$shadow-light: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+$shadow-base: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+$shadow-heavy: 0 8rpx 30rpx rgba(0, 0, 0, 0.15);
+
+/* ============================================
+ * 动画系统
+ * ============================================ */
+
+$transition-fast: 0.1s ease-out;
+$transition-base: 0.15s ease-out;
+$transition-slow: 0.3s ease-out;
+
+/* ============================================
+ * z-index层级
+ * ============================================ */
+
+$z-index-base: 1;
+$z-index-dropdown: 100;
+$z-index-sticky: 200;
+$z-index-modal: 500;
+$z-index-toast: 1000;
