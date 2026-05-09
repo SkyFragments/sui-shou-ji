@@ -151,13 +151,13 @@ export default {
 
 		const formData = ref({
 			name: '',
-			icon: 'C',
+			icon: '📦',
 			color: '#07c160'
 		})
 
 		const iconOptions = [
-			'F', 'T', 'S', 'L', 'X', 'G', 'Y', 'M',
-			'E', 'G', 'C', 'M', 'L', 'G', 'C', 'O'
+			'🍜', '🍔', '🛒', '🏠', '🚗', '🚌', '✈️', '💊',
+			'🎬', '🎮', '📱', '💰', '👔', '🎁', '☕', '🍎'
 		]
 
 		const colorOptions = [
@@ -183,7 +183,7 @@ export default {
 			editingCode.value = ''
 			formData.value = {
 				name: '',
-				icon: 'C',
+				icon: '📦',
 				color: '#07c160'
 			}
 			showModal.value = true

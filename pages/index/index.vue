@@ -144,14 +144,14 @@ export default {
 		const budgetStore = useBudgetStore()
 		const categoryStore = useCategoryStore()
 
-		// 快捷模板 - 使用英文首字母代替 emoji
+		// 快捷模板
 		const templates = [
-			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: 'B', color: '#FF6B6B' },
-			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: 'L', color: '#FF6B6B' },
-			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: 'T', color: '#4ECDC4' },
-			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: 'S', color: '#4ECDC4' },
-			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: 'C', color: '#FF6B6B' },
-			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: 'M', color: '#96CEB4' }
+			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
+			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: '🍔', color: '#FF6B6B' },
+			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: '🚗', color: '#4ECDC4' },
+			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: '🚌', color: '#4ECDC4' },
+			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: '☕', color: '#FF6B6B' },
+			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: '🎬', color: '#96CEB4' }
 		]
 
 		// 初始化数据
@@ -220,8 +220,8 @@ export default {
 
 		const getCategoryIcon = (code) => {
 			const category = categoryStore.getCategoryByCode(code)
-			if (category?.code) {
-				return category.code.charAt(0)
+			if (category?.icon) {
+				return category.icon
 			}
 			return '?'
 		}
