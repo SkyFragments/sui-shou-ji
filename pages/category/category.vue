@@ -217,6 +217,10 @@ export default {
 				uni.showToast({ title: '请输入分类名称', icon: 'none' })
 				return
 			}
+			if (formData.value.name.length > 20) {
+				uni.showToast({ title: '名称不能超过20字符', icon: 'none' })
+				return
+			}
 
 			const categoryData = {
 				type: currentType.value,

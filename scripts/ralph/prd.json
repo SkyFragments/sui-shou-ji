@@ -1,389 +1,170 @@
 {
-  "project": "随手记",
-  "branchName": "ralph/sui-shou-ji-mvp",
-  "description": "随手记 - 个人记账小程序 MVP，使用 uni-app + Vue3 + Pinia + SQLite + 微信云开发",
+  "project": "随手记-云端同步",
+  "branchName": "ralph/cloud-sync",
+  "description": "随手记云端同步功能 - 微信一键登录、云端数据同步、数据导出",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "初始化项目结构和数据库表",
-      "description": "作为开发者，需要建立项目结构和数据库表，以便存储账单、分类、账户、预算数据",
+      "id": "CS-001",
+      "title": "创建 login 云函数",
+      "description": "作为开发者，需要创建云函数处理微信 code 换取 openid",
       "acceptanceCriteria": [
-        "创建 uni-app 项目结构（pages/components/store/utils/static）",
-        "创建 record 表（id, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status）",
-        "创建 category 表（id, code, name, icon, color, type, sort, is_default）",
-        "创建 account 表（id, code, name, type, balance, sort, is_default, create_time, update_time）",
-        "创建 budget 表（id, year_month, total_budget, create_time, update_time）",
-        "创建 user 表（id, openid, default_budget, last_sync_time, create_time）",
+        "在 cloudfunctions/login/ 创建云函数",
+        "接收参数 { code }",
+        "调用微信接口 SnsService.code2Session",
+        "返回 { openid, session_key, unionid }",
+        "部署到微信云开发环境",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Completed: Project structure created, pages.json configured with routes and tabBar, Pinia initialized"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-002",
-      "title": "初始化 Pinia stores",
-      "description": "作为开发者，需要创建 Pinia stores 来管理应用状态",
+      "id": "CS-002",
+      "title": "实现 login() 鉴权函数",
+      "description": "作为用户，我希望微信一键登录，无需注册密码",
       "acceptanceCriteria": [
-        "创建 bill store（records, addRecord, updateRecord, deleteRecord, getRecordsByDate, getRecordsByMonth）",
-        "创建 category store（categories, expenseCategories, incomeCategories, loadCategories）",
-        "创建 account store（accounts, defaultAccount, loadAccounts, addAccount, updateAccount, deleteAccount）",
-        "创建 budget store（currentBudget, setBudget, getBudgetByMonth, calculateUsage）",
-        "创建 sync store（syncStatus, lastSyncTime, syncToCloud, pullFromCloud）",
+        "utils/auth.js 提供 login() 函数",
+        "调用 wx.login() 获取 code",
+        "调用云函数 login 换取 openid",
+        "存储用户信息到 ssj_users",
+        "登录成功后显示用户 openid（短号，前8位）",
+        "登录状态持久化",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Completed: Created bill, category, account, budget, and sync Pinia stores"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-003",
-      "title": "创建数据库工具函数",
-      "description": "作为开发者，需要数据库 CRUD 操作工具函数",
+      "id": "CS-003",
+      "title": "创建 sync-data 云函数",
+      "description": "作为开发者，需要创建云函数处理增量数据同步",
       "acceptanceCriteria": [
-        "创建 db.js 工具文件",
-        "实现 initDatabase() 初始化数据库和表",
-        "实现 insertRecord(), getRecords(), updateRecord(), deleteRecord()",
-        "实现 getRecordsByMonth(), getRecordsByDateRange()",
-        "实现 getCategoryStats(), getMonthStats()",
+        "在 cloudfunctions/sync-data/ 创建云函数",
+        "接收 { openid, last_sync_time }",
+        "返回 last_sync_time 之后的所有增量数据",
+        "支持记录、分类、账户、预算四种数据",
+        "按 update_time 降序排列",
+        "部署到微信云开发环境",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Completed: Created utils/db.js with full CRUD operations, initDatabase(), insertRecord(), getRecords(), updateRecord(), deleteRecord(), getRecordsByMonth(), getRecordsByDateRange(), getCategoryStats(), getMonthStats()"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-004",
-      "title": "初始化默认分类数据",
-      "description": "作为开发者，需要插入默认的支出和收入分类数据",
+      "id": "CS-004",
+      "title": "改造 db.js 使用云数据库",
+      "description": "作为开发者，需要改造 db.js 使用 uniCloud.database() 替代 LocalStorage",
       "acceptanceCriteria": [
-        "插入支出分类：餐饮、交通、购物、娱乐、居住、医疗、教育、通讯、其他（带图标和颜色）",
-        "插入收入分类：工资、副业、投资、其他（带图标和颜色）",
-        "分类排序：支出按 FOOD/TRANSPORT/SHOPPING/ENTERTAINMENT/LIVING/MEDICAL/EDUCATION/COMMUNICATION/OTHER，收入按 SALARY/SIDE_JOB/INVESTMENT/OTHER_INCOME",
+        "utils/db.js 改用 uniCloud.database()",
+        "所有 CRUD 操作支持云端和本地双模式",
+        "离线时数据存入 pendingSync 队列",
+        "网络恢复后自动重试",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Completed: init-data.js creates 9 expense categories and 4 income categories with correct codes, icons, colors, and sort order"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-005",
-      "title": "初始化默认账户数据",
-      "description": "作为开发者，需要插入默认账户（现金、支付宝、微信、银行卡）",
+      "id": "CS-005",
+      "title": "实现首次登录全量同步",
+      "description": "作为新用户，登录后自动将云端数据拉取到本地，若云端无数据则上传本地数据",
       "acceptanceCriteria": [
-        "插入默认账户：现金（cash）、支付宝（alipay）、微信（wechat）、银行卡（bankcard）",
-        "账户类型正确标识",
-        "默认账户 is_default=1",
+        "store/sync.js 实现 triggerFirstSync()",
+        "拉取云端数据并覆盖本地（若云端有数据）",
+        "上传本地数据到云端（若云端无数据）",
+        "显示同步进度 uni.showLoading",
+        "同步完成后 lastSyncTime 更新",
+        "同步失败时弹出错误提示",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Completed: init-data.js creates 4 default accounts (cash, alipay, wechat, bankcard) with correct codes, types, and is_default flags"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-006",
-      "title": "创建金额键盘组件",
-      "description": "作为用户，我需要输入金额的键盘来快速记账",
+      "id": "CS-006",
+      "title": "实现日常增量同步",
+      "description": "作为老用户，每次新增/修改/删除账单后自动同步到云端",
       "acceptanceCriteria": [
-        "创建 components/amount-keyboard/ 组件",
-        "4x4 键盘布局：1-9、数字点、0、删除键",
-        "支持小数点输入，最多2位小数",
-        "支持最大金额 999,999.99",
-        "点击按键触发 onInput 事件",
-        "点击删除键触发 onDelete 事件",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "billStore.addRecord() 后调用 syncToCloud()",
+        "billStore.updateRecord() 后调用 syncToCloud()",
+        "billStore.deleteRecord() 后调用 syncToCloud()",
+        "同步为异步，不阻塞用户操作",
+        "同步失败时数据存入 pendingSync 队列",
+        "网络恢复后自动重试待同步数据",
+        "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Completed: Enhanced amount-keyboard with Vue3 Composition API, 4x4 layout, decimal support, max 999999.99, clear/confirm buttons"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-007",
-      "title": "创建分类选择器组件",
-      "description": "作为用户，我需要选择分类来记账",
+      "id": "CS-007",
+      "title": "实现冲突处理",
+      "description": "当多设备同时修改同一记录，以最新 update_time 为准",
       "acceptanceCriteria": [
-        "创建 components/category-picker/ 组件",
-        "显示分类图标网格（40px x 40px）",
-        "支持切换支出/收入分类",
-        "支出显示9个分类图标，收入显示4个分类图标",
-        "每个分类显示图标+名称",
-        "选中状态有视觉反馈（边框或背景色）",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "拉取云端数据时比较 update_time",
+        "本地数据 update_time 较新则保留本地",
+        "云端数据 update_time 较新则覆盖本地",
+        "合并后的数据再次上传到云端",
+        "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "Completed: Enhanced category-picker with Vue3 Composition API, integrates with category store, shows 9 expense/4 income categories with icons"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-008",
-      "title": "创建记账页面",
-      "description": "作为用户，我希望在记账页面输入金额、选择分类、选择账户、添加备注后保存账单",
+      "id": "CS-008",
+      "title": "实现 CSV 数据导出",
+      "description": "作为用户，我想导出账单到 CSV 文件，方便在 Excel 中分析",
       "acceptanceCriteria": [
-        "创建 pages/add/add.vue 记账页面",
-        "大字显示输入金额",
-        "收支切换按钮（支出红色/收入绿色）",
-        "集成 category-picker 组件",
-        "集成 amount-keyboard 组件",
-        "账户选择下拉框（默认现金）",
-        "日期选择器（默认今天）",
-        "备注输入框（选填，最多256字符）",
-        "保存按钮点击后调用 store.addRecord()",
-        "保存成功后显示 Toast 并返回首页",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "在 my 页面点击数据导出",
+        "弹出月份选择器，默认当前月份",
+        "调用 exportToCSV() 生成 CSV 格式",
+        "使用 uni.saveFile() 保存到本地",
+        "使用 uni.openDocument() 打开文件",
+        "导出成功显示文件路径",
+        "Typecheck passes"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "Completed: Created pages/add/add.vue with amount display, type switch, category-picker, account picker, date picker, remark input, and amount-keyboard integration"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-009",
-      "title": "创建快捷模板功能",
-      "description": "作为用户，我希望通过快捷模板一键记账",
+      "id": "CS-009",
+      "title": "实现 Excel 数据导出",
+      "description": "作为用户，我想导出账单到 xlsx 文件，保留格式和公式",
       "acceptanceCriteria": [
-        "在首页添加快捷模板区域",
-        "模板：早餐(10元/餐饮)、午餐(30元/餐饮)、打车(25元/交通)、地铁(5元/交通)、咖啡(20元/餐饮)、电影(50元/娱乐)",
-        "点击模板直接创建对应账单并显示成功 Toast",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "CSV 导出选项下方增加导出 Excel 选项",
+        "使用 xlsx 库生成 .xlsx 文件",
+        "表头：日期、类型、分类、账户、金额、备注",
+        "支出显示红色，收入显示绿色",
+        "金额列使用数字格式，非文本",
+        "使用 uni.saveFile() + uni.openDocument() 打开",
+        "Typecheck passes"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "Completed: Added templates grid to index page with 6 quick-add templates (breakfast, lunch, taxi, subway, coffee, movie)"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-010",
-      "title": "创建环形图组件",
-      "description": "作为用户，我希望看到今日支出占月预算的比例",
+      "id": "CS-010",
+      "title": "集成测试",
+      "description": "作为用户，我希望多设备间数据同步无感知",
       "acceptanceCriteria": [
-        "创建 components/ring-chart/ 组件",
-        "显示环形图（已用/总预算比例）",
-        "中心显示已用金额或剩余金额",
-        "支持进度颜色：正常蓝色，80%黄色，100%+红色",
+        "设备 A 添加记录，设备 B 刷新后可见",
+        "多设备同时修改，取最新 update_time",
+        "导出文件格式正确",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "Completed: Ring chart component with conic-gradient, shows used/total ratio, color changes at 80%/100% thresholds"
-    },
-    {
-      "id": "US-011",
-      "title": "创建统计卡片组件",
-      "description": "作为用户，我希望看到收支统计卡片",
-      "acceptanceCriteria": [
-        "创建 components/stat-card/ 组件",
-        "显示标题（收入/支出/结余）",
-        "显示金额（大字，支出红色/收入绿色）",
-        "可选显示对比数据（如比上月）",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": "Completed: Stat card component with title, amount display, and optional compare text, supports expense/income/balance types"
-    },
-    {
-      "id": "US-012",
-      "title": "创建账单项组件",
-      "description": "作为用户，我希望在列表中看到每条账单的详情",
-      "acceptanceCriteria": [
-        "创建 components/bill-item/ 组件",
-        "显示时间（HH:mm格式）",
-        "显示分类图标（24px x 24px）和分类名称",
-        "显示备注（如有）",
-        "显示金额（支出红色带负号/收入绿色带正号）",
-        "支持侧滑显示删除按钮",
-        "点击账单项触发编辑事件",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": "Completed: Bill item component shows category icon, name, remark, time, and amount with color coding for expense/income"
-    },
-    {
-      "id": "US-013",
-      "title": "创建首页",
-      "description": "作为用户，我希望打开应用就看到今日概况和快速入口",
-      "acceptanceCriteria": [
-        "创建 pages/index/index.vue 首页",
-        "显示今日支出总额（红色大字）",
-        "显示今日收入总额（绿色）",
-        "显示今日账单列表（最近5条，使用 bill-item）",
-        "显示月预算进度（使用 ring-chart）",
-        "超支80%显示黄色提醒Banner",
-        "超支100%显示红色提醒Banner",
-        "显示「记一笔」按钮（点击跳转记账页）",
-        "显示快捷模板区域",
-        "底部导航栏（首页/账单/记账/分析/我的）",
-        "页面下拉刷新",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": "Completed: Created full index page with today stats, budget progress ring-chart, alert banners, quick templates, recent records list, add button, and tabbar navigation"
-    },
-    {
-      "id": "US-014",
-      "title": "创建账单列表页面",
-      "description": "作为用户，我希望按日查看所有账单",
-      "acceptanceCriteria": [
-        "创建 pages/records/records.vue 账单列表页",
-        "月份选择器（可切换查看不同月份）",
-        "按日分组显示账单，每组显示日期和当日合计",
-        "每条账单使用 bill-item 组件",
-        "侧滑删除功能（删除前显示确认对话框）",
-        "下拉刷新",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 14,
-      "passes": true,
-      "notes": "Completed: Created records page with month selector, stats overview, grouped records by date, delete confirmation, and edit support"
-    },
-    {
-      "id": "US-015",
-      "title": "创建饼图组件",
-      "description": "作为用户，我希望看到分类支出占比",
-      "acceptanceCriteria": [
-        "创建 components/pie-chart/ 组件",
-        "显示分类占比饼图",
-        "各分类颜色按设计规范",
-        "支持点击扇区查看分类详情",
-        "显示图例",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "Completed: Pie chart component with conic-gradient, legend with percentages, and click events"
-    },
-    {
-      "id": "US-016",
-      "title": "创建折线图组件",
-      "description": "作为用户，我希望看到支出趋势",
-      "acceptanceCriteria": [
-        "创建 components/line-chart/ 组件",
-        "显示日支出趋势折线图",
-        "支持多个月份对比",
-        "X轴为日期，Y轴为金额",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "Completed: Line chart component with data points visualization and x-axis labels"
-    },
-    {
-      "id": "US-017",
-      "title": "创建统计页面",
-      "description": "作为用户，我希望查看月度统计分析",
-      "acceptanceCriteria": [
-        "创建 pages/stats/stats.vue 统计页",
-        "显示本月概况卡片（收入/支出/结余）",
-        "显示分类占比饼图（使用 pie-chart）",
-        "显示日支出趋势折线图（使用 line-chart）",
-        "支持月份切换",
-        "下拉刷新",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 17,
-      "passes": true,
-      "notes": "Completed: Created stats page with month selector, overview cards (income/expense/balance), pie-chart for category breakdown, and line-chart for daily expense trend"
-    },
-    {
-      "id": "US-018",
-      "title": "创建预算页面",
-      "description": "作为用户，我希望设置月预算并查看执行进度",
-      "acceptanceCriteria": [
-        "创建 pages/budget/budget.vue 预算页",
-        "显示月预算设置（滑动条+手动输入）",
-        "默认预算 3000 元",
-        "显示预算执行进度条",
-        "显示已用/总预算/剩余",
-        "超支提醒Banner（80%黄色/100%红色/120%强警示）",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 18,
-      "passes": true,
-      "notes": "Completed: Created budget page with month selector, budget input/slider/presets, progress bar with color coding, alert banners, and daily available suggestion"
-    },
-    {
-      "id": "US-019",
-      "title": "创建我的页面",
-      "description": "作为用户，我希望在个人中心管理账户、导出数据、查看同步状态",
-      "acceptanceCriteria": [
-        "创建 pages/my/my.vue 我的页面",
-        "账户管理入口（查看/添加/编辑/删除账户）",
-        "数据导出入口（选择月份范围，导出 Excel/CSV）",
-        "预算设置入口（跳转预算页）",
-        "同步状态显示（同步中/已同步/同步失败）",
-        "手动同步按钮",
-        "关于信息",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 19,
-      "passes": true,
-      "notes": "Completed: Created my page with profile section, account management, budget setting, data export, sync status, and about info"
-    },
-    {
-      "id": "US-020",
-      "title": "实现云端同步功能",
-      "description": "作为用户，我需要多设备数据同步",
-      "acceptanceCriteria": [
-        "创建 utils/sync.js 同步工具",
-        "使用微信云数据库存储数据",
-        "每次数据变更自动同步到云端（延迟<5秒）",
-        "切换设备时自动拉取云端数据",
-        "离线时数据存储到本地 SQLite",
-        "网络恢复后自动同步离线数据",
-        "同步冲突时以最新 update_time 为准",
-        "Typecheck passes"
-      ],
-      "priority": 20,
-      "passes": true,
-      "notes": "Completed: store/sync.js implements sync status management, offline queue, and cloud sync operations. ⚠️ PLACEHOLDER: Cloud sync UI is functional but requires WeChat Cloud Development environment (uni.cloud.database()) to be connected to a real cloud database for actual data synchronization across devices."
-    },
-    {
-      "id": "US-021",
-      "title": "实现数据导出功能",
-      "description": "作为用户，我希望导出账单数据为 Excel 或 CSV",
-      "acceptanceCriteria": [
-        "创建 utils/export.js 导出工具",
-        "使用 xlsx 库生成 Excel 文件",
-        "支持选择月份范围导出",
-        "导出字段：日期、类型、分类、账户、金额、备注",
-        "导出时显示进度",
-        "导出成功可分享或保存",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 21,
-      "passes": true,
-      "notes": "Completed: utils/export.js provides full CSV export functionality with recordToCsvRow, exportToCSV, generateExportFileName, and downloadCSVFile. ⚠️ PLACEHOLDER: Export UI shows data preview in modal, actual file download requires WeChat file API integration or web download."
-    },
-    {
-      "id": "US-022",
-      "title": "配置底部导航栏和页面路由",
-      "description": "作为用户，我需要在各页面间导航",
-      "acceptanceCriteria": [
-        "配置 pages.json 路由（index/add/records/stats/budget/my）",
-        "配置底部导航栏",
-        "记账按钮突出显示（plus-circle）",
-        "当前页面高亮",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 22,
-      "passes": true,
-      "notes": "Completed: pages.json already configured with all routes (index/add/records/stats/budget/my) and tabBar with 5 items"
+      "passes": false,
+      "notes": ""
     }
   ]
 }

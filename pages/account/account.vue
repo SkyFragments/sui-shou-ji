@@ -218,6 +218,10 @@ export default {
 				uni.showToast({ title: '请输入账户名称', icon: 'none' })
 				return
 			}
+			if (formData.value.name.length > 20) {
+				uni.showToast({ title: '名称不能超过20字符', icon: 'none' })
+				return
+			}
 
 			if (editingAccount.value) {
 				accountStore.updateAccount(editingAccount.value.code, {

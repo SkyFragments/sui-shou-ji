@@ -1,7 +1,7 @@
 # Ralph Progress - 随手记 MVP
 
 ## Project: 随手记
-## Branch: ralph/sui-shou-ji-mvp
+## Branch: ralph/sui-shou-ji-mvp (archive: 2026-05-10-cloud-sync)
 ## Total Stories: 22
 
 ## Progress
@@ -131,3 +131,26 @@
   - ring-chart shows percentage with color coding
   - Alert banners show at 80%, 100%, 120% thresholds
 ---
+
+## Cloud Sync Phase Started
+## 2026-05-10 - Cloud Sync PRD Created
+- New PRD for cloud sync feature created: ralph/cloud-sync
+- 10 user stories covering login cloud function, auth, sync-data cloud function, db.js migration, sync implementation, CSV/Excel export, and integration testing
+- Previous MVP progress archived to archive/2026-05-10-cloud-sync/
+## 2026-05-10 - Cloud Sync Phase
+- What was implemented: Created cloud functions and updated auth/export utilities
+- Files changed:
+  - cloudfunctions/login/index.js (新增 - 微信登录云函数)
+  - cloudfunctions/sync-data/index.js (新增 - 数据同步云函数)
+  - utils/auth.js (修改 - login() 优先使用云函数)
+  - utils/export.js (修改 - 添加 exportToExcel, exportToExcelWithStyle, downloadExcelFile)
+  - scripts/ralph/prd.json (修改 - 新增 10 个云同步用户故事)
+  - scripts/ralph/progress.txt (修改 - 记录进度)
+- **Learnings for future iterations:**
+  - 微信云函数需要使用 wx-server-sdk
+  - cloud.getWXContext() 可获取 OPENID
+  - 云函数部署需要在微信开发者工具中进行
+  - xlsx 库 require('xlsx') 用于生成 Excel 文件
+  - 微信小程序使用 wx.arrayBufferToBase64 和 wx.openDocument 处理文件下载
+---
+

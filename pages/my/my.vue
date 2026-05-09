@@ -6,12 +6,25 @@
 	<view class="my-page">
 		<!-- 用户信息 -->
 		<view class="profile-section">
-			<view class="profile-avatar">
-				<text class="avatar-icon">👤</text>
+			<!-- 已登录状态 -->
+			<view v-if="isLoggedIn" class="profile-logged-in">
+				<view class="profile-avatar">
+					<text class="avatar-icon">👤</text>
+				</view>
+				<view class="profile-info">
+					<text class="profile-name">{{ nickName || '随手记用户' }}</text>
+					<text class="profile-id">UID: {{ shortOpenid }}</text>
+				</view>
 			</view>
-			<view class="profile-info">
-				<text class="profile-name">随手记用户</text>
-				<text class="profile-id">UID: {{ userId }}</text>
+			<!-- 未登录状态 -->
+			<view v-else class="profile-logged-out" @click="onLogin">
+				<view class="profile-avatar not-login">
+					<text class="avatar-icon">👤</text>
+				</view>
+				<view class="profile-info">
+					<text class="profile-name login-hint">点击登录</text>
+					<text class="profile-id">登录后可同步数据</text>
+				</view>
 			</view>
 		</view>
 
@@ -104,6 +117,7 @@ import { useSyncStore } from '@/store/sync'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
+import { login, getStoredUser, isLoggedIn as checkIsLoggedIn } from '@/utils/auth'
 
 export default {
 	setup() {
@@ -111,14 +125,52 @@ export default {
 		const billStore = useBillStore()
 		const categoryStore = useCategoryStore()
 		const accountStore = useAccountStore()
-		const userId = ref('******')
+
+		// 用户状态
+		const nickName = ref('')
+		const isLoggedIn = ref(false)
+		const shortOpenid = ref('')
+
+		// 初始化用户状态
+		const initUserState = () => {
+			const user = getStoredUser()
+			if (user && user.openid) {
+				isLoggedIn.value = true
+				nickName.value = user.nickName || ''
+				shortOpenid.value = user.openid.substring(0, 8) + '...'
+			} else {
+				isLoggedIn.value = false
+				shortOpenid.value = ''
+			}
+		}
 
 		onMounted(() => {
+			initUserState()
 			syncStore.loadSyncStatus()
 			billStore.loadRecords()
 			categoryStore.loadCategories()
 			accountStore.loadAccounts()
 		})
+
+		// 登录
+		const onLogin = async () => {
+			try {
+				uni.showLoading({ title: '登录中...' })
+				const userInfo = await login()
+				isLoggedIn.value = true
+				nickName.value = userInfo.nickName || ''
+				shortOpenid.value = userInfo.openid.substring(0, 8) + '...'
+				uni.hideLoading()
+				uni.showToast({ title: '登录成功', icon: 'success' })
+
+				// 登录成功后触发首次同步
+				await syncStore.triggerFirstSync()
+			} catch (e) {
+				uni.hideLoading()
+				uni.showToast({ title: '登录失败', icon: 'none' })
+				console.error('Login error:', e)
+			}
+		}
 
 		const syncStatusText = computed(() => {
 			switch (syncStore.syncStatus) {
@@ -245,7 +297,9 @@ export default {
 		}
 
 		return {
-			userId,
+			isLoggedIn,
+			nickName,
+			shortOpenid,
 			syncStatusText,
 			goToIndex,
 			goToRecords,
@@ -255,7 +309,8 @@ export default {
 			goToCategoryManage,
 			goToBudget,
 			onExport,
-			onSync
+			onSync,
+			onLogin
 		}
 	}
 }
@@ -275,6 +330,13 @@ export default {
 	padding: 40rpx 30rpx;
 }
 
+.profile-logged-in,
+.profile-logged-out {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
 .profile-avatar {
 	width: 120rpx;
 	height: 120rpx;
@@ -284,6 +346,10 @@ export default {
 	align-items: center;
 	justify-content: center;
 	margin-right: 24rpx;
+}
+
+.profile-avatar.not-login {
+	background-color: rgba(255, 255, 255, 0.5);
 }
 
 .avatar-icon {
@@ -299,6 +365,10 @@ export default {
 	font-weight: bold;
 	color: #ffffff;
 	display: block;
+}
+
+.profile-name.login-hint {
+	opacity: 0.8;
 }
 
 .profile-id {

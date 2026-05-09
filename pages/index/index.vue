@@ -232,14 +232,15 @@ export default {
 		}
 
 		const quickAdd = async (template) => {
+			const category = categoryStore.getCategoryByCode(template.category_code)
 			const record = {
 				type: 1, // 支出
 				amount: template.amount,
 				category_code: template.category_code,
-				category_name: template.name,
+				category_name: category?.name || template.name,
 				account_code: 'cash',
 				remark: '',
-				record_date: new Date().toISOString().split('T')[0]
+				record_date: new Date().toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' }).replace(/\//g, '-')
 			}
 			try {
 				await billStore.addRecord(record)

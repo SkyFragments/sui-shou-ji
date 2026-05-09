@@ -219,6 +219,27 @@ export const useSyncStore = defineStore('sync', {
       this.lastSyncTime = null
       this.pendingSync = []
       this.saveSyncStatus()
+    },
+
+    // 首次登录同步（登录成功后调用）
+    async triggerFirstSync() {
+      try {
+        uni.showLoading({ title: '同步中...' })
+        const pullResult = await this.pullFromCloud()
+
+        if (pullResult.success) {
+          if (!pullResult.data) {
+            await this.syncToCloud()
+          }
+        }
+        uni.hideLoading()
+        uni.showToast({ title: '同步完成', icon: 'success' })
+        return { success: true }
+      } catch (e) {
+        uni.hideLoading()
+        console.error('First sync failed:', e)
+        return { success: false, error: e }
+      }
     }
   }
 })
