@@ -7,7 +7,7 @@
 		<!-- 用户信息 -->
 		<view class="profile-section">
 			<view class="profile-avatar">
-				<text class="avatar-icon">我</text>
+				<text class="avatar-icon">S</text>
 			</view>
 			<view class="profile-info">
 				<text class="profile-name">随手记用户</text>
@@ -20,7 +20,7 @@
 			<!-- 账户管理 -->
 			<view class="menu-item" @click="goToAccountManage">
 				<view class="menu-left">
-					<text class="menu-icon">账</text>
+					<text class="menu-icon">W</text>
 					<text class="menu-text">账户管理</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -29,7 +29,7 @@
 			<!-- 分类管理 -->
 			<view class="menu-item" @click="goToCategoryManage">
 				<view class="menu-left">
-					<text class="menu-icon">类</text>
+					<text class="menu-icon">C</text>
 					<text class="menu-text">分类管理</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -38,7 +38,7 @@
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
-					<text class="menu-icon">预</text>
+					<text class="menu-icon">B</text>
 					<text class="menu-text">预算设置</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -47,7 +47,7 @@
 			<!-- 数据导出 -->
 			<view class="menu-item" @click="onExport">
 				<view class="menu-left">
-					<text class="menu-icon">出</text>
+					<text class="menu-icon">E</text>
 					<text class="menu-text">数据导出</text>
 				</view>
 				<text class="menu-arrow">▶</text>
@@ -56,7 +56,7 @@
 			<!-- 同步状态 -->
 			<view class="menu-item sync-item" @click="onSync">
 				<view class="menu-left">
-					<text class="menu-icon">同</text>
+					<text class="menu-icon">↻</text>
 					<text class="menu-text">同步</text>
 				</view>
 				<view class="sync-status">
@@ -70,7 +70,7 @@
 		<view class="menu-section">
 			<view class="menu-item">
 				<view class="menu-left">
-					<text class="menu-icon">关于</text>
+					<text class="menu-icon">i</text>
 					<text class="menu-text">关于</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
