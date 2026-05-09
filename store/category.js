@@ -143,3 +143,22 @@ export const useCategoryStore = defineStore('category', {
     }
   }
 })
+    // 同步分类到云端
+    async syncToCloud(openid) {
+      try {
+        const { getCloudDb } = await import('@/utils/db')
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const now = Date.now()
+        for (const cat of this.categories) {
+          await db.collection('ssj_categories').add({
+            data: { ...cat, openid, update_time: now }
+          })
+        }
+        return { success: true }
+      } catch (e) {
+        console.error('Sync categories failed:', e)
+        return { success: false, error: e }
+      }
+    }

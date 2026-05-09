@@ -156,3 +156,33 @@ export const useBillStore = defineStore('bill', {
     }
   }
 })
+    // 同步到云端（添加记录后调用）
+    async syncToCloudAfterAdd(openid) {
+      const lastRecord = this.records[0]
+      if (!lastRecord) return { success: false }
+
+      try {
+        const { syncRecordToCloud } = await import('@/utils/db')
+        return await syncRecordToCloud(lastRecord, openid)
+      } catch (e) {
+        console.error('Sync after add failed:', e)
+        return { success: false, error: e }
+      }
+    },
+
+    // 从云端同步数据
+    async syncFromCloud(openid, lastSyncTime = 0) {
+      try {
+        const { pullFromCloud } = await import('@/utils/db')
+        const result = await pullFromCloud(openid, lastSyncTime)
+        if (result.success && result.data && result.data.length > 0) {
+          // 合并数据
+          this.records = result.data
+          this.saveRecords()
+        }
+        return result
+      } catch (e) {
+        console.error('Sync from cloud failed:', e)
+        return { success: false, error: e }
+      }
+    }

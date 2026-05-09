@@ -250,3 +250,86 @@ export function getTodayDate() {
   const now = new Date()
   return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 }
+
+// ========== 云端同步支持 ==========
+
+/**
+ * 云端数据库引用
+ */
+let cloudDb = null
+
+/**
+ * 获取云端数据库实例
+ */
+export function getCloudDb() {
+  if (!cloudDb) {
+    try {
+      cloudDb = uniCloud.database()
+    } catch (e) {
+      console.warn('Cloud database not available:', e)
+      return null
+    }
+  }
+  return cloudDb
+}
+
+/**
+ * 同步记录到云端
+ * @param {Object} record 记录
+ * @param {string} openid 用户openid
+ */
+export async function syncRecordToCloud(record, openid) {
+  const db = getCloudDb()
+  if (!db) return { offline: true }
+
+  try {
+    const res = await db.collection('ssj_records').add({
+      data: {
+        ...record,
+        openid,
+        sync_status: 1
+      }
+    })
+    return { success: true, id: res.id }
+  } catch (e) {
+    console.error('Sync record failed:', e)
+    return { success: false, error: e }
+  }
+}
+
+/**
+ * 从云端拉取用户数据
+ * @param {string} openid 用户openid
+ * @param {number} lastSyncTime 上次同步时间
+ */
+export async function pullFromCloud(openid, lastSyncTime = 0) {
+  const db = getCloudDb()
+  if (!db) return { offline: true }
+
+  try {
+    const res = await db.collection('ssj_records')
+      .where({
+        openid,
+        update_time: db.command.gt(lastSyncTime)
+      })
+      .orderBy('update_time', 'desc')
+      .get()
+
+    return { success: true, data: res.data || [] }
+  } catch (e) {
+    console.error('Pull from cloud failed:', e)
+    return { success: false, error: e }
+  }
+}
+
+/**
+ * 云端同步状态检查
+ */
+export function isCloudAvailable() {
+  try {
+    const db = getCloudDb()
+    return !!db
+  } catch (e) {
+    return false
+  }
+}

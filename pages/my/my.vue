@@ -478,3 +478,53 @@ export default {
 	color: #07c160;
 }
 </style>
+
+		const onExportExcel = () => {
+			const now = new Date()
+			const year = now.getFullYear()
+			const month = now.getMonth() + 1
+			const startMonth = `${year}-${String(month).padStart(2, '0')}-01`
+			const endDay = new Date(year, month, 0).getDate()
+			const endMonth = `${year}-${String(month).padStart(2, '0')}-${endDay}`
+
+			uni.showModal({
+				title: '数据导出',
+				content: `确定导出 ${startMonth} 至 ${endMonth} 的账单数据到 Excel 吗？`,
+				success: async (res) => {
+					if (res.confirm) {
+						const billStore = useBillStore()
+						const records = billStore.getRecordsByDateRange(startMonth, endMonth)
+
+						if (records.length === 0) {
+							uni.showToast({ title: '该月无账单数据', icon: 'none' })
+							return
+						}
+
+						const categoryStore = useCategoryStore()
+						const accountStore = useAccountStore()
+
+						const categoryMap = {}
+						categoryStore.categories.forEach(c => {
+							categoryMap[c.code] = c.name
+						})
+
+						const accountMap = {}
+						accountStore.accounts.forEach(a => {
+							accountMap[a.code] = a.name
+						})
+
+						const { exportToExcelWithStyle, generateExcelFileName, downloadExcelFile } = require('@/utils/export.js')
+
+						try {
+							const excelData = exportToExcelWithStyle(records, { categoryMap, accountMap })
+							const fileName = generateExcelFileName(startMonth, endMonth)
+							downloadExcelFile(excelData, fileName)
+							uni.showToast({ title: '导出成功', icon: 'success' })
+						} catch (e) {
+							console.error('Export Excel failed:', e)
+							uni.showToast({ title: '导出失败', icon: 'none' })
+						}
+					}
+				}
+			})
+		}
