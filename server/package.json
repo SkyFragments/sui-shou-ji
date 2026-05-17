@@ -1,0 +1,16 @@
+{
+  "name": "suishouji-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5",
+    "jsonwebtoken": "^9.0.2",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  }
+}
