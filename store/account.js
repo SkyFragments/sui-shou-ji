@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { ACCOUNT_CODES } from '@/utils/schema'
+import { postAccount, putAccount, deleteAccount } from '@/utils/api'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_accounts'
@@ -78,6 +79,10 @@ export const useAccountStore = defineStore('account', {
       }
       this.accounts.push(newAccount)
       this.saveAccounts()
+      
+      // Sync to cloud
+      this.syncAccount(newAccount).catch(() => {})
+      
       return newAccount
     },
 
@@ -91,6 +96,10 @@ export const useAccountStore = defineStore('account', {
           update_time: Date.now()
         }
         this.saveAccounts()
+        
+        // Sync to cloud
+        this.syncAccount(this.accounts[index]).catch(() => {})
+        
         return this.accounts[index]
       }
       return null
@@ -145,6 +154,53 @@ export const useAccountStore = defineStore('account', {
     resetAccounts() {
       this.accounts = initAccounts()
       this.saveAccounts()
+    },
+
+    // 同步单个账户到云端
+    async syncAccount(account) {
+      try {
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+
+        await db.collection('ssj_accounts').add({
+          data: { ...account, openid: user.openid, update_time: Date.now() }
+        })
+        return { success: true }
+      } catch (e) {
+        console.error('Sync account failed:', e)
+        return { success: false, error: e }
+      }
+    },
+
+    // 同步所有账户到云端
+    async syncToCloud() {
+      try {
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+        if (!db) return { offline: true }
+        
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+
+        const now = Date.now()
+        for (const acc of this.accounts) {
+          await db.collection('ssj_accounts').add({
+            data: { ...acc, openid: user.openid, update_time: now }
+          })
+        }
+        return { success: true }
+      } catch (e) {
+        console.error('Sync accounts failed:', e)
+        return { success: false, error: e }
+      }
     }
   }
 })

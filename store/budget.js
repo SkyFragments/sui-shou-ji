@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { useBillStore } from './bill'
+import { postBudget, putBudget, deleteBudget } from '@/utils/api'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_budgets'
@@ -71,13 +72,16 @@ export const useBudgetStore = defineStore('budget', {
 
     // 设置月度预算
     setBudget(yearMonth, amount) {
-      // 存储为对象以匹配 schema: { year_month, total_budget }
       this.budgets[yearMonth] = {
         year_month: yearMonth,
         total_budget: amount,
         update_time: Date.now()
       }
       this.saveBudgets()
+      
+      // Sync to cloud
+      this.syncBudget(this.budgets[yearMonth]).catch(() => {})
+      
       return this.budgets[yearMonth]
     },
 
@@ -116,6 +120,50 @@ export const useBudgetStore = defineStore('budget', {
     resetBudgets() {
       this.budgets = {}
       this.saveBudgets()
+    },
+
+    // 同步单个预算到云端
+    async syncBudget(budget) {
+      try {
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+
+        await db.collection('ssj_budgets').add({
+          data: { ...budget, openid: user.openid, update_time: Date.now() }
+        })
+        return { success: true }
+      } catch (e) {
+        console.error('Sync budget failed:', e)
+        return { success: false, error: e }
+      }
+    },
+
+    // 同步所有预算到云端
+    async syncToCloud() {
+      try {
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+
+        const now = Date.now()
+        const budgetsArray = Object.values(this.budgets)
+        for (const budget of budgetsArray) {
+          await db.collection('ssj_budgets').add({
+            data: { ...budget, openid: user.openid, update_time: now }
+          })
+        }
+        return { success: true }
+      } catch (e) {
+        console.error('Sync budgets failed:', e)
+        return { success: false, error: e }
+      }
     }
   }
 })

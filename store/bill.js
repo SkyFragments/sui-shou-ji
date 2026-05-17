@@ -5,6 +5,8 @@
 
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
+import { useSyncStore } from '@/store/sync'
+import { postRecord, putRecord, deleteRecord } from '@/utils/api'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_records'
@@ -79,6 +81,13 @@ export const useBillStore = defineStore('bill', {
       }
       this.records.unshift(newRecord)
       this.saveRecords()
+      
+      // Sync to cloud (fire-and-forget, queue on failure)
+      this.syncToCloudAfterAdd().catch(err => {
+        const syncStore = useSyncStore()
+        syncStore.addPendingSync('record_add', newRecord)
+      })
+      
       return newRecord
     },
 
@@ -93,20 +102,63 @@ export const useBillStore = defineStore('bill', {
           sync_status: 0
         }
         this.saveRecords()
+        
+        // Sync update to cloud (fire-and-forget, queue on failure)
+        this.syncUpdateInCloud(this.records[index]).catch(err => {
+          const syncStore = useSyncStore()
+          syncStore.addPendingSync('record_update', this.records[index])
+        })
+        
         return this.records[index]
       }
       return null
+    },
+    
+    // 更新云端记录
+    async syncUpdateInCloud(record) {
+      try {
+        const { syncUpdateToCloud } = await import('@/utils/db')
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { success: false, offline: true }
+        return await syncUpdateToCloud(record, user.openid)
+      } catch (e) {
+        console.error('Sync update failed:', e)
+        return { success: false, error: e }
+      }
     },
 
     // 删除账单
     deleteRecord(id) {
       const index = this.records.findIndex(r => r.id === id)
       if (index !== -1) {
+        const deletedRecord = this.records[index]
         this.records.splice(index, 1)
         this.saveRecords()
+        
+        // Sync delete to cloud (fire-and-forget, queue on failure)
+        this.syncDeleteFromCloud(id).catch(err => {
+          const syncStore = useSyncStore()
+          syncStore.addPendingSync('record_delete', { id, ...deletedRecord })
+        })
+        
         return true
       }
       return false
+    },
+    
+    // 从云端删除记录
+    async syncDeleteFromCloud(id) {
+      try {
+        const { syncDeleteFromCloud } = await import('@/utils/db')
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { success: false, offline: true }
+        return await syncDeleteFromCloud(id, user.openid)
+      } catch (e) {
+        console.error('Sync delete failed:', e)
+        return { success: false, error: e }
+      }
     },
 
     // 保存到本地存储
@@ -153,17 +205,19 @@ export const useBillStore = defineStore('bill', {
         stats[r.category_code].total += r.amount
       })
       return Object.values(stats)
-    }
-  }
-})
+    },
+
     // 同步到云端（添加记录后调用）
-    async syncToCloudAfterAdd(openid) {
+    async syncToCloudAfterAdd() {
       const lastRecord = this.records[0]
       if (!lastRecord) return { success: false }
 
       try {
         const { syncRecordToCloud } = await import('@/utils/db')
-        return await syncRecordToCloud(lastRecord, openid)
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { success: false, offline: true }
+        return await syncRecordToCloud(lastRecord, user.openid)
       } catch (e) {
         console.error('Sync after add failed:', e)
         return { success: false, error: e }
@@ -171,18 +225,6 @@ export const useBillStore = defineStore('bill', {
     },
 
     // 从云端同步数据
-    async syncFromCloud(openid, lastSyncTime = 0) {
-      try {
-        const { pullFromCloud } = await import('@/utils/db')
-        const result = await pullFromCloud(openid, lastSyncTime)
-        if (result.success && result.data && result.data.length > 0) {
-          // 合并数据
-          this.records = result.data
-          this.saveRecords()
-        }
-        return result
-      } catch (e) {
-        console.error('Sync from cloud failed:', e)
-        return { success: false, error: e }
-      }
-    }
+    // syncFromCloud is now handled by sync store
+  }
+})

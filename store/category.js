@@ -5,6 +5,7 @@
 
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
+import { postCategory, putCategory, deleteCategory } from '@/utils/api'
 import {
   EXPENSE_CATEGORY_CODES,
   INCOME_CATEGORY_CODES
@@ -98,6 +99,10 @@ export const useCategoryStore = defineStore('category', {
       }
       this.categories.push(newCategory)
       this.saveCategories()
+      
+      // Sync to cloud
+      this.syncCategory(newCategory).catch(() => {})
+      
       return newCategory
     },
 
@@ -110,6 +115,10 @@ export const useCategoryStore = defineStore('category', {
           ...updates
         }
         this.saveCategories()
+        
+        // Sync to cloud
+        this.syncCategory(this.categories[index]).catch(() => {})
+        
         return this.categories[index]
       }
       return null
@@ -140,20 +149,43 @@ export const useCategoryStore = defineStore('category', {
     resetCategories() {
       this.categories = initCategories()
       this.saveCategories()
-    }
-  }
-})
-    // 同步分类到云端
-    async syncToCloud(openid) {
+    },
+
+    // 同步单个分类到云端
+    async syncCategory(category) {
       try {
         const { getCloudDb } = await import('@/utils/db')
+        const { getStoredUser } = await import('@/utils/auth')
         const db = getCloudDb()
         if (!db) return { offline: true }
+        
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
+
+        await db.collection('ssj_categories').add({
+          data: { ...category, openid: user.openid, update_time: Date.now() }
+        })
+        return { success: true }
+      } catch (e) {
+        console.error('Sync category failed:', e)
+        return { success: false, error: e }
+      }
+    },
+
+    // 同步所有分类到云端
+    async syncToCloud() {
+      try {
+        const db = getCloudDb()
+        if (!db) return { offline: true }
+
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) return { offline: true }
 
         const now = Date.now()
         for (const cat of this.categories) {
           await db.collection('ssj_categories').add({
-            data: { ...cat, openid, update_time: now }
+            data: { ...cat, openid: user.openid, update_time: now }
           })
         }
         return { success: true }
@@ -162,3 +194,5 @@ export const useCategoryStore = defineStore('category', {
         return { success: false, error: e }
       }
     }
+  }
+})
