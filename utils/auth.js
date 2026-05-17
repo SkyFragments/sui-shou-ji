@@ -59,25 +59,25 @@ async function mockLogin(code) {
 }
 
 /**
- * 云函数登录（实际实现）
- * 需要先在 cloudfunctions 目录创建 login 云函数
+ * 云函数登录（自建服务器版本）
  */
 export async function cloudLogin(code) {
 	try {
-		const res = await uniCloud.callFunction({
-			name: 'login',
-			data: { code }
-		})
+		const api = await import('./api')
+		const res = await api.login(code)
 
-		if (res.result.openid) {
+		if (res.openid) {
+			if (res.token) {
+				uni.setStorageSync(STORAGE_KEY_TOKEN, res.token)
+			}
 			const userData = {
-				...res.result,
+				openid: res.openid,
 				create_time: Date.now()
 			}
 			uni.setStorageSync(STORAGE_KEY_USER, userData)
-			return res.result
+			return { openid: res.openid }
 		} else {
-			throw new Error('云函数返回无 openid')
+			throw new Error('服务器返回无 openid')
 		}
 	} catch (e) {
 		console.error('cloudLogin failed:', e)
