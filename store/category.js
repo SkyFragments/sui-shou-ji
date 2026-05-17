@@ -154,17 +154,7 @@ export const useCategoryStore = defineStore('category', {
     // 同步单个分类到云端
     async syncCategory(category) {
       try {
-        const { getCloudDb } = await import('@/utils/db')
-        const { getStoredUser } = await import('@/utils/auth')
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-        
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        await db.collection('ssj_categories').add({
-          data: { ...category, openid: user.openid, update_time: Date.now() }
-        })
+        const res = await postCategory(category)
         return { success: true }
       } catch (e) {
         console.error('Sync category failed:', e)
@@ -175,18 +165,8 @@ export const useCategoryStore = defineStore('category', {
     // 同步所有分类到云端
     async syncToCloud() {
       try {
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        const now = Date.now()
         for (const cat of this.categories) {
-          await db.collection('ssj_categories').add({
-            data: { ...cat, openid: user.openid, update_time: now }
-          })
+          await postCategory(cat)
         }
         return { success: true }
       } catch (e) {

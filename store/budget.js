@@ -125,16 +125,7 @@ export const useBudgetStore = defineStore('budget', {
     // 同步单个预算到云端
     async syncBudget(budget) {
       try {
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        await db.collection('ssj_budgets').add({
-          data: { ...budget, openid: user.openid, update_time: Date.now() }
-        })
+        const res = await postBudget(budget)
         return { success: true }
       } catch (e) {
         console.error('Sync budget failed:', e)
@@ -145,19 +136,9 @@ export const useBudgetStore = defineStore('budget', {
     // 同步所有预算到云端
     async syncToCloud() {
       try {
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        const now = Date.now()
         const budgetsArray = Object.values(this.budgets)
         for (const budget of budgetsArray) {
-          await db.collection('ssj_budgets').add({
-            data: { ...budget, openid: user.openid, update_time: now }
-          })
+          await postBudget(budget)
         }
         return { success: true }
       } catch (e) {

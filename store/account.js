@@ -159,16 +159,7 @@ export const useAccountStore = defineStore('account', {
     // 同步单个账户到云端
     async syncAccount(account) {
       try {
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        await db.collection('ssj_accounts').add({
-          data: { ...account, openid: user.openid, update_time: Date.now() }
-        })
+        const res = await postAccount(account)
         return { success: true }
       } catch (e) {
         console.error('Sync account failed:', e)
@@ -179,22 +170,8 @@ export const useAccountStore = defineStore('account', {
     // 同步所有账户到云端
     async syncToCloud() {
       try {
-        const db = getCloudDb()
-        if (!db) return { offline: true }
-
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-        if (!db) return { offline: true }
-        
-        const user = getStoredUser()
-        if (!user?.openid) return { offline: true }
-
-        const now = Date.now()
         for (const acc of this.accounts) {
-          await db.collection('ssj_accounts').add({
-            data: { ...acc, openid: user.openid, update_time: now }
-          })
+          await postAccount(acc)
         }
         return { success: true }
       } catch (e) {
