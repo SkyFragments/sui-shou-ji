@@ -449,7 +449,6 @@ function getCurrentYearMonth() {
 	width: 44rpx;
 	height: 44rpx;
 }
-}
 
 .record-info {
 	flex: 1;
