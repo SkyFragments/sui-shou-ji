@@ -1,4 +1,6 @@
 import App from './App'
+import './common/style.scss'
+import './common/flex.scss'
 import { registerStores, useBillStore, useCategoryStore, useAccountStore, useBudgetStore } from './store'
 
 // #ifndef VUE3
