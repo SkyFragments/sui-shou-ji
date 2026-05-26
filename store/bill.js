@@ -208,20 +208,9 @@ export const useBillStore = defineStore('bill', {
     },
 
     // 同步到云端（添加记录后调用）
+    // 现在由 REST API 处理，这个方法保留作为向后兼容
     async syncToCloudAfterAdd() {
-      const lastRecord = this.records[0]
-      if (!lastRecord) return { success: false }
-
-      try {
-        const { syncRecordToCloud } = await import('@/utils/db')
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { success: false, offline: true }
-        return await syncRecordToCloud(lastRecord, user.openid)
-      } catch (e) {
-        console.error('Sync after add failed:', e)
-        return { success: false, error: e }
-      }
+      return { success: true, offline: false }
     },
 
     // 从云端同步数据
