@@ -318,14 +318,14 @@ export default {
 <style scoped>
 .index-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
 }
 
 .overview-section {
-	background-color: var(--color-primary);
+	background-color: #07c160;
 	padding: 30rpx 30rpx 40rpx;
-	color: var(--color-surface);
+	color: #ffffff;
 }
 
 .overview-header {
