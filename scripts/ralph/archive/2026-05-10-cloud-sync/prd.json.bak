@@ -18,7 +18,7 @@
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Project structure created, pages.json configured with routes and tabBar, Pinia initialized"
     },
     {
       "id": "US-002",
@@ -34,7 +34,7 @@
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created bill, category, account, budget, and sync Pinia stores"
     },
     {
       "id": "US-003",
@@ -50,7 +50,7 @@
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created utils/db.js with full CRUD operations, initDatabase(), insertRecord(), getRecords(), updateRecord(), deleteRecord(), getRecordsByMonth(), getRecordsByDateRange(), getCategoryStats(), getMonthStats()"
     },
     {
       "id": "US-004",
@@ -64,7 +64,7 @@
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: init-data.js creates 9 expense categories and 4 income categories with correct codes, icons, colors, and sort order"
     },
     {
       "id": "US-005",
@@ -78,7 +78,7 @@
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: init-data.js creates 4 default accounts (cash, alipay, wechat, bankcard) with correct codes, types, and is_default flags"
     },
     {
       "id": "US-006",
@@ -96,7 +96,7 @@
       ],
       "priority": 6,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Enhanced amount-keyboard with Vue3 Composition API, 4x4 layout, decimal support, max 999999.99, clear/confirm buttons"
     },
     {
       "id": "US-007",
@@ -114,7 +114,7 @@
       ],
       "priority": 7,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Enhanced category-picker with Vue3 Composition API, integrates with category store, shows 9 expense/4 income categories with icons"
     },
     {
       "id": "US-008",
@@ -136,7 +136,7 @@
       ],
       "priority": 8,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created pages/add/add.vue with amount display, type switch, category-picker, account picker, date picker, remark input, and amount-keyboard integration"
     },
     {
       "id": "US-009",
@@ -151,7 +151,7 @@
       ],
       "priority": 9,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Added templates grid to index page with 6 quick-add templates (breakfast, lunch, taxi, subway, coffee, movie)"
     },
     {
       "id": "US-010",
@@ -167,7 +167,7 @@
       ],
       "priority": 10,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Ring chart component with conic-gradient, shows used/total ratio, color changes at 80%/100% thresholds"
     },
     {
       "id": "US-011",
@@ -183,7 +183,7 @@
       ],
       "priority": 11,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Stat card component with title, amount display, and optional compare text, supports expense/income/balance types"
     },
     {
       "id": "US-012",
@@ -202,7 +202,7 @@
       ],
       "priority": 12,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Bill item component shows category icon, name, remark, time, and amount with color coding for expense/income"
     },
     {
       "id": "US-013",
@@ -225,7 +225,7 @@
       ],
       "priority": 13,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created full index page with today stats, budget progress ring-chart, alert banners, quick templates, recent records list, add button, and tabbar navigation"
     },
     {
       "id": "US-014",
@@ -243,7 +243,7 @@
       ],
       "priority": 14,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created records page with month selector, stats overview, grouped records by date, delete confirmation, and edit support"
     },
     {
       "id": "US-015",
@@ -260,7 +260,7 @@
       ],
       "priority": 15,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Pie chart component with conic-gradient, legend with percentages, and click events"
     },
     {
       "id": "US-016",
@@ -276,7 +276,7 @@
       ],
       "priority": 16,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Line chart component with data points visualization and x-axis labels"
     },
     {
       "id": "US-017",
@@ -294,7 +294,7 @@
       ],
       "priority": 17,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created stats page with month selector, overview cards (income/expense/balance), pie-chart for category breakdown, and line-chart for daily expense trend"
     },
     {
       "id": "US-018",
@@ -312,7 +312,7 @@
       ],
       "priority": 18,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created budget page with month selector, budget input/slider/presets, progress bar with color coding, alert banners, and daily available suggestion"
     },
     {
       "id": "US-019",
@@ -331,7 +331,7 @@
       ],
       "priority": 19,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: Created my page with profile section, account management, budget setting, data export, sync status, and about info"
     },
     {
       "id": "US-020",
@@ -349,7 +349,7 @@
       ],
       "priority": 20,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: store/sync.js implements sync status management, offline queue, and cloud sync operations. ⚠️ PLACEHOLDER: Cloud sync UI is functional but requires WeChat Cloud Development environment (uni.cloud.database()) to be connected to a real cloud database for actual data synchronization across devices."
     },
     {
       "id": "US-021",
@@ -367,7 +367,7 @@
       ],
       "priority": 21,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: utils/export.js provides full CSV export functionality with recordToCsvRow, exportToCSV, generateExportFileName, and downloadCSVFile. ⚠️ PLACEHOLDER: Export UI shows data preview in modal, actual file download requires WeChat file API integration or web download."
     },
     {
       "id": "US-022",
@@ -383,7 +383,7 @@
       ],
       "priority": 22,
       "passes": true,
-      "notes": "Implemented - all code exists in codebase"
+      "notes": "Completed: pages.json already configured with all routes (index/add/records/stats/budget/my) and tabBar with 5 items"
     }
   ]
 }

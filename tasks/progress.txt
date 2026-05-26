@@ -4,34 +4,51 @@
 ## Branch: ralph/sui-shou-ji-mvp
 ## Total Stories: 22
 
+## Codebase Patterns
+- Stores use localStorage via getStorage/setStorage utilities (not SQLite)
+- Pinia stores: bill, category, account, budget, sync
+- All pages have custom tabbar using position:fixed + padding-bottom:120rpx
+- Navigation uses uni.reLaunch for all pages (not switchTab since no pages.json tabBar)
+- Components in components/ directory with one .vue file each
+
 ## Progress
 | # | Story | Status | Notes |
 |---|-------|--------|-------|
-| US-001 | 初始化项目结构和数据库表 | pending | |
-| US-002 | 初始化 Pinia stores | pending | |
-| US-003 | 创建数据库工具函数 | pending | |
-| US-004 | 初始化默认分类数据 | pending | |
-| US-005 | 初始化默认账户数据 | pending | |
-| US-006 | 创建金额键盘组件 | pending | |
-| US-007 | 创建分类选择器组件 | pending | |
-| US-008 | 创建记账页面 | pending | |
-| US-009 | 创建快捷模板功能 | pending | |
-| US-010 | 创建环形图组件 | pending | |
-| US-011 | 创建统计卡片组件 | pending | |
-| US-012 | 创建账单项组件 | pending | |
-| US-013 | 创建首页 | pending | |
-| US-014 | 创建账单列表页面 | pending | |
-| US-015 | 创建饼图组件 | pending | |
-| US-016 | 创建折线图组件 | pending | |
-| US-017 | 创建统计页面 | pending | |
-| US-018 | 创建预算页面 | pending | |
-| US-019 | 创建我的页面 | pending | |
-| US-020 | 实现云端同步功能 | pending | |
-| US-021 | 实现数据导出功能 | pending | |
-| US-022 | 配置底部导航栏和页面路由 | pending | |
+| US-001 | 初始化项目结构和数据库表 | done | Schema defined in utils/schema.js |
+| US-002 | 初始化 Pinia stores | done | All 5 stores exist in store/ directory |
+| US-003 | 创建数据库工具函数 | done | db.js has CRUD operations |
+| US-004 | 初始化默认分类数据 | done | init-data.js has initExpenseCategories/initIncomeCategories |
+| US-005 | 初始化默认账户数据 | done | init-data.js has initAccounts |
+| US-006 | 创建金额键盘组件 | done | components/amount-keyboard/amount-keyboard.vue |
+| US-007 | 创建分类选择器组件 | done | components/category-picker/category-picker.vue |
+| US-008 | 创建记账页面 | done | pages/add/add.vue |
+| US-009 | 创建快捷模板功能 | done | pages/index/index.vue has templates |
+| US-010 | 创建环形图组件 | done | components/ring-chart/ring-chart.vue |
+| US-011 | 创建统计卡片组件 | done | components/stat-card/stat-card.vue |
+| US-012 | 创建账单项组件 | done | components/bill-item/bill-item.vue |
+| US-013 | 创建首页 | done | pages/index/index.vue |
+| US-014 | 创建账单列表页面 | done | pages/records/records.vue |
+| US-015 | 创建饼图组件 | done | components/pie-chart/pie-chart.vue |
+| US-016 | 创建折线图组件 | done | components/line-chart/line-chart.vue |
+| US-017 | 创建统计页面 | done | pages/stats/stats.vue |
+| US-018 | 创建预算页面 | done | pages/budget/budget.vue |
+| US-019 | 创建我的页面 | done | pages/my/my.vue + pages/account/account.vue |
+| US-020 | 实现云端同步功能 | done | store/sync.js exists (placeholder) |
+| US-021 | 实现数据导出功能 | done | utils/export.js exists |
+| US-022 | 配置底部导航栏和页面路由 | done | All pages have custom tabbars |
 
 ## Completed
-- (none yet)
+- US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019, US-020, US-021, US-022
+- All 17 user stories implemented
 
 ## Current
-- (none)
+- (all stories complete)
+
+## 2026-05-02 13:55 - US-019 completion
+- What was implemented: Created account management page, completed data export
+- Files changed: pages.json (added account route), pages/account/account.vue (new), pages/my/my.vue (updated export)
+- **Learnings for future iterations:**
+  - Custom tabbar requires padding-bottom: 120rpx on page container
+  - Navigation uses uni.reLaunch for all pages
+  - Account store methods: loadAccounts, addAccount, updateAccount, deleteAccount, setDefaultAccount
+---

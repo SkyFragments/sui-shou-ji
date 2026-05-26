@@ -1,65 +1,61 @@
 # CLAUDE.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+## Project Overview
 
-## 1. Think Before Coding
+随手记 (SuiShouJi) - 个人记账小程序，基于 UniApp + Vue3 + Pinia构建，使用 LocalStorage 模拟数据持久化。
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+## Storage Key Convention
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+**所有存储键必须使用复数形式：**
+- `ssj_records` (NOT `ssj_record`)
+- `ssj_categories` (NOT `ssj_category`)
+- `ssj_accounts` (NOT `ssj_account`)
+- `ssj_budgets` (NOT `ssj_budget`)
+- `ssj_users` (NOT `ssj_user`)
 
-## 2. Simplicity First
+修改 `utils/db.js`、`utils/init-data.js`、`utils/schema.js` 中的 TABLE_NAMES 和 `store/sync.js` 中的 mergeFromCloud 时必须遵循此规范。
 
-**Minimum code that solves the problem. Nothing speculative.**
+## Field Naming
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+所有字段名必须与 `utils/schema.js` 中定义一致：
+- **record**: id, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status
+- **category**: id, code, name, icon, color, type, sort, is_default
+- **account**: id, code, name, type, balance, sort, is_default, create_time, update_time
+- **budget**: id, year_month, total_budget, create_time, update_time
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+## Architecture
 
-## 3. Surgical Changes
+### Stores (Pinia)
+- `store/bill.js` - 账单记录管理
+- `store/category.js` - 分类管理
+- `store/account.js` - 账户管理
+- `store/budget.js` - 预算管理
+- `store/sync.js` - 云端同步（使用 `setStorage`/`getStorage` 工具函数）
 
-**Touch only what you must. Clean up only your own mess.**
+### Pages
+每个页面都包含自定义底部导航栏(tabbar)，通过 `uni.reLaunch` 实现页面跳转。编辑模式通过URL参数 `?recordId=xxx` 传递。
 
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
+### Components
+- `components/category-picker/` - 分类选择器
+- `components/amount-keyboard/` - 金额键盘
+- `components/pie-chart/` - 饼图
+- `components/line-chart/` - 折线图
+- `components/ring-chart/` - 环形图
 
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
+### Common Styles
+- `common/style.scss` - 全局样式变量（颜色、字体、间距、圆角、阴影、动画、z-index）
+- `common/flex.scss` - 通用工具类（弹性布局、文字对齐、文字截断、卡片、按钮、触摸反馈）
 
-The test: Every changed line should trace directly to the user's request.
+## Navigation Pattern
 
-## 4. Goal-Driven Execution
+- 底部导航主要页面: 使用 `uni.reLaunch`
+- 子页面/编辑页面: 使用 `uni.navigateTo`
+- 首页快捷记账: 使用 `uni.navigateTo` 带 `?recordId` 参数
 
-**Define success criteria. Loop until verified.**
+## Key Patterns
 
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+1. **预算存储**: `store/budget.js` 内部存储 `{year_month, total_budget, update_time}` 对象，但 `getBudget()` 返回 `total_budget` 数值
+2. **分类类型**: `type=1` 表示支出，`type=2` 表示收入
+3. **账单类型**: `type=1` 表示支出，`type=2` 表示收入

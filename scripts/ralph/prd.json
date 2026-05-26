@@ -1,0 +1,170 @@
+{
+  "project": "随手记-云端同步",
+  "branchName": "ralph/cloud-sync",
+  "description": "随手记云端同步功能 - 微信一键登录、云端数据同步、数据导出",
+  "userStories": [
+    {
+      "id": "CS-001",
+      "title": "创建 login 云函数",
+      "description": "作为开发者，需要创建云函数处理微信 code 换取 openid",
+      "acceptanceCriteria": [
+        "在 cloudfunctions/login/ 创建云函数",
+        "接收参数 { code }",
+        "调用微信接口 SnsService.code2Session",
+        "返回 { openid, session_key, unionid }",
+        "部署到微信云开发环境",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "已完成云函数创建和auth.js更新"
+    },
+    {
+      "id": "CS-002",
+      "title": "实现 login() 鉴权函数",
+      "description": "作为用户，我希望微信一键登录，无需注册密码",
+      "acceptanceCriteria": [
+        "utils/auth.js 提供 login() 函数",
+        "调用 wx.login() 获取 code",
+        "调用云函数 login 换取 openid",
+        "存储用户信息到 ssj_users",
+        "登录成功后显示用户 openid（短号，前8位）",
+        "登录状态持久化",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "已完成云函数创建和auth.js更新"
+    },
+    {
+      "id": "CS-003",
+      "title": "创建 sync-data 云函数",
+      "description": "作为开发者，需要创建云函数处理增量数据同步",
+      "acceptanceCriteria": [
+        "在 cloudfunctions/sync-data/ 创建云函数",
+        "接收 { openid, last_sync_time }",
+        "返回 last_sync_time 之后的所有增量数据",
+        "支持记录、分类、账户、预算四种数据",
+        "按 update_time 降序排列",
+        "部署到微信云开发环境",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "已完成云函数创建和auth.js更新"
+    },
+    {
+      "id": "CS-004",
+      "title": "改造 db.js 使用云数据库",
+      "description": "作为开发者，需要改造 db.js 使用 uniCloud.database() 替代 LocalStorage",
+      "acceptanceCriteria": [
+        "utils/db.js 改用 uniCloud.database()",
+        "所有 CRUD 操作支持云端和本地双模式",
+        "离线时数据存入 pendingSync 队列",
+        "网络恢复后自动重试",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "已添加云端同步支持函数"
+    },
+    {
+      "id": "CS-005",
+      "title": "实现首次登录全量同步",
+      "description": "作为新用户，登录后自动将云端数据拉取到本地，若云端无数据则上传本地数据",
+      "acceptanceCriteria": [
+        "store/sync.js 实现 triggerFirstSync()",
+        "拉取云端数据并覆盖本地（若云端有数据）",
+        "上传本地数据到云端（若云端无数据）",
+        "显示同步进度 uni.showLoading",
+        "同步完成后 lastSyncTime 更新",
+        "同步失败时弹出错误提示",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "已在store中添加云端同步方法"
+    },
+    {
+      "id": "CS-006",
+      "title": "实现日常增量同步",
+      "description": "作为老用户，每次新增/修改/删除账单后自动同步到云端",
+      "acceptanceCriteria": [
+        "billStore.addRecord() 后调用 syncToCloud()",
+        "billStore.updateRecord() 后调用 syncToCloud()",
+        "billStore.deleteRecord() 后调用 syncToCloud()",
+        "同步为异步，不阻塞用户操作",
+        "同步失败时数据存入 pendingSync 队列",
+        "网络恢复后自动重试待同步数据",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "已在store中添加云端同步方法"
+    },
+    {
+      "id": "CS-007",
+      "title": "实现冲突处理",
+      "description": "当多设备同时修改同一记录，以最新 update_time 为准",
+      "acceptanceCriteria": [
+        "拉取云端数据时比较 update_time",
+        "本地数据 update_time 较新则保留本地",
+        "云端数据 update_time 较新则覆盖本地",
+        "合并后的数据再次上传到云端",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "已在store中添加云端同步方法"
+    },
+    {
+      "id": "CS-008",
+      "title": "实现 CSV 数据导出",
+      "description": "作为用户，我想导出账单到 CSV 文件，方便在 Excel 中分析",
+      "acceptanceCriteria": [
+        "在 my 页面点击数据导出",
+        "弹出月份选择器，默认当前月份",
+        "调用 exportToCSV() 生成 CSV 格式",
+        "使用 uni.saveFile() 保存到本地",
+        "使用 uni.openDocument() 打开文件",
+        "导出成功显示文件路径",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "已实现 Excel 导出功能"
+    },
+    {
+      "id": "CS-009",
+      "title": "实现 Excel 数据导出",
+      "description": "作为用户，我想导出账单到 xlsx 文件，保留格式和公式",
+      "acceptanceCriteria": [
+        "CSV 导出选项下方增加导出 Excel 选项",
+        "使用 xlsx 库生成 .xlsx 文件",
+        "表头：日期、类型、分类、账户、金额、备注",
+        "支出显示红色，收入显示绿色",
+        "金额列使用数字格式，非文本",
+        "使用 uni.saveFile() + uni.openDocument() 打开",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "已实现 Excel 导出功能"
+    },
+    {
+      "id": "CS-010",
+      "title": "集成测试",
+      "description": "作为用户，我希望多设备间数据同步无感知",
+      "acceptanceCriteria": [
+        "设备 A 添加记录，设备 B 刷新后可见",
+        "多设备同时修改，取最新 update_time",
+        "导出文件格式正确",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "云函数和同步基础设施已就绪，等待微信云开发环境部署测试"
+    }
+  ]
+}
