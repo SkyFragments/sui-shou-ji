@@ -11,7 +11,7 @@
   /* 基础背景与文字 */
   --bg-main: #FDF4E9;          /* 温柔的暖米色底色 */
   --text-main: #332211;        /* 深咖啡色（代替死黑，提升温暖感） */
-  --text-muted: #776655;       /* 次要文本咖啡色 */
+  --text-muted: #5D4A3A;       /* 次要文本咖啡色 (WCAG 4.5:1+) */
 
   /* 语义化状态色 */
   --color-expense: #C85A53;    /* 支出主色 (暗红) */
@@ -343,6 +343,19 @@ page {
 .delay-3 { animation-delay: 0.3s; }
 .delay-4 { animation-delay: 0.4s; }
 .delay-5 { animation-delay: 0.5s; }
+
+/* 减少动画模式 - 支持 prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-fade-in,
+  .animate-scale-in {
+    animation: none;
+    opacity: 1;
+  }
+  .delay-1, .delay-2, .delay-3, .delay-4, .delay-5 {
+    animation-delay: 0s;
+  }
+}
 
 /* ============================================
  * 暗色模式支持
