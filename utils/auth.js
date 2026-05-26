@@ -63,8 +63,8 @@ async function mockLogin(code) {
  */
 export async function cloudLogin(code) {
 	try {
-		const api = await import('./api')
-		const res = await api.login(code)
+		const { login } = require('./api')
+		const res = await login(code)
 
 		if (res.openid) {
 			if (res.token) {
