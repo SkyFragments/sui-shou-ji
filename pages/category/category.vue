@@ -1,11 +1,11 @@
 /**
  * 分类管理页面
- * 管理支出和收入分类
+* 管理支出和收入分类
  */
 <template>
 	<view class="category-page">
 		<!-- 类型切换 -->
-		<view class="type-tabs">
+		<view class="type-tabs animate-slide-up">
 			<view
 				class="type-tab"
 				:class="{ active: currentType === 1 }"
@@ -23,7 +23,7 @@
 		</view>
 
 		<!-- 分类列表 -->
-		<view class="category-list">
+		<view class="category-list animate-slide-up delay-1">
 			<view
 				v-for="category in filteredCategories"
 				:key="category.code"
@@ -31,13 +31,13 @@
 				@click="editCategory(category)"
 			>
 				<view class="category-icon" :style="{ backgroundColor: category.color }">
-					<text>{{ category.icon }}</text>
+					<image :src="getIconPath(category.icon)" class="category-icon-svg" />
 				</view>
 				<view class="category-info">
 					<text class="category-name">{{ category.name }}</text>
 					<text class="category-code">{{ category.code }}</text>
 				</view>
-				<text class="category-arrow">▶</text>
+					<text class="category-arrow">></text>
 			</view>
 
 			<view class="empty-state" v-if="filteredCategories.length === 0">
@@ -46,7 +46,7 @@
 		</view>
 
 		<!-- 添加按钮 -->
-		<view class="add-btn" @click="addCategory">
+		<view class="add-btn animate-scale-in delay-2" @click="addCategory">
 			<text class="add-icon">+</text>
 		</view>
 
@@ -79,7 +79,7 @@
 								:class="{ selected: formData.icon === icon }"
 								@click="selectIcon(icon)"
 							>
-								<text>{{ icon }}</text>
+								<image :src="getIconPath(icon)" class="icon-option-svg" />
 							</view>
 						</view>
 					</view>
@@ -96,7 +96,7 @@
 								:style="{ backgroundColor: color }"
 								@click="selectColor(color)"
 							>
-								<text v-if="formData.color === color" class="color-check">✓</text>
+							<text v-if="formData.color === color" class="color-check">✓</text>
 							</view>
 						</view>
 					</view>
@@ -118,18 +118,22 @@
 		<!-- 底部导航 -->
 		<view class="tabbar">
 			<view class="tab-item" @click="goToIndex">
+				<image src="/static/icon/icon-home.svg" class="tab-icon" />
 				<text>首页</text>
 			</view>
 			<view class="tab-item" @click="goToRecords">
+				<image src="/static/icon/icon-folder.svg" class="tab-icon" />
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<text class="add-tab-icon">+</text>
+				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
+				<image src="/static/icon/icon-info.svg" class="tab-icon" />
 				<text>分析</text>
 			</view>
 			<view class="tab-item" @click="goToMy">
+				<image src="/static/icon/icon-user.svg" class="tab-icon" />
 				<text>我的</text>
 			</view>
 		</view>
@@ -151,19 +155,19 @@ export default {
 
 		const formData = ref({
 			name: '',
-			icon: '📦',
-			color: '#07c160'
+			icon: 'meal',
+			color: 'var(--color-primary)'
 		})
 
 		const iconOptions = [
-			'🍜', '🍔', '🛒', '🏠', '🚗', '🚌', '✈️', '💊',
-			'🎬', '🎮', '📱', '💰', '👔', '🎁', '☕', '🍎'
+			'meal', 'food', 'shopping', 'home', 'car', 'bus', 'travel', 'health',
+			'movie', 'game', 'phone', 'wallet', 'gift', 'drink', 'fruit', 'clothes'
 		]
 
 		const colorOptions = [
 			'#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
 			'#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-			'#BB8FCE', '#85C1E9', '#F8B500', '#07c160'
+			'#BB8FCE', '#85C1E9', '#F8B500', 'var(--color-primary)'
 		]
 
 		onMounted(() => {
@@ -183,8 +187,8 @@ export default {
 			editingCode.value = ''
 			formData.value = {
 				name: '',
-				icon: '📦',
-				color: '#07c160'
+				icon: 'meal',
+				color: 'var(--color-primary)'
 			}
 			showModal.value = true
 		}
@@ -273,6 +277,10 @@ export default {
 			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
+		const getIconPath = (iconName) => {
+			return `/static/icon/icon-${iconName}.svg`
+		}
+
 		return {
 			currentType,
 			showModal,
@@ -293,7 +301,8 @@ export default {
 			goToRecords,
 			goToAdd,
 			goToStats,
-			goToMy
+			goToMy,
+			getIconPath
 		}
 	}
 }
@@ -302,13 +311,13 @@ export default {
 <style scoped>
 .category-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	padding-bottom: 120rpx;
 }
 
 .type-tabs {
 	display: flex;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	padding: 20rpx;
 	gap: 20rpx;
 }
@@ -318,14 +327,14 @@ export default {
 	text-align: center;
 	padding: 20rpx 0;
 	border-radius: 12rpx;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .type-tab.active {
-	background-color: #07c160;
-	color: #ffffff;
+	background-color: var(--color-primary);
+	color: var(--color-surface);
 }
 
 .category-list {
@@ -335,7 +344,7 @@ export default {
 .category-item {
 	display: flex;
 	align-items: center;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	padding: 24rpx;
 	border-radius: 12rpx;
 	margin-bottom: 16rpx;
@@ -348,8 +357,12 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 40rpx;
 	margin-right: 20rpx;
+}
+
+.category-icon-svg {
+	width: 48rpx;
+	height: 48rpx;
 }
 
 .category-info {
@@ -358,26 +371,26 @@ export default {
 
 .category-name {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	display: block;
 }
 
 .category-code {
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 	margin-top: 4rpx;
 	display: block;
 }
 
 .category-arrow {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .empty-state {
 	text-align: center;
 	padding: 100rpx 0;
-	color: #999;
+	color: var(--color-text-secondary);
 	font-size: 28rpx;
 }
 
@@ -388,7 +401,7 @@ export default {
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
-	background-color: #07c160;
+	background-color: var(--color-primary);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -397,7 +410,7 @@ export default {
 
 .add-icon {
 	font-size: 48rpx;
-	color: #fff;
+	color: var(--color-surface);
 }
 
 /* Modal */
@@ -424,20 +437,20 @@ export default {
 	transform: translate(-50%, -50%);
 	width: 600rpx;
 	max-height: 80vh;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 16rpx;
 	overflow: hidden;
 }
 
 .modal-header {
 	padding: 30rpx;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .modal-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -452,13 +465,13 @@ export default {
 
 .form-label {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	display: block;
 	margin-bottom: 16rpx;
 }
 
 .form-input {
-	border: 1rpx solid #ddd;
+	border: 1rpx solid var(--color-border);
 	border-radius: 8rpx;
 	padding: 20rpx;
 	font-size: 28rpx;
@@ -474,16 +487,20 @@ export default {
 	width: 80rpx;
 	height: 80rpx;
 	border-radius: 12rpx;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 40rpx;
+}
+
+.icon-option-svg {
+	width: 48rpx;
+	height: 48rpx;
 }
 
 .icon-item.selected {
-	background-color: #e8f8f0;
-	border: 2rpx solid #07c160;
+	background-color: var(--bg-income);
+	border: 2rpx solid var(--color-primary);
 }
 
 .color-grid {
@@ -502,18 +519,18 @@ export default {
 }
 
 .color-item.selected {
-	border: 3rpx solid #333;
+	border: 3rpx solid var(--color-text-primary);
 }
 
 .color-check {
-	color: #fff;
+	color: var(--color-surface);
 	font-size: 32rpx;
 	font-weight: bold;
 }
 
 .modal-footer {
 	display: flex;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 }
 
 .btn {
@@ -524,16 +541,16 @@ export default {
 }
 
 .cancel-btn {
-	color: #666;
-	border-right: 1rpx solid #f0f0f0;
+	color: var(--color-text-secondary);
+	border-right: 1rpx solid var(--color-border);
 }
 
 .danger-btn {
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .confirm-btn {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .tabbar {
@@ -542,11 +559,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -554,11 +571,11 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -569,6 +586,22 @@ export default {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: #07c160;
+	color: var(--color-primary);
+}
+
+.tab-icon {
+	width: 44rpx;
+	height: 44rpx;
+	margin-bottom: 4rpx;
+}
+
+.add-tab-icon-svg {
+	width: 56rpx;
+	height: 56rpx;
+}
+
+.icon-svg {
+	width: 48rpx;
+	height: 48rpx;
 }
 </style>

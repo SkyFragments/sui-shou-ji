@@ -15,34 +15,14 @@
 
 		<!-- 金额显示 -->
 		<view class="amount-display">
-			<view class="amount-label">{{ recordType === 1 ? '支出' : '收入' }}</view>
 			<view class="amount-value">
 				<text class="currency">¥</text>
 				<text class="amount">{{ displayAmount || '0.00' }}</text>
 			</view>
 		</view>
 
-		<!-- 收支切换 -->
-		<view class="type-switch">
-			<view
-				class="type-btn"
-				:class="{ active: recordType === 1 }"
-				@click="switchType(1)"
-			>
-				支出
-			</view>
-			<view
-				class="type-btn"
-				:class="{ active: recordType === 2 }"
-				@click="switchType(2)"
-			>
-				收入
-			</view>
-		</view>
-
 		<!-- 分类选择 -->
 		<view class="section">
-			<view class="section-title">分类</view>
 			<category-picker
 				:type="recordType"
 				:modelValue="selectedCategoryCode"
@@ -80,7 +60,6 @@
 
 		<!-- 备注 -->
 		<view class="section">
-			<view class="section-title">备注</view>
 			<input
 				class="remark-input"
 				type="text"
@@ -91,28 +70,34 @@
 		</view>
 
 		<!-- 键盘 -->
-		<amount-keyboard
-			@onInput="onInput"
-			@onDelete="onDelete"
-			@onClear="onClear"
-			@onConfirm="onSave"
-		/>
+		<view class="keyboard-wrapper">
+			<amount-keyboard
+				@onInput="onInput"
+				@onDelete="onDelete"
+				@onClear="onClear"
+				@onConfirm="onSave"
+			/>
+		</view>
 
 		<!-- 底部导航 -->
 		<view class="tabbar">
 			<view class="tab-item" @click="goToIndex">
+				<image src="/static/icon/icon-home.svg" class="tab-icon" />
 				<text>首页</text>
 			</view>
 			<view class="tab-item" @click="goToRecords">
+				<image src="/static/icon/icon-folder.svg" class="tab-icon" />
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab active">
-				<text class="add-tab-icon">+</text>
+				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
+				<image src="/static/icon/icon-info.svg" class="tab-icon" />
 				<text>分析</text>
 			</view>
 			<view class="tab-item" @click="goToMy">
+				<image src="/static/icon/icon-user.svg" class="tab-icon" />
 				<text>我的</text>
 			</view>
 		</view>
@@ -120,7 +105,8 @@
 </template>
 
 <script>
-import { ref, computed, onLoad } from '@dcloudio/uni-app'
+import { ref, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
@@ -228,11 +214,11 @@ export default {
 				return
 			}
 
-			// 限制最多2位小数
+			// 限制最大2位小数
 			const parts = amount.value.split('.')
 			if (parts[1] && parts[1].length >= 2) return
 
-			// 限制最大金额 999,999.99
+			// 限制最大金额999,999.99
 			const newAmount = amount.value + value
 			const num = parseFloat(newAmount)
 			if (num > 999999.99) return
@@ -254,7 +240,7 @@ export default {
 			if (!editingRecordId.value) return
 			uni.showModal({
 				title: '确认删除',
-				content: '确定要删除这条账单吗？',
+					content: '确定要删除这条账单吗？',
 				success: async (res) => {
 					if (res.confirm) {
 						await billStore.deleteRecord(editingRecordId.value)
@@ -271,7 +257,7 @@ export default {
 			// 验证金额
 			const numAmount = parseFloat(amount.value)
 			if (!numAmount || numAmount <= 0) {
-				uni.showToast({ title: '请输入金额', icon: 'none' })
+			uni.showToast({ title: '请输入金额', icon: 'none' })
 				return
 			}
 
@@ -375,8 +361,8 @@ function getToday() {
 <style scoped>
 .add-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
-	padding-bottom: 120rpx;
+	background-color: var(--color-background);
+	padding-bottom: 240rpx;
 }
 
 .page-header {
@@ -384,36 +370,36 @@ function getToday() {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx 30rpx;
-	background-color: #ffffff;
-	border-bottom: 1rpx solid #f0f0f0;
+	background-color: var(--color-surface);
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .page-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .delete-btn {
 	padding: 10rpx 24rpx;
-	background-color: #fff0f0;
+	background-color: var(--bg-expense);
 	border-radius: 8rpx;
 }
 
 .delete-btn text {
 	font-size: 26rpx;
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .amount-display {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	padding: 40rpx 0;
 	text-align: center;
 }
 
 .amount-label {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	margin-bottom: 16rpx;
 }
 
@@ -425,14 +411,14 @@ function getToday() {
 
 .currency {
 	font-size: 40rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	margin-right: 8rpx;
 }
 
 .amount {
 	font-size: 72rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .type-switch {
@@ -440,7 +426,7 @@ function getToday() {
 	justify-content: center;
 	gap: 60rpx;
 	padding: 24rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin-bottom: 16rpx;
 }
 
@@ -448,38 +434,38 @@ function getToday() {
 	padding: 12rpx 48rpx;
 	border-radius: 40rpx;
 	font-size: 28rpx;
-	color: #666;
-	background-color: #f0f0f0;
+	color: var(--color-text-secondary);
+	background-color: var(--color-border);
 	transition: all 0.2s;
 }
 
 .type-btn.active {
-	color: #ffffff;
+	color: var(--color-surface);
 }
 
 .type-btn.active:nth-child(1) {
-	background-color: #ff6b6b;
+	background-color: var(--color-expense);
 }
 
 .type-btn.active:nth-child(2) {
-	background-color: #07c160;
+	background-color: var(--color-primary);
 }
 
 .section {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin-bottom: 16rpx;
 }
 
 .section-title {
 	padding: 20rpx 24rpx;
 	font-size: 28rpx;
-	color: #333;
-	border-bottom: 1rpx solid #f0f0f0;
+	color: var(--color-text-primary);
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .form-row {
 	display: flex;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin-bottom: 16rpx;
 }
 
@@ -490,15 +476,17 @@ function getToday() {
 
 .form-label {
 	font-size: 26rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	margin-bottom: 12rpx;
 }
 
 .picker-value {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	padding: 16rpx 0;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
+	min-height: 88rpx;
+	box-sizing: border-box;
 }
 
 .remark-input {
@@ -506,6 +494,12 @@ function getToday() {
 	padding: 20rpx 24rpx;
 	font-size: 28rpx;
 	box-sizing: border-box;
+	min-height: 88rpx;
+}
+
+.keyboard-wrapper {
+	background-color: var(--color-surface);
+	box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 
 .tabbar {
@@ -514,11 +508,11 @@ function getToday() {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -526,11 +520,11 @@ function getToday() {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -539,8 +533,5 @@ function getToday() {
 	justify-content: center;
 }
 
-.add-tab-icon {
-	font-size: 56rpx;
-	color: #07c160;
-}
+.tab-icon { width: 44rpx; height: 44rpx; margin-bottom: 4rpx; } .add-tab-icon-svg { width: 56rpx; height: 56rpx; }
 </style>

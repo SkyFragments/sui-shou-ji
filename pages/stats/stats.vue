@@ -5,20 +5,20 @@
 <template>
 	<view class="stats-page">
 		<!-- 月份选择器 -->
-		<view class="month-selector">
+		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
-				<text class="nav-btn">◀</text>
+				<text class="nav-btn"><</text>
 			</view>
 			<view class="month-display">
 				<text class="month-text">{{ displayMonth }}</text>
 			</view>
 			<view class="month-nav" @click="nextMonth">
-				<text class="nav-btn">▶</text>
+				<text class="nav-btn">></text>
 			</view>
 		</view>
 
 		<!-- 本月概况 -->
-		<view class="overview-section">
+		<view class="overview-section animate-slide-up delay-1">
 			<view class="overview-card">
 				<view class="stat-row">
 					<view class="stat-item">
@@ -40,7 +40,7 @@
 		</view>
 
 		<!-- 分类占比饼图 -->
-		<view class="chart-section">
+		<view class="chart-section animate-slide-up delay-2">
 			<view class="section-title">支出分类</view>
 			<pie-chart
 				v-if="categoryStats.length > 0"
@@ -82,7 +82,7 @@
 		</view>
 
 		<!-- 日支出趋势 -->
-		<view class="chart-section">
+		<view class="chart-section animate-slide-up delay-2">
 			<view class="section-title">日支出趋势</view>
 			<line-chart
 				v-if="dailyExpense.length > 0"
@@ -98,18 +98,22 @@
 		<!-- 底部导航 -->
 		<view class="tabbar">
 			<view class="tab-item" @click="goToIndex">
+				<image src="/static/icon/icon-home.svg" class="tab-icon" />
 				<text>首页</text>
 			</view>
 			<view class="tab-item" @click="goToRecords">
+				<image src="/static/icon/icon-folder.svg" class="tab-icon" />
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<text class="add-tab-icon">+</text>
+				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item active" @click="goToStats">
+				<image src="/static/icon/icon-info.svg" class="tab-icon" />
 				<text>分析</text>
 			</view>
 			<view class="tab-item" @click="goToMy">
+				<image src="/static/icon/icon-user.svg" class="tab-icon" />
 				<text>我的</text>
 			</view>
 		</view>
@@ -284,7 +288,7 @@ function getCurrentYearMonth() {
 <style scoped>
 .stats-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	padding-bottom: 120rpx;
 }
 
@@ -292,7 +296,7 @@ function getCurrentYearMonth() {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	padding: 20rpx 30rpx;
 }
 
@@ -302,7 +306,7 @@ function getCurrentYearMonth() {
 
 .nav-btn {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .month-display {
@@ -312,7 +316,7 @@ function getCurrentYearMonth() {
 .month-text {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .overview-section {
@@ -320,7 +324,7 @@ function getCurrentYearMonth() {
 }
 
 .overview-card {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 16rpx;
 	padding: 30rpx;
 }
@@ -336,7 +340,7 @@ function getCurrentYearMonth() {
 
 .stat-label {
 	font-size: 26rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	display: block;
 }
 
@@ -348,15 +352,15 @@ function getCurrentYearMonth() {
 }
 
 .income {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .expense {
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .chart-section {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 0 20rpx 20rpx;
 	border-radius: 16rpx;
 	padding: 24rpx;
@@ -365,14 +369,14 @@ function getCurrentYearMonth() {
 .section-title {
 	font-size: 30rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 	margin-bottom: 20rpx;
 }
 
 .empty-chart {
 	text-align: center;
 	padding: 60rpx 0;
-	color: #999;
+	color: var(--color-text-secondary);
 	font-size: 28rpx;
 }
 
@@ -399,20 +403,20 @@ function getCurrentYearMonth() {
 	top: 50%;
 	transform: translate(-50%, -50%);
 	width: 600rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 16rpx;
 	overflow: hidden;
 }
 
 .modal-header {
 	padding: 30rpx;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .modal-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -423,7 +427,7 @@ function getCurrentYearMonth() {
 	display: flex;
 	justify-content: space-between;
 	padding: 20rpx 0;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .detail-row:last-child {
@@ -432,17 +436,17 @@ function getCurrentYearMonth() {
 
 .detail-label {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .detail-value {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	font-weight: 500;
 }
 
 .modal-footer {
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 }
 
 .btn {
@@ -452,7 +456,7 @@ function getCurrentYearMonth() {
 }
 
 .confirm-btn {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .tabbar {
@@ -461,11 +465,11 @@ function getCurrentYearMonth() {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -473,11 +477,11 @@ function getCurrentYearMonth() {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -488,6 +492,17 @@ function getCurrentYearMonth() {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: #07c160;
+	color: var(--color-primary);
+}
+
+.tab-icon {
+	width: 44rpx;
+	height: 44rpx;
+	margin-bottom: 4rpx;
+}
+
+.add-tab-icon-svg {
+	width: 56rpx;
+	height: 56rpx;
 }
 </style>

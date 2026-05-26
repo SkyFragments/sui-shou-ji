@@ -46,13 +46,13 @@ export default {
 .stat-card {
 	padding: 20rpx;
 	border-radius: 12rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .title {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .amount {
@@ -64,20 +64,20 @@ export default {
 
 .compare {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 	display: block;
 	margin-top: 5rpx;
 }
 
 .type-expense .amount {
-	color: #dd524d;
+	color: var(--color-expense);
 }
 
 .type-income .amount {
-	color: #4cd964;
+	color: var(--color-income);
 }
 
 .type-balance .amount {
-	color: #007AFF;
+	color: var(--color-primary);
 }
 </style>

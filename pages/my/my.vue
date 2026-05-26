@@ -5,11 +5,11 @@
 <template>
 	<view class="my-page">
 		<!-- 用户信息 -->
-		<view class="profile-section">
+		<view class="profile-section animate-slide-up">
 			<!-- 已登录状态 -->
 			<view v-if="isLoggedIn" class="profile-logged-in">
 				<view class="profile-avatar">
-					<text class="avatar-icon">👤</text>
+					<image src="/static/icon/icon-user.svg" class="avatar-icon-svg" />
 				</view>
 				<view class="profile-info">
 					<text class="profile-name">{{ nickName || '随手记用户' }}</text>
@@ -19,7 +19,7 @@
 			<!-- 未登录状态 -->
 			<view v-else class="profile-logged-out" @click="onLogin">
 				<view class="profile-avatar not-login">
-					<text class="avatar-icon">👤</text>
+					<image src="/static/icon/icon-user.svg" class="avatar-icon-svg" />
 				</view>
 				<view class="profile-info">
 					<text class="profile-name login-hint">点击登录</text>
@@ -29,61 +29,61 @@
 		</view>
 
 		<!-- 功能列表 -->
-		<view class="menu-section">
+		<view class="menu-section animate-slide-up delay-1">
 			<!-- 账户管理 -->
 			<view class="menu-item" @click="goToAccountManage">
 				<view class="menu-left">
-					<text class="menu-icon">💳</text>
+					<image src="/static/icon/icon-card.svg" class="menu-icon-svg" />
 					<text class="menu-text">账户管理</text>
 				</view>
-				<text class="menu-arrow">▶</text>
+				<text class="menu-arrow">></text>
 			</view>
 
 			<!-- 分类管理 -->
 			<view class="menu-item" @click="goToCategoryManage">
 				<view class="menu-left">
-					<text class="menu-icon">📂</text>
+					<image src="/static/icon/icon-folder.svg" class="menu-icon-svg" />
 					<text class="menu-text">分类管理</text>
 				</view>
-				<text class="menu-arrow">▶</text>
+				<text class="menu-arrow">></text>
 			</view>
 
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
-					<text class="menu-icon">💰</text>
+					<image src="/static/icon/icon-wallet.svg" class="menu-icon-svg" />
 					<text class="menu-text">预算设置</text>
 				</view>
-				<text class="menu-arrow">▶</text>
+				<text class="menu-arrow">></text>
 			</view>
 
 			<!-- 数据导出 -->
 			<view class="menu-item" @click="onExport">
 				<view class="menu-left">
-					<text class="menu-icon">📤</text>
+					<image src="/static/icon/icon-export.svg" class="menu-icon-svg" />
 					<text class="menu-text">数据导出</text>
 				</view>
-				<text class="menu-arrow">▶</text>
+				<text class="menu-arrow">></text>
 			</view>
 
 			<!-- 同步状态 -->
 			<view class="menu-item sync-item" @click="onSync">
 				<view class="menu-left">
-					<text class="menu-icon">🔄</text>
+					<image src="/static/icon/icon-sync.svg" class="menu-icon-svg" />
 					<text class="menu-text">同步</text>
 				</view>
 				<view class="sync-status">
 					<text class="sync-text">{{ syncStatusText }}</text>
-					<text class="menu-arrow">▶</text>
+					<text class="menu-arrow">></text>
 				</view>
 			</view>
 		</view>
 
 		<!-- 关于 -->
-		<view class="menu-section">
+		<view class="menu-section animate-slide-up delay-1">
 			<view class="menu-item">
 				<view class="menu-left">
-					<text class="menu-icon">ℹ️</text>
+					<image src="/static/icon/icon-info.svg" class="menu-icon-svg" />
 					<text class="menu-text">关于</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
@@ -93,18 +93,22 @@
 		<!-- 底部导航 -->
 		<view class="tabbar">
 			<view class="tab-item" @click="goToIndex">
+				<image src="/static/icon/icon-home.svg" class="tab-icon" />
 				<text>首页</text>
 			</view>
 			<view class="tab-item" @click="goToRecords">
+				<image src="/static/icon/icon-folder.svg" class="tab-icon" />
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<text class="add-tab-icon">+</text>
+				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
+				<image src="/static/icon/icon-info.svg" class="tab-icon" />
 				<text>分析</text>
 			</view>
 			<view class="tab-item active">
+				<image src="/static/icon/icon-user.svg" class="tab-icon" />
 				<text>我的</text>
 			</view>
 		</view>
@@ -319,14 +323,14 @@ export default {
 <style scoped>
 .my-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	padding-bottom: 120rpx;
 }
 
 .profile-section {
 	display: flex;
 	align-items: center;
-	background-color: #07c160;
+	background-color: var(--color-primary);
 	padding: 40rpx 30rpx;
 }
 
@@ -341,7 +345,7 @@ export default {
 	width: 120rpx;
 	height: 120rpx;
 	border-radius: 50%;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -352,8 +356,10 @@ export default {
 	background-color: rgba(255, 255, 255, 0.5);
 }
 
-.avatar-icon {
-	font-size: 60rpx;
+.avatar-icon-svg {
+	width: 80rpx;
+	 height: 80rpx;
+	 border-radius: 50%;
 }
 
 .profile-info {
@@ -363,7 +369,7 @@ export default {
 .profile-name {
 	font-size: 36rpx;
 	font-weight: bold;
-	color: #ffffff;
+	color: var(--color-surface);
 	display: block;
 }
 
@@ -379,7 +385,7 @@ export default {
 }
 
 .menu-section {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 20rpx;
 	border-radius: 12rpx;
 	overflow: hidden;
@@ -390,12 +396,12 @@ export default {
 	align-items: center;
 	justify-content: space-between;
 	padding: 28rpx 24rpx;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 	transition: background-color 0.15s ease-out;
 }
 
 .menu-item:active {
-	background-color: #f8f8f8;
+	background-color: var(--color-background);
 }
 
 .menu-item:last-child {
@@ -412,23 +418,29 @@ export default {
 	margin-right: 16rpx;
 }
 
+.menu-icon-svg {
+	width: 40rpx;
+	height: 40rpx;
+	margin-right: 16rpx;
+}
+
 .menu-text {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .menu-arrow {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .menu-value {
 	font-size: 26rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .sync-item {
-	background-color: #fff;
+	background-color: var(--color-surface);
 }
 
 .sync-status {
@@ -438,7 +450,7 @@ export default {
 
 .sync-text {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 	margin-right: 12rpx;
 }
 
@@ -448,11 +460,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -460,11 +472,11 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -473,9 +485,15 @@ export default {
 	justify-content: center;
 }
 
-.add-tab-icon {
-	font-size: 56rpx;
-	color: #07c160;
+.tab-icon {
+	width: 44rpx;
+	height: 44rpx;
+	margin-bottom: 4rpx;
+}
+
+.add-tab-icon-svg {
+	width: 56rpx;
+	height: 56rpx;
 }
 </style>
 

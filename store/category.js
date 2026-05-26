@@ -16,23 +16,23 @@ const STORAGE_KEY = 'ssj_categories'
 
 // 默认支出分类
 const DEFAULT_EXPENSE_CATEGORIES = [
-  { code: EXPENSE_CATEGORY_CODES.FOOD, name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 1, sort: 1, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.TRANSPORT, name: '交通', icon: '🚗', color: '#4ECDC4', type: 1, sort: 2, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.SHOPPING, name: '购物', icon: '🛒', color: '#45B7D1', type: 1, sort: 3, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.ENTERTAINMENT, name: '娱乐', icon: '🎮', color: '#96CEB4', type: 1, sort: 4, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.LIVING, name: '居住', icon: '🏠', color: '#DDA0DD', type: 1, sort: 5, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.MEDICAL, name: '医疗', icon: '💊', color: '#98D8C8', type: 1, sort: 6, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.EDUCATION, name: '教育', icon: '📚', color: '#F7DC6F', type: 1, sort: 7, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.COMMUNICATION, name: '通讯', icon: '📱', color: '#85C1E9', type: 1, sort: 8, is_default: 1 },
-  { code: EXPENSE_CATEGORY_CODES.OTHER, name: '其他', icon: '📦', color: '#BB8FCE', type: 1, sort: 9, is_default: 1 }
+  { code: EXPENSE_CATEGORY_CODES.FOOD, name: '餐饮', icon: 'meal', color: '#FF6B6B', type: 1, sort: 1, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.TRANSPORT, name: '交通', icon: 'car', color: '#4ECDC4', type: 1, sort: 2, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.SHOPPING, name: '购物', icon: 'shopping', color: '#45B7D1', type: 1, sort: 3, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.ENTERTAINMENT, name: '娱乐', icon: 'movie', color: '#96CEB4', type: 1, sort: 4, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.LIVING, name: '居住', icon: 'home', color: '#DDA0DD', type: 1, sort: 5, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.MEDICAL, name: '医疗', icon: 'health', color: '#98D8C8', type: 1, sort: 6, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.EDUCATION, name: '教育', icon: 'box', color: '#F7DC6F', type: 1, sort: 7, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.COMMUNICATION, name: '通讯', icon: 'phone', color: '#85C1E9', type: 1, sort: 8, is_default: 1 },
+  { code: EXPENSE_CATEGORY_CODES.OTHER, name: '其他', icon: 'box', color: '#BB8FCE', type: 1, sort: 9, is_default: 1 }
 ]
 
 // 默认收入分类
 const DEFAULT_INCOME_CATEGORIES = [
-  { code: INCOME_CATEGORY_CODES.SALARY, name: '工资', icon: '💰', color: '#27AE60', type: 2, sort: 1, is_default: 1 },
-  { code: INCOME_CATEGORY_CODES.SIDE_JOB, name: '副业', icon: '💼', color: '#3498DB', type: 2, sort: 2, is_default: 1 },
-  { code: INCOME_CATEGORY_CODES.INVESTMENT, name: '投资', icon: '📈', color: '#E74C3C', type: 2, sort: 3, is_default: 1 },
-  { code: INCOME_CATEGORY_CODES.OTHER_INCOME, name: '其他', icon: '💵', color: '#95A5A6', type: 2, sort: 4, is_default: 1 }
+  { code: INCOME_CATEGORY_CODES.SALARY, name: '工资', icon: 'wallet', color: '#27AE60', type: 2, sort: 1, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.SIDE_JOB, name: '副业', icon: 'gift', color: '#3498DB', type: 2, sort: 2, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.INVESTMENT, name: '投资', icon: 'box', color: '#E74C3C', type: 2, sort: 3, is_default: 1 },
+  { code: INCOME_CATEGORY_CODES.OTHER_INCOME, name: '其他', icon: 'box', color: '#95A5A6', type: 2, sort: 4, is_default: 1 }
 ]
 
 // 初始化分类数据
@@ -77,10 +77,23 @@ export const useCategoryStore = defineStore('category', {
       if (!data || data.length === 0) {
         // 初始化默认分类
         this.categories = initCategories()
-        this.saveCategories()
       } else {
-        this.categories = data
+        // 迁移旧数据：把 emoji 图标替换为 SVG 名称
+        const emojiToIcon = {
+          '🍜': 'meal', '🚗': 'car', '🛒': 'shopping', '🎮': 'game',
+          '🏠': 'home', '💊': 'health', '📚': 'box', '📱': 'phone',
+          '📦': 'box', '💰': 'wallet', '💼': 'gift', '📈': 'box',
+          '💵': 'box'
+        }
+        this.categories = data.map(cat => {
+          const newCat = { ...cat }
+          if (emojiToIcon[cat.icon]) {
+            newCat.icon = emojiToIcon[cat.icon]
+          }
+          return newCat
+        })
       }
+      this.saveCategories()
       return this.categories
     },
 
@@ -91,7 +104,7 @@ export const useCategoryStore = defineStore('category', {
         id: now.toString(),
         code: category.code || '',
         name: category.name || '',
-        icon: category.icon || '📦',
+        icon: category.icon || 'box',
         color: category.color || '#999999',
         type: category.type || 1,
         sort: category.sort || 0,

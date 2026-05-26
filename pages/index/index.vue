@@ -5,7 +5,7 @@
 <template>
 	<view class="index-page">
 		<!-- 头部概况 -->
-		<view class="overview-section">
+		<view class="overview-section animate-slide-up">
 			<view class="overview-header">
 				<text class="date">{{ todayDate }}</text>
 				<text class="greeting">今天</text>
@@ -24,7 +24,7 @@
 		</view>
 
 		<!-- 预算进度 -->
-		<view class="budget-section" v-if="budgetStore.currentBudget">
+		<view class="budget-section animate-slide-up delay-1" v-if="budgetStore.currentBudget">
 			<ring-chart
 				:used="monthUsed"
 				:total="budgetStore.currentBudget"
@@ -45,7 +45,7 @@
 		</view>
 
 		<!-- 超支提醒 - 使用 CSS dot 替代 emoji -->
-		<view class="alert-banner" :class="alertClass" v-if="alertMessage">
+		<view class="alert-banner animate-slide-up delay-2" :class="alertClass" v-if="alertMessage">
 			<view class="alert-icon-wrapper">
 				<text class="alert-icon">!</text>
 			</view>
@@ -53,7 +53,7 @@
 		</view>
 
 		<!-- 快捷模板 -->
-		<view class="templates-section">
+		<view class="templates-section animate-slide-up delay-3">
 			<view class="section-title">快捷记账</view>
 			<view class="templates-grid">
 				<view
@@ -63,7 +63,7 @@
 					@click="quickAdd(template)"
 				>
 					<view class="template-icon" :style="{ backgroundColor: template.color }">
-						<text>{{ template.icon }}</text>
+						<image :src="getIconPath(template.icon)" class="icon-svg" />
 					</view>
 					<text class="template-name">{{ template.name }}</text>
 					<text class="template-amount">¥{{ template.amount }}</text>
@@ -72,7 +72,7 @@
 		</view>
 
 		<!-- 今日账单 -->
-		<view class="records-section">
+		<view class="records-section animate-slide-up delay-4">
 			<view class="section-header">
 				<text class="section-title">今日账单</text>
 				<text class="more" @click="goToRecords">查看全部</text>
@@ -85,7 +85,7 @@
 					@click="editRecord(record)"
 				>
 					<view class="record-icon" :style="{ backgroundColor: getCategoryColor(record.category_code) }">
-						<text>{{ getCategoryIcon(record.category_code) }}</text>
+						<image :src="getCategoryIconPath(record.category_code)" class="record-icon-svg" />
 					</view>
 					<view class="record-info">
 						<text class="record-category">{{ record.category_name }}</text>
@@ -110,18 +110,22 @@
 		<!-- 底部导航 -->
 		<view class="tabbar">
 			<view class="tab-item active">
+				<image src="/static/icon/icon-home.svg" class="tab-icon" />
 				<text>首页</text>
 			</view>
 			<view class="tab-item" @click="goToRecords">
+				<image src="/static/icon/icon-folder.svg" class="tab-icon" />
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<text class="add-tab-icon">+</text>
+				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
+				<image src="/static/icon/icon-info.svg" class="tab-icon" />
 				<text>分析</text>
 			</view>
 			<view class="tab-item" @click="goToMy">
+				<image src="/static/icon/icon-user.svg" class="tab-icon" />
 				<text>我的</text>
 			</view>
 		</view>
@@ -144,14 +148,14 @@ export default {
 		const budgetStore = useBudgetStore()
 		const categoryStore = useCategoryStore()
 
-		// 快捷模板
+		// 快捷模板 - 使用SVG图标
 		const templates = [
-			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: '🍜', color: '#FF6B6B' },
-			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: '🍔', color: '#FF6B6B' },
-			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: '🚗', color: '#4ECDC4' },
-			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: '🚌', color: '#4ECDC4' },
-			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: '☕', color: '#FF6B6B' },
-			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: '🎬', color: '#96CEB4' }
+			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: 'meal', color: '#FF6B6B' },
+			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: 'food', color: '#FF6B6B' },
+			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: 'car', color: '#4ECDC4' },
+			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: 'bus', color: '#4ECDC4' },
+			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: 'drink', color: '#FF6B6B' },
+			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: 'movie', color: '#96CEB4' }
 		]
 
 		// 初始化数据
@@ -226,6 +230,11 @@ export default {
 			return '?'
 		}
 
+		const getCategoryIconPath = (code) => {
+			const iconName = getCategoryIcon(code)
+			return `/static/icon/icon-${iconName}.svg`
+		}
+
 		const formatTime = (timestamp) => {
 			const date = new Date(timestamp)
 			return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
@@ -266,6 +275,10 @@ export default {
 			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
+		const getIconPath = (iconName) => {
+			return `/static/icon/icon-${iconName}.svg`
+		}
+
 		const editRecord = (record) => {
 			uni.navigateTo({
 				url: `/pages/add/add?recordId=${record.id}`
@@ -288,12 +301,14 @@ export default {
 			budgetStore,
 			getCategoryColor,
 			getCategoryIcon,
+			getCategoryIconPath,
 			formatTime,
 			quickAdd,
 			goToAdd,
 			goToRecords,
 			goToStats,
 			goToMy,
+			getIconPath,
 			editRecord
 		}
 	}
@@ -303,14 +318,14 @@ export default {
 <style scoped>
 .index-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	padding-bottom: 120rpx;
 }
 
 .overview-section {
-	background-color: #07c160;
+	background-color: var(--color-primary);
 	padding: 30rpx 30rpx 40rpx;
-	color: #fff;
+	color: var(--color-surface);
 }
 
 .overview-header {
@@ -354,7 +369,7 @@ export default {
 .budget-section {
 	display: flex;
 	align-items: center;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 20rpx;
 	border-radius: 16rpx;
 	padding: 30rpx;
@@ -374,21 +389,21 @@ export default {
 
 .budget-label {
 	font-size: 26rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .budget-value {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	font-weight: 500;
 }
 
 .text-danger {
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .text-warning {
-	color: #ff9500;
+	color: var(--color-warning);
 }
 
 /* 优化：超支提醒 Banner 样式 */
@@ -424,22 +439,22 @@ export default {
 }
 
 .alert-caution {
-	background-color: #fff3e0;
-	color: #ff9500;
+	background-color: var(--bg-caution);
+	color: var(--color-warning);
 }
 
 .alert-warning {
-	background-color: #fff0e0;
-	color: #ff6b00;
+	background-color: var(--bg-warning);
+	color: var(--color-warning);
 }
 
 .alert-danger {
-	background-color: #ffebee;
-	color: #dd524d;
+	background-color: var(--bg-expense);
+	color: var(--color-danger);
 }
 
 .templates-section {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 0 20rpx 20rpx;
 	border-radius: 16rpx;
 	padding: 24rpx;
@@ -448,7 +463,7 @@ export default {
 .section-title {
 	font-size: 30rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 	margin-bottom: 20rpx;
 }
 
@@ -481,24 +496,24 @@ export default {
 	align-items: center;
 	justify-content: center;
 	font-size: 36rpx;
-	color: #fff;
+	color: var(--color-surface);
 	font-weight: 500;
 }
 
 .template-name {
 	font-size: 24rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	margin-top: 10rpx;
 }
 
 .template-amount {
 	font-size: 22rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	margin-top: 4rpx;
 }
 
 .records-section {
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 0 20rpx;
 	border-radius: 16rpx;
 	padding: 24rpx;
@@ -517,14 +532,14 @@ export default {
 }
 
 .records-list {
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 }
 
 .record-item {
 	display: flex;
 	align-items: center;
 	padding: 20rpx 0;
-	border-bottom: 1rpx solid #f5f5f5;
+	border-bottom: 1rpx solid var(--color-background);
 	transition: background-color 0.15s ease-out;
 }
 
@@ -544,10 +559,14 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 32rpx;
-	color: #fff;
+	color: var(--color-surface);
 	font-weight: 500;
 	margin-right: 20rpx;
+}
+
+.record-icon-svg {
+	width: 44rpx;
+	height: 44rpx;
 }
 
 .record-info {
@@ -556,7 +575,7 @@ export default {
 
 .record-category {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	display: block;
 }
 
@@ -572,11 +591,11 @@ export default {
 }
 
 .record-amount.expense {
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .record-amount.income {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .empty-state {
@@ -589,11 +608,11 @@ export default {
 .add-btn {
 	position: fixed;
 	right: 30rpx;
-	bottom: 150rpx;
+	bottom: 120rpx;
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
-	background-color: #07c160;
+	background-color: var(--color-primary);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -610,13 +629,13 @@ export default {
 
 .add-icon {
 	font-size: 48rpx;
-	color: #fff;
+	color: var(--color-surface);
 	line-height: 1;
 }
 
 .add-text {
 	font-size: 22rpx;
-	color: #fff;
+	color: var(--color-surface);
 	margin-top: 4rpx;
 }
 
@@ -626,11 +645,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -643,7 +662,7 @@ export default {
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -654,6 +673,22 @@ export default {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: #07c160;
+	color: var(--color-primary);
+}
+
+.tab-icon {
+	width: 44rpx;
+	height: 44rpx;
+	margin-bottom: 4rpx;
+}
+
+.add-tab-icon-svg {
+	width: 56rpx;
+	height: 56rpx;
+}
+
+.icon-svg {
+	width: 48rpx;
+	height: 48rpx;
 }
 </style>

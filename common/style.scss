@@ -1,39 +1,91 @@
 /**
- * 公共样式
+ * 公共样式 - Neumorphism + Macaron 设计系统
  * 随手记 - 全局样式变量和工具类
  */
 
 /* ============================================
- * 颜色系统 - 与 uni.scss 保持一致
+ * 核心基准：CSS 变量提取 (Tokens)
  * ============================================ */
 
-/* 主色调 */
-$primary-color: #07c160;
-$primary-light: #4ecdc4;
+:root {
+  /* 基础背景与文字 */
+  --bg-main: #FDF4E9;          /* 温柔的暖米色底色 */
+  --text-main: #332211;        /* 深咖啡色（代替死黑，提升温暖感） */
+  --text-muted: #776655;       /* 次要文本咖啡色 */
 
-/* 功能色 */
-$expense-color: #dd524d;
-$income-color: #07c160;
-$warning-color: #ff9500;
-$danger-color: #dd524d;
-$info-color: #666;
+  /* 语义化状态色 */
+  --color-expense: #C85A53;    /* 支出主色 (暗红) */
+  --bg-expense: #FDEBE7;       /* 支出卡片背景 */
+  --color-income: #3A7D5C;     /* 收入主色 (暗绿) */
+  --bg-income: #EAF6EE;        /* 收入卡片背景 */
 
-/* 中性色 */
-$text-primary: #333;
-$text-secondary: #666;
-$text-placeholder: #999;
-$text-disabled: #c0c0c0;
+  /* 金额列表分类区块背景 (淡彩色系) */
+  --bg-cat-food: #FCECD9;      /* 食物淡黄 */
+  --bg-cat-game: #FCE8EE;      /* 游戏淡粉 */
+  --bg-cat-greens: #E8F5EE;    /* 蔬菜淡绿 */
+  --bg-cat-car: #E1F3F7;       /* 汽车淡蓝 */
+  --bg-cat-coffee: #F5EDE8;    /* 咖啡淡棕 */
+  --bg-cat-shopping: #FDE8F0;  /* 购物淡玫 */
 
-$bg-page: #f5f5f5;
-$bg-card: #ffffff;
-$bg-hover: #f1f1f1;
+  /* 间距系统 (基于 8px 栅格) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-xxl: 24px;
 
-$border-color: #f0f0f0;
-$divider-color: #eee;
+  /* 圆角系统 */
+  --radius-sm: 12px;           /* 分类小图标/小按钮 */
+  --radius-md: 20px;           /* 顶部总览卡片 */
+  --radius-lg: 28px;           /* 账单主面板/大分类卡片 */
+  --radius-pill: 999px;        /* 胶囊形按钮 */
+
+  /* 阴影系统 (Neumorphism 核心) */
+  --shadow-soft-in: inset 0px 2px 4px rgba(255, 255, 255, 0.6), inset 0px -2px 4px rgba(180, 160, 140, 0.15);
+  --shadow-card: 0px 8px 24px rgba(210, 195, 180, 0.25);
+  --shadow-btn: 0px 4px 10px rgba(210, 195, 180, 0.4), inset 0px 2px 2px rgba(255, 255, 255, 0.5);
+  --shadow-add-btn: 0px 6px 16px rgba(255, 168, 38, 0.4), inset 0px 2px 2px rgba(255, 255, 255, 0.6);
+
+  /* 加号按钮渐变 */
+  --gradient-add-btn: linear-gradient(135deg, #FFCE7A 0%, #FFA826 100%);
+
+  /* 警告状态色 */
+  --color-caution: #d4a056;      /* 橙色-注意 */
+  --color-warning: #c85a30;       /* 深橙-警告 */
+  --bg-caution: #fff3e0;          /* 警告背景-淡橙 */
+  --bg-warning: #fff0e0;         /* 警告背景-深橙 */
+
+  /* TabBar 悬浮导航 */
+  --tabbar-height: 64px;
+  --tabbar-bg: #FDF4E9;
+
+  /* 主题色 */
+  --color-primary: #07c160;
+  --color-primary-rgb: 7, 193, 96;
+  --color-surface: #ffffff;
+  --color-background: #f5f5f5;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-border: #f0f0f0;
+  --color-danger: #dd524d;
+  --color-warning: #ff9500;
+  --color-success: #07c160;
+
+  /* 动画 */
+  --duration-fast: 0.1s;
+  --duration-base: 0.15s;
+  --duration-slow: 0.3s;
+  --duration-enter: 0.4s;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
+}
 
 /* ============================================
  * 字体系统
  * ============================================ */
+
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Nunito', 'PingFang SC', 'Helvetica Neue', sans-serif;
 
 $font-size-xs: 22rpx;
 $font-size-sm: 24rpx;
@@ -42,6 +94,20 @@ $font-size-md: 28rpx;
 $font-size-lg: 32rpx;
 $font-size-xl: 36rpx;
 $font-size-xxl: 44rpx;
+
+/* 金额数字 - 顶部数字样式 */
+$font-size-amount: 26px;
+$font-weight-amount: 700;
+$font-line-height-amount: 1.2;
+$font-letter-spacing-amount: -0.5px;
+
+/* 列表分类标题 */
+$font-size-list-title: 15px;
+$font-weight-list-title: 600;
+
+/* 次要提示字 */
+$font-size-muted: 13px;
+$font-weight-muted: 500;
 
 $font-weight-normal: 400;
 $font-weight-medium: 500;
@@ -94,3 +160,219 @@ $z-index-dropdown: 100;
 $z-index-sticky: 200;
 $z-index-modal: 500;
 $z-index-toast: 1000;
+
+/* ============================================
+ * 全局触摸反馈
+ * ============================================ */
+
+/* 所有可点击元素的基础触摸反馈 */
+view, text, image {
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* 按钮类元素增强触摸反馈 */
+.btn, .tab-item, .menu-item, .record-item, .template-item {
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.95);
+  }
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+/* ============================================
+ * 全局样式重置
+ * ============================================ */
+
+page {
+  background-color: var(--bg-main);
+  font-family: $font-family-base;
+  color: var(--text-main);
+}
+
+/* ============================================
+ * Neumorphism 工具类
+ * ============================================ */
+
+/* 浮雕卡片 */
+.neu-card {
+  background-color: var(--bg-main);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* 内陷效果 */
+.neu-inset {
+  box-shadow: var(--shadow-soft-in);
+}
+
+/* 按钮效果 */
+.neu-btn {
+  box-shadow: var(--shadow-btn);
+  transition: all 0.2s ease;
+}
+
+.neu-btn:active {
+  transform: scale(0.95);
+  box-shadow: var(--shadow-soft-in);
+}
+
+/* ============================================
+ * 通用组件样式
+ * ============================================ */
+
+/* 分类图标容器 */
+.category-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+/* 记录行 */
+.record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  transition: transform 0.2s ease;
+}
+
+/* 悬浮加号按钮 */
+.btn-add-primary {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-add-btn);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-add-btn);
+  transition: all 0.2s ease;
+}
+
+.btn-add-primary:active {
+  transform: scale(0.92);
+  box-shadow: 0px 2px 6px rgba(255, 168, 38, 0.4);
+}
+
+/* ============================================
+ * 全局弹性缩放动画
+ * ============================================ */
+
+@keyframes bounceIn {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.95); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* 弹性缩放反馈类 */
+.bounce-active {
+  animation: bounceIn 0.3s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+ * 页面进入动画
+ * ============================================ */
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 页面元素动画类 */
+.animate-slide-up {
+  animation: slideUp var(--duration-enter) var(--ease-out) forwards;
+  opacity: 0;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-base) var(--ease-out) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-base) var(--ease-out) forwards;
+}
+
+/* 延迟类 - 配合 nth-child 使用 */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* ============================================
+ * 暗色模式支持
+ * ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #2dd58a;
+    --color-primary-rgb: 45, 213, 138;
+    --color-surface: #1a1a2e;
+    --color-background: #0f0f1a;
+    --color-text-primary: #e8e8e8;
+    --color-text-secondary: #a0a0a0;
+    --color-border: #2a2a3e;
+    --color-danger: #ff6b6b;
+    --color-warning: #ffab40;
+    --color-success: #2dd58a;
+  }
+}
+
+/* 手动暗色模式切换类 */
+.dark {
+  --color-primary: #2dd58a;
+  --color-primary-rgb: 45, 213, 138;
+  --color-surface: #1a1a2e;
+  --color-background: #0f0f1a;
+  --color-text-primary: #e8e8e8;
+  --color-text-secondary: #a0a0a0;
+  --color-border: #2a2a3e;
+  --color-danger: #ff6b6b;
+  --color-warning: #ffab40;
+  --color-success: #2dd58a;
+}

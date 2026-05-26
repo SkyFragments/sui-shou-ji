@@ -5,7 +5,7 @@
 <template>
 	<view class="account-page">
 		<!-- 账户列表 -->
-		<view class="account-list">
+		<view class="account-list animate-slide-up">
 			<view
 				v-for="account in accounts"
 				:key="account.code"
@@ -13,7 +13,7 @@
 			>
 				<view class="account-info">
 					<view class="account-icon" :style="{ backgroundColor: getAccountColor(account.type) }">
-						<text>{{ getAccountIcon(account.type) }}</text>
+						<image :src="getAccountIconPath(account.type)" class="account-icon-img" />
 					</view>
 					<view class="account-detail">
 						<text class="account-name">{{ account.name }}</text>
@@ -76,7 +76,7 @@
 						<switch
 							:checked="formData.is_default === 1"
 							@change="onDefaultChange"
-							color="#07c160"
+							color="var(--color-primary)"
 						/>
 					</view>
 				</view>
@@ -140,19 +140,24 @@ export default {
 
 		const getAccountIcon = (type) => {
 			const icons = {
-				cash: '💵',
-				alipay: '💳',
-				wechat: '💬',
-				bankcard: '🏦'
+				cash: 'wallet',
+				alipay: 'card',
+				wechat: 'wallet',
+				bankcard: 'card'
 			}
-			return icons[type] || '💰'
+			return icons[type] || 'wallet'
+		}
+
+		const getAccountIconPath = (type) => {
+			const iconName = getAccountIcon(type)
+			return `/static/icon/icon-${iconName}.svg`
 		}
 
 		const getAccountColor = (type) => {
 			const colors = {
-				cash: '#07c160',
+				cash: 'var(--color-primary)',
 				alipay: '#1677ff',
-				wechat: '#07c160',
+				wechat: 'var(--color-primary)',
 				bankcard: '#722ed1'
 			}
 			return colors[type] || '#999'
@@ -278,6 +283,7 @@ export default {
 			accountTypes,
 			accountTypeIndex,
 			getAccountIcon,
+			getAccountIconPath,
 			getAccountColor,
 			getAccountTypeName,
 			onAccountTypeChange,
@@ -299,7 +305,7 @@ export default {
 <style scoped>
 .account-page {
 	min-height: 100vh;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	padding-bottom: 120rpx;
 }
 
@@ -311,7 +317,7 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 12rpx;
 	padding: 24rpx;
 	margin-bottom: 16rpx;
@@ -329,8 +335,12 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 40rpx;
 	margin-right: 20rpx;
+}
+
+.account-icon-img {
+	width: 48rpx;
+	height: 48rpx;
 }
 
 .account-detail {
@@ -340,13 +350,13 @@ export default {
 
 .account-name {
 	font-size: 30rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	font-weight: 500;
 }
 
 .account-type {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 	margin-top: 8rpx;
 }
 
@@ -357,43 +367,43 @@ export default {
 
 .default-badge {
 	font-size: 22rpx;
-	color: #07c160;
+	color: var(--color-primary);
 	padding: 4rpx 12rpx;
-	border: 1rpx solid #07c160;
+	border: 1rpx solid var(--color-primary);
 	border-radius: 20rpx;
 	margin-right: 16rpx;
 }
 
 .action-btn {
 	font-size: 26rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	padding: 8rpx 16rpx;
 }
 
 .delete-btn {
-	color: #dd524d;
+	color: var(--color-danger);
 }
 
 .add-account-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	margin: 20rpx;
 	padding: 24rpx;
 	border-radius: 12rpx;
-	border: 2rpx dashed #ddd;
+	border: 2rpx dashed var(--color-border);
 }
 
 .add-icon {
 	font-size: 48rpx;
-	color: #07c160;
+	color: var(--color-primary);
 	margin-right: 12rpx;
 }
 
 .add-text {
 	font-size: 28rpx;
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 /* Modal */
@@ -419,20 +429,20 @@ export default {
 	top: 50%;
 	transform: translate(-50%, -50%);
 	width: 600rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 16rpx;
 	overflow: hidden;
 }
 
 .modal-header {
 	padding: 30rpx;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .modal-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -444,7 +454,7 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx 0;
-	border-bottom: 1rpx solid #f0f0f0;
+	border-bottom: 1rpx solid var(--color-border);
 }
 
 .form-item:last-child {
@@ -453,24 +463,24 @@ export default {
 
 .form-label {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .form-input {
 	flex: 1;
 	text-align: right;
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .picker-value {
 	font-size: 28rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .modal-footer {
 	display: flex;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 }
 
 .btn {
@@ -481,12 +491,12 @@ export default {
 }
 
 .cancel-btn {
-	color: #666;
-	border-right: 1rpx solid #f0f0f0;
+	color: var(--color-text-secondary);
+	border-right: 1rpx solid var(--color-border);
 }
 
 .confirm-btn {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 /* Tabbar */
@@ -496,11 +506,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid #f0f0f0;
+	border-top: 1rpx solid var(--color-border);
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -508,11 +518,11 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 
 .tab-item.active {
-	color: #07c160;
+	color: var(--color-primary);
 }
 
 .add-tab {
@@ -523,6 +533,6 @@ export default {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: #07c160;
+	color: var(--color-primary);
 }
 </style>

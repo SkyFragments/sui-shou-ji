@@ -30,7 +30,7 @@
 				@click="selectCategory(category)"
 			>
 				<view class="category-icon" :style="{ backgroundColor: category.color }">
-					<text>{{ category.icon }}</text>
+					<image :src="getIconPath(category.icon)" class="category-icon-img" />
 				</view>
 				<text class="category-name">{{ category.name }}</text>
 			</view>
@@ -90,12 +90,17 @@ export default {
 			})
 		}
 
+		const getIconPath = (iconName) => {
+			return `/static/icon/icon-${iconName}.svg`
+		}
+
 		return {
 			currentType,
 			selectedCode,
 			displayCategories,
 			switchType,
-			selectCategory
+			selectCategory,
+			getIconPath
 		}
 	}
 }
@@ -117,14 +122,14 @@ export default {
 	padding: 12rpx 48rpx;
 	border-radius: 40rpx;
 	font-size: 28rpx;
-	color: #666;
-	background-color: #f0f0f0;
+	color: var(--color-text-secondary);
+	background-color: var(--color-border);
 	transition: all 0.2s;
 }
 
 .tab.active {
-	color: #ffffff;
-	background-color: #07c160;
+	color: var(--color-surface);
+	background-color: var(--color-primary);
 }
 
 .category-grid {
@@ -149,18 +154,22 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 44rpx;
 	border: 3rpx solid transparent;
 	transition: border-color 0.2s;
 }
 
+.category-icon-img {
+	width: 48rpx;
+	height: 48rpx;
+}
+
 .category-item.selected .category-icon {
-	border-color: #333;
+	border-color: var(--color-text-primary);
 }
 
 .category-name {
 	font-size: 24rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 	margin-top: 8rpx;
 	text-align: center;
 }

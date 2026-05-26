@@ -68,7 +68,7 @@ export default {
 <style scoped>
 .line-chart {
 	padding: 20rpx;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 12rpx;
 }
 
@@ -78,7 +78,7 @@ export default {
 
 .title {
 	font-size: 28rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	font-weight: bold;
 }
 
@@ -90,8 +90,8 @@ export default {
 .line-canvas {
 	position: relative;
 	height: 250rpx;
-	border-left: 1rpx solid #e0e0e0;
-	border-bottom: 1rpx solid #e0e0e0;
+	border-left: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid var(--color-border);
 	margin: 0 20rpx;
 }
 
@@ -104,7 +104,7 @@ export default {
 	width: 16rpx;
 	height: 16rpx;
 	border-radius: 50%;
-	background-color: #007AFF;
+	background-color: var(--color-primary);
 }
 
 .x-axis {
@@ -115,6 +115,6 @@ export default {
 
 .x-label {
 	font-size: 20rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 </style>

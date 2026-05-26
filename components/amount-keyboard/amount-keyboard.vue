@@ -75,7 +75,7 @@ export default {
 <style scoped>
 .amount-keyboard {
 	padding: 12rpx;
-	background-color: #f5f5f5;
+	background-color: var(--color-background);
 	border-radius: 16rpx;
 }
 
@@ -90,39 +90,41 @@ export default {
 	height: 88rpx;
 	line-height: 88rpx;
 	text-align: center;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	border-radius: 12rpx;
 	font-size: 40rpx;
-	color: #333;
+	color: var(--color-text-primary);
 	margin: 0 4rpx;
 	box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
-	transition: background-color 0.1s;
+	transition: background-color var(--duration-fast), transform var(--duration-fast);
 }
 
 .key:active {
-	background-color: #e0e0e0;
+	background-color: var(--color-border);
+	transform: scale(0.96);
 }
 
 .key-action {
-	background-color: #f0f0f0;
-	color: #666;
+	background-color: var(--color-border);
+	color: var(--color-text-secondary);
 }
 
 .key-action:active {
-	background-color: #e0e0e0;
+	background-color: var(--color-text-secondary);
 }
 
 .key-clear {
-	color: #ff9500;
+	color: var(--color-warning);
 }
 
 .key-confirm {
-	background-color: #07c160;
-	color: #ffffff;
+	background-color: var(--color-primary);
+	color: var(--color-surface);
 }
 
 .key-confirm:active {
-	background-color: #06ad56;
+	background-color: var(--color-primary);
+	opacity: 0.85;
 }
 
 .key-double {

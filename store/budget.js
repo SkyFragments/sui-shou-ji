@@ -23,7 +23,8 @@ export const useBudgetStore = defineStore('budget', {
     // 获取当前月份预算
     currentBudget(state) {
       const yearMonth = getCurrentYearMonth()
-      return state.budgets[yearMonth] || DEFAULT_BUDGET
+      const budget = state.budgets[yearMonth]
+      return budget?.total_budget || DEFAULT_BUDGET
     },
 
     // 获取指定月份预算

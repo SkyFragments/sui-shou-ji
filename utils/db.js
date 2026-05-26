@@ -18,7 +18,7 @@ export function getDb() {
 export async function initDatabase() {
   return new Promise((resolve, reject) => {
     try {
-      db = uni.cloud.database()
+      db = uniCloud.database()
       createTables()
       resolve()
     } catch (error) {
@@ -293,6 +293,51 @@ export async function syncRecordToCloud(record, openid) {
     return { success: true, id: res.id }
   } catch (e) {
     console.error('Sync record failed:', e)
+    return { success: false, error: e }
+  }
+}
+
+/**
+ * 更新云端记录
+ * @param {Object} record 记录
+ * @param {string} openid 用户openid
+ */
+export async function syncUpdateToCloud(record, openid) {
+  const db = getCloudDb()
+  if (!db) return { offline: true }
+
+  try {
+    const res = await db.collection('ssj_records')
+      .where({ openid, id: record.id })
+      .update({
+        data: {
+          ...record,
+          sync_status: 1
+        }
+      })
+    return { success: true }
+  } catch (e) {
+    console.error('Update cloud record failed:', e)
+    return { success: false, error: e }
+  }
+}
+
+/**
+ * 从云端删除记录
+ * @param {string} recordId 记录ID
+ * @param {string} openid 用户openid
+ */
+export async function syncDeleteFromCloud(recordId, openid) {
+  const db = getCloudDb()
+  if (!db) return { offline: true }
+
+  try {
+    await db.collection('ssj_records')
+      .where({ openid, id: recordId })
+      .remove()
+    return { success: true }
+  } catch (e) {
+    console.error('Delete cloud record failed:', e)
     return { success: false, error: e }
   }
 }

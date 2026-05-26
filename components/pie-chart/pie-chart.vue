@@ -42,10 +42,10 @@ export default {
 		},
 		pieStyle() {
 			if (this.data.length === 0) {
-				return { background: '#e0e0e0' }
+				return { background: 'var(--color-border)' }
 			}
 			// 简化实现，使用渐变模拟
-			const colors = this.data.map(item => item.color || '#007AFF')
+			const colors = this.data.map(item => item.color || 'var(--color-primary)')
 			return {
 				background: `conic-gradient(${colors.join(', ')})`
 			}
@@ -90,7 +90,7 @@ export default {
 	width: 70%;
 	height: 70%;
 	border-radius: 50%;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -99,7 +99,7 @@ export default {
 .total {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .legend {
@@ -125,11 +125,11 @@ export default {
 
 .legend-name {
 	font-size: 22rpx;
-	color: #666;
+	color: var(--color-text-secondary);
 }
 
 .legend-value {
 	font-size: 20rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 }
 </style>

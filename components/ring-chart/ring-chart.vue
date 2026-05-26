@@ -42,14 +42,14 @@ export default {
 		},
 		ringStyle() {
 			const percentage = this.percentage
-			let color = '#007AFF' // 正常蓝色
+			let color = 'var(--color-primary)' // 正常蓝色
 			if (percentage >= 100) {
-				color = '#dd524d' // 红色
+				color = 'var(--color-expense)' // 红色
 			} else if (percentage >= 80) {
-				color = '#f0ad4e' // 黄色
+				color = 'var(--color-warning)' // 黄色
 			}
 			return {
-				background: `conic-gradient(${color} ${percentage}%, #e0e0e0 0%)`
+				background: `conic-gradient(${color} ${percentage}%, var(--color-border) 0%)`
 			}
 		}
 	}
@@ -82,7 +82,7 @@ export default {
 	width: 80%;
 	height: 80%;
 	border-radius: 50%;
-	background-color: #ffffff;
+	background-color: var(--color-surface);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -92,12 +92,12 @@ export default {
 .amount {
 	font-size: 36rpx;
 	font-weight: bold;
-	color: #333;
+	color: var(--color-text-primary);
 }
 
 .label {
 	font-size: 24rpx;
-	color: #999;
+	color: var(--color-text-secondary);
 	margin-top: 5rpx;
 }
 </style>

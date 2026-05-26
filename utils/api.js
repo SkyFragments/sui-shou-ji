@@ -3,7 +3,7 @@
  * 替换 uniCloud 调用
  */
 
-const API_BASE = 'https://your-domain.com/api' // TODO: 替换为实际域名
+const API_BASE = 'https://txwh.online/api'
 
 const STORAGE_KEY_TOKEN = 'ssj_auth_token'
 
