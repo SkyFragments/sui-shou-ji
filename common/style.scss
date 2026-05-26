@@ -72,6 +72,9 @@
   --color-warning: #ff9500;
   --color-success: #07c160;
 
+  /* 交互状态色 */
+  --color-active-bg: #F0EBE3;      /* 按压态背景（暖色调变暗） */
+
   /* 动画 */
   --duration-fast: 0.1s;
   --duration-base: 0.15s;
@@ -373,6 +376,7 @@ page {
     --color-danger: #ff6b6b;
     --color-warning: #ffab40;
     --color-success: #2dd58a;
+    --color-active-bg: #2A2520;
   }
 }
 
@@ -388,4 +392,5 @@ page {
   --color-danger: #ff6b6b;
   --color-warning: #ffab40;
   --color-success: #2dd58a;
+  --color-active-bg: #2A2520;
 }

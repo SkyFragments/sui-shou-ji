@@ -545,7 +545,7 @@ export default {
 
 /* 优化：记录项触摸反馈 */
 .record-item:active {
-	background-color: #f8f8f8;
+	background-color: var(--color-active-bg);
 }
 
 .record-item:last-child {
