@@ -474,6 +474,10 @@ export default {
 	text-align: center;
 	font-size: 22rpx;
 	color: var(--color-text-secondary);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .tab-item.active {

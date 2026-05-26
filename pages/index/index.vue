@@ -608,7 +608,7 @@ export default {
 .add-btn {
 	position: fixed;
 	right: 30rpx;
-	bottom: 120rpx;
+	bottom: 180rpx;
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
@@ -659,21 +659,20 @@ export default {
 	font-size: 22rpx;
 	color: #999;
 	transition: color 0.15s ease-out;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .tab-item.active {
 	color: var(--color-primary);
 }
 
-.add-tab {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
 .add-tab-icon {
 	font-size: 56rpx;
 	color: var(--color-primary);
+	margin-bottom: 0;
 }
 
 .tab-icon {
