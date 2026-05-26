@@ -239,29 +239,23 @@ page {
   }
 }
 
+/* Page element animation classes */
 .animate-slide-up {
-  -webkit-transform: translateY(20rpx);
-          transform: translateY(20rpx);
-  opacity: 0;
-  animation: slideUp var(--duration-enter) var(--ease-out) forwards;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  /* Debug: disable animation to test if it's the cause */
+  /* animation: slideUp var(--duration-enter) var(--ease-out) forwards; */
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .animate-fade-in {
-  opacity: 0;
-  animation: fadeIn var(--duration-base) var(--ease-out) forwards;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  /* animation: fadeIn var(--duration-base) var(--ease-out) forwards; */
+  opacity: 1 !important;
 }
 
 .animate-scale-in {
-  opacity: 0;
-  -webkit-transform: scale(0.95);
-          transform: scale(0.95);
-  animation: scaleIn var(--duration-base) var(--ease-out) forwards;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  /* animation: scaleIn var(--duration-base) var(--ease-out) forwards; */
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .delay-1 { animation-delay: 0.1s; }
