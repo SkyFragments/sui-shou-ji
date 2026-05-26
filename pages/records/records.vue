@@ -7,7 +7,7 @@
 		<!-- 月份选择器 -->
 		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
-				<text class="nav-btn"><</text>
+				<image src="/static/icon/icon-arrow-left.svg" class="nav-btn-icon" />
 			</view>
 			<view class="month-display">
 				<picker mode="date" :value="currentYearMonth" fields="month" @change="onMonthChange">
@@ -15,7 +15,7 @@
 				</picker>
 			</view>
 			<view class="month-nav" @click="nextMonth">
-				<text class="nav-btn">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="nav-btn-icon" />
 			</view>
 		</view>
 
@@ -318,6 +318,12 @@ function getCurrentYearMonth() {
 
 .nav-btn {
 	font-size: 28rpx;
+	color: var(--color-text-secondary);
+}
+
+.nav-btn-icon {
+	width: 36rpx;
+	height: 36rpx;
 	color: var(--color-text-secondary);
 }
 

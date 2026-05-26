@@ -36,7 +36,7 @@
 					<image src="/static/icon/icon-card.svg" class="menu-icon-svg" />
 					<text class="menu-text">账户管理</text>
 				</view>
-				<text class="menu-arrow">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 			</view>
 
 			<!-- 分类管理 -->
@@ -45,7 +45,7 @@
 					<image src="/static/icon/icon-folder.svg" class="menu-icon-svg" />
 					<text class="menu-text">分类管理</text>
 				</view>
-				<text class="menu-arrow">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 			</view>
 
 			<!-- 预算设置 -->
@@ -54,7 +54,7 @@
 					<image src="/static/icon/icon-wallet.svg" class="menu-icon-svg" />
 					<text class="menu-text">预算设置</text>
 				</view>
-				<text class="menu-arrow">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 			</view>
 
 			<!-- 数据导出 -->
@@ -63,7 +63,7 @@
 					<image src="/static/icon/icon-export.svg" class="menu-icon-svg" />
 					<text class="menu-text">数据导出</text>
 				</view>
-				<text class="menu-arrow">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 			</view>
 
 			<!-- 同步状态 -->
@@ -74,7 +74,7 @@
 				</view>
 				<view class="sync-status">
 					<text class="sync-text">{{ syncStatusText }}</text>
-					<text class="menu-arrow">></text>
+					<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 				</view>
 			</view>
 		</view>
@@ -429,8 +429,9 @@ export default {
 	color: var(--color-text-primary);
 }
 
-.menu-arrow {
-	font-size: 24rpx;
+.menu-arrow-icon {
+	width: 32rpx;
+	height: 32rpx;
 	color: var(--color-text-secondary);
 }
 
