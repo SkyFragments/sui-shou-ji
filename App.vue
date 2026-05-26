@@ -3,7 +3,8 @@
 
 	export default {
 		onLaunch: function() {
-			console.log('App Launch')
+			console.log('App Launch - 随手记启动')
+			console.log('页面数量:', getCurrentPages().length)
 			// 初始化默认数据
 			initAllData()
 		},
@@ -17,5 +18,6 @@
 </script>
 
 <style>
-	/*每个页面公共css */
+/每个页面公共css */
+@import "./common/style.scss";
 </style>
