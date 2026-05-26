@@ -1,6 +1,5 @@
 import App from './App'
 import { registerStores, useBillStore, useCategoryStore, useAccountStore, useBudgetStore } from './store'
-import { initCategories, initAccounts } from './utils/init-data'
 
 // #ifndef VUE3
 import Vue from 'vue'

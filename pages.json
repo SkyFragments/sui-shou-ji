@@ -52,8 +52,8 @@
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "随手记",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
+		"navigationBarBackgroundColor": "#FDF4E9",
+		"backgroundColor": "#FDF4E9"
 	},
 	"uniIdRouter": {}
 }
