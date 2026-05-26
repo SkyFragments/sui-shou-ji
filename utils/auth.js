@@ -19,16 +19,10 @@ export function login() {
 					return
 				}
 
-				try {
-					// 优先使用云函数登录
-					const userInfo = await cloudLogin(res.code)
-					resolve(userInfo)
-				} catch (e) {
-					// 云函数不可用时使用模拟登录
-					console.warn('Cloud login failed, using mock:', e)
-					const mockInfo = await mockLogin(res.code)
-					resolve(mockInfo)
-				}
+				// 后端 API 不可用，直接使用模拟登录
+				console.warn('Using mock login (API not available)')
+				const mockInfo = await mockLogin(res.code)
+				resolve(mockInfo)
 			},
 			fail: (err) => {
 				reject(new Error('wx.login 调用失败: ' + err.errMsg))
