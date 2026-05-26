@@ -239,23 +239,22 @@ page {
   }
 }
 
-/* Page element animation classes */
+/* Page element animation classes - use opacity transition instead of keyframes */
 .animate-slide-up {
-  /* Debug: disable animation to test if it's the cause */
-  /* animation: slideUp var(--duration-enter) var(--ease-out) forwards; */
   opacity: 1 !important;
   transform: none !important;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 .animate-fade-in {
-  /* animation: fadeIn var(--duration-base) var(--ease-out) forwards; */
   opacity: 1 !important;
+  transition: opacity 0.15s ease-out;
 }
 
 .animate-scale-in {
-  /* animation: scaleIn var(--duration-base) var(--ease-out) forwards; */
   opacity: 1 !important;
   transform: none !important;
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
 .delay-1 { animation-delay: 0.1s; }
