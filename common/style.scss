@@ -169,19 +169,17 @@ $z-index-toast: 1000;
  * ============================================ */
 
 /* 所有可点击元素的基础触摸反馈 */
-view, text, image {
-  &:active {
-    opacity: 0.8;
-    transform: scale(0.98);
-  }
+view:active, text:active, image:active {
+  opacity: 0.8;
+  transform: scale(0.98);
 }
 
 /* 按钮类元素增强触摸反馈 */
+.btn:active, .tab-item:active, .menu-item:active, .record-item:active, .template-item:active {
+  opacity: 0.85;
+  transform: scale(0.95);
+}
 .btn, .tab-item, .menu-item, .record-item, .template-item {
-  &:active {
-    opacity: 0.85;
-    transform: scale(0.95);
-  }
   transition: all var(--duration-base) var(--ease-out);
 }
 
