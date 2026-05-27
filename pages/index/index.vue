@@ -242,6 +242,8 @@ export default {
 
 		const quickAdd = async (template) => {
 			const category = categoryStore.getCategoryByCode(template.category_code)
+			const now = new Date()
+			const recordDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 			const record = {
 				type: 1, // 支出
 				amount: template.amount,
@@ -249,7 +251,7 @@ export default {
 				category_name: category?.name || template.name,
 				account_code: 'cash',
 				remark: '',
-				record_date: new Date().toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' }).replace(/\//g, '-')
+				record_date: recordDate
 			}
 			try {
 				await billStore.addRecord(record)
