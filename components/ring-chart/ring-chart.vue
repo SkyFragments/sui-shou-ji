@@ -42,14 +42,17 @@ export default {
 		},
 		ringStyle() {
 			const percentage = this.percentage
-			let color = 'var(--color-primary)' // 正常蓝色
+			// 根据百分比选择颜色
+			let color = '#07c160' // 正常绿色
 			if (percentage >= 100) {
-				color = 'var(--color-expense)' // 红色
+				color = '#dd524d' // 红色 - 超出
 			} else if (percentage >= 80) {
-				color = 'var(--color-warning)' // 黄色
+				color = '#ff9500' // 橙色 - 警告
 			}
+			const bgColor = '#f0f0f0' // 灰色边框
+			// conic-gradient 正确语法：色值 起始%, 色值 结束%, 色值 结束%, 色值 起始%
 			return {
-				background: `conic-gradient(${color} ${percentage}%, var(--color-border) 0%)`
+				background: `conic-gradient(${color} 0%, ${color} ${percentage}%, ${bgColor} ${percentage}%, ${bgColor} 100%)`
 			}
 		}
 	}
@@ -82,7 +85,7 @@ export default {
 	width: 80%;
 	height: 80%;
 	border-radius: 50%;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -92,12 +95,12 @@ export default {
 .amount {
 	font-size: 36rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .label {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 5rpx;
 }
 </style>

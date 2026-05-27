@@ -76,8 +76,8 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx;
-	background-color: var(--color-surface);
-	border-bottom: 1rpx solid var(--color-border);
+	background-color: #ffffff;
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .left {
@@ -101,13 +101,13 @@ export default {
 
 .category {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	display: block;
 }
 
 .remark {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: block;
 	margin-top: 5rpx;
 }
@@ -123,16 +123,16 @@ export default {
 }
 
 .amount.expense {
-	color: var(--color-expense);
+	color: #C85A53;
 }
 
 .amount.income {
-	color: var(--color-income);
+	color: #3A7D5C;
 }
 
 .time {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: block;
 	margin-top: 5rpx;
 }

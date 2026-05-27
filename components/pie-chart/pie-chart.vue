@@ -42,12 +42,26 @@ export default {
 		},
 		pieStyle() {
 			if (this.data.length === 0) {
-				return { background: 'var(--color-border)' }
+				return { background: '#f0f0f0' }
 			}
-			// 简化实现，使用渐变模拟
-			const colors = this.data.map(item => item.color || 'var(--color-primary)')
+			// 构建 conic-gradient 正确语法：每段需要起止百分比
+			const total = this.totalAmount
+			let gradient = []
+			let currentPercent = 0
+			this.data.forEach((item, index) => {
+				const color = item.color || '#07c160'
+				const percent = total > 0 ? (item.value / total) * 100 : 0
+				const startPercent = currentPercent
+				const endPercent = currentPercent + percent
+				gradient.push(`${color} ${startPercent}% ${endPercent}%`)
+				currentPercent = endPercent
+			})
+			// 补足100%
+			if (currentPercent < 100) {
+				gradient.push(`#f0f0f0 ${currentPercent}% 100%`)
+			}
 			return {
-				background: `conic-gradient(${colors.join(', ')})`
+				background: `conic-gradient(${gradient.join(', ')})`
 			}
 		},
 		legendItems() {

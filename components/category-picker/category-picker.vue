@@ -122,14 +122,14 @@ export default {
 	padding: 12rpx 48rpx;
 	border-radius: 40rpx;
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
-	background-color: var(--color-border);
+	color: #666666;
+	background-color: #f0f0f0;
 	transition: all 0.2s;
 }
 
 .tab.active {
-	color: var(--color-surface);
-	background-color: var(--color-primary);
+	color: #ffffff;
+	background-color: #07c160;
 }
 
 .category-grid {
@@ -164,12 +164,12 @@ export default {
 }
 
 .category-item.selected .category-icon {
-	border-color: var(--color-text-primary);
+	border-color: #333333;
 }
 
 .category-name {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 8rpx;
 	text-align: center;
 }
