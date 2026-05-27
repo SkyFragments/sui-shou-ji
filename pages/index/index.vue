@@ -369,7 +369,7 @@ export default {
 .budget-section {
 	display: flex;
 	align-items: center;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin: 20rpx;
 	border-radius: 16rpx;
 	padding: 30rpx;
@@ -389,21 +389,21 @@ export default {
 
 .budget-label {
 	font-size: 26rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .budget-value {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	font-weight: 500;
 }
 
 .text-danger {
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .text-warning {
-	color: var(--color-warning);
+	color: #ff9500;
 }
 
 /* 优化：超支提醒 Banner 样式 */
@@ -439,22 +439,22 @@ export default {
 }
 
 .alert-caution {
-	background-color: var(--bg-caution);
-	color: var(--color-warning);
+	background-color: #fff3e0;
+	color: #ff9500;
 }
 
 .alert-warning {
-	background-color: var(--bg-warning);
-	color: var(--color-warning);
+	background-color: #fff0e0;
+	color: #ff9500;
 }
 
 .alert-danger {
-	background-color: var(--bg-expense);
-	color: var(--color-danger);
+	background-color: #FDEBE7;
+	color: #dd524d;
 }
 
 .templates-section {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin: 0 20rpx 20rpx;
 	border-radius: 16rpx;
 	padding: 24rpx;
@@ -463,7 +463,7 @@ export default {
 .section-title {
 	font-size: 30rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 	margin-bottom: 20rpx;
 }
 
@@ -496,24 +496,24 @@ export default {
 	align-items: center;
 	justify-content: center;
 	font-size: 36rpx;
-	color: var(--color-surface);
+	color: #ffffff;
 	font-weight: 500;
 }
 
 .template-name {
 	font-size: 24rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	margin-top: 10rpx;
 }
 
 .template-amount {
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 4rpx;
 }
 
 .records-section {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin: 0 20rpx;
 	border-radius: 16rpx;
 	padding: 24rpx;
@@ -532,20 +532,20 @@ export default {
 }
 
 .records-list {
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 }
 
 .record-item {
 	display: flex;
 	align-items: center;
 	padding: 20rpx 0;
-	border-bottom: 1rpx solid var(--color-background);
+	border-bottom: 1rpx solid #FDF4E9;
 	transition: background-color 0.15s ease-out;
 }
 
 /* 优化：记录项触摸反馈 */
 .record-item:active {
-	background-color: var(--color-active-bg);
+	background-color: #F0EBE3;
 }
 
 .record-item:last-child {
@@ -559,7 +559,7 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--color-surface);
+	color: #ffffff;
 	font-weight: 500;
 	margin-right: 20rpx;
 }
@@ -575,7 +575,7 @@ export default {
 
 .record-category {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	display: block;
 }
 
@@ -591,11 +591,11 @@ export default {
 }
 
 .record-amount.expense {
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .record-amount.income {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .empty-state {
@@ -612,7 +612,7 @@ export default {
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
-	background-color: var(--color-primary);
+	background-color: #07c160;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -629,13 +629,13 @@ export default {
 
 .add-icon {
 	font-size: 48rpx;
-	color: var(--color-surface);
+	color: #ffffff;
 	line-height: 1;
 }
 
 .add-text {
 	font-size: 22rpx;
-	color: var(--color-surface);
+	color: #ffffff;
 	margin-top: 4rpx;
 }
 
@@ -645,11 +645,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -666,12 +666,12 @@ export default {
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: var(--color-primary);
+	color: #07c160;
 	margin-bottom: 0;
 }
 

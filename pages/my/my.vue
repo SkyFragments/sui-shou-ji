@@ -323,14 +323,14 @@ export default {
 <style scoped>
 .my-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
 }
 
 .profile-section {
 	display: flex;
 	align-items: center;
-	background-color: var(--color-primary);
+	background-color: #07c160;
 	padding: 40rpx 30rpx;
 }
 
@@ -345,7 +345,7 @@ export default {
 	width: 120rpx;
 	height: 120rpx;
 	border-radius: 50%;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -369,7 +369,7 @@ export default {
 .profile-name {
 	font-size: 36rpx;
 	font-weight: bold;
-	color: var(--color-surface);
+	color: #ffffff;
 	display: block;
 }
 
@@ -385,7 +385,7 @@ export default {
 }
 
 .menu-section {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin: 20rpx;
 	border-radius: 12rpx;
 	overflow: hidden;
@@ -396,12 +396,12 @@ export default {
 	align-items: center;
 	justify-content: space-between;
 	padding: 28rpx 24rpx;
-	border-bottom: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid #f0f0f0;
 	transition: background-color 0.15s ease-out;
 }
 
 .menu-item:active {
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 }
 
 .menu-item:last-child {
@@ -426,22 +426,22 @@ export default {
 
 .menu-text {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .menu-arrow-icon {
 	width: 32rpx;
 	height: 32rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .menu-value {
 	font-size: 26rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .sync-item {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 }
 
 .sync-status {
@@ -451,7 +451,7 @@ export default {
 
 .sync-text {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-right: 12rpx;
 }
 
@@ -461,11 +461,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -473,7 +473,7 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -481,7 +481,7 @@ export default {
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab {

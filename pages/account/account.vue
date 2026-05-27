@@ -76,7 +76,7 @@
 						<switch
 							:checked="formData.is_default === 1"
 							@change="onDefaultChange"
-							color="var(--color-primary)"
+							color="#07c160"
 						/>
 					</view>
 				</view>
@@ -155,9 +155,9 @@ export default {
 
 		const getAccountColor = (type) => {
 			const colors = {
-				cash: 'var(--color-primary)',
+				cash: '#07c160',
 				alipay: '#1677ff',
-				wechat: 'var(--color-primary)',
+				wechat: '#07c160',
 				bankcard: '#722ed1'
 			}
 			return colors[type] || '#999'
@@ -305,7 +305,7 @@ export default {
 <style scoped>
 .account-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
 }
 
@@ -317,7 +317,7 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	border-radius: 12rpx;
 	padding: 24rpx;
 	margin-bottom: 16rpx;
@@ -350,13 +350,13 @@ export default {
 
 .account-name {
 	font-size: 30rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	font-weight: 500;
 }
 
 .account-type {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 8rpx;
 }
 
@@ -367,43 +367,43 @@ export default {
 
 .default-badge {
 	font-size: 22rpx;
-	color: var(--color-primary);
+	color: #07c160;
 	padding: 4rpx 12rpx;
-	border: 1rpx solid var(--color-primary);
+	border: 1rpx solid #07c160;
 	border-radius: 20rpx;
 	margin-right: 16rpx;
 }
 
 .action-btn {
 	font-size: 26rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	padding: 8rpx 16rpx;
 }
 
 .delete-btn {
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .add-account-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin: 20rpx;
 	padding: 24rpx;
 	border-radius: 12rpx;
-	border: 2rpx dashed var(--color-border);
+	border: 2rpx dashed #f0f0f0;
 }
 
 .add-icon {
 	font-size: 48rpx;
-	color: var(--color-primary);
+	color: #07c160;
 	margin-right: 12rpx;
 }
 
 .add-text {
 	font-size: 28rpx;
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 /* Modal */
@@ -429,20 +429,20 @@ export default {
 	top: 50%;
 	transform: translate(-50%, -50%);
 	width: 600rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	border-radius: 16rpx;
 	overflow: hidden;
 }
 
 .modal-header {
 	padding: 30rpx;
-	border-bottom: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .modal-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .modal-body {
@@ -454,7 +454,7 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx 0;
-	border-bottom: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .form-item:last-child {
@@ -463,24 +463,24 @@ export default {
 
 .form-label {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .form-input {
 	flex: 1;
 	text-align: right;
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .picker-value {
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .modal-footer {
 	display: flex;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 }
 
 .btn {
@@ -491,12 +491,12 @@ export default {
 }
 
 .cancel-btn {
-	color: var(--color-text-secondary);
-	border-right: 1rpx solid var(--color-border);
+	color: #666666;
+	border-right: 1rpx solid #f0f0f0;
 }
 
 .confirm-btn {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 /* Tabbar */
@@ -506,11 +506,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -518,11 +518,11 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab {
@@ -533,6 +533,6 @@ export default {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: var(--color-primary);
+	color: #07c160;
 }
 </style>

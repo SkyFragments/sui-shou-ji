@@ -300,7 +300,7 @@ function getCurrentYearMonth() {
 <style scoped>
 .records-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
 }
 
@@ -308,7 +308,7 @@ function getCurrentYearMonth() {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	padding: 20rpx 30rpx;
 }
 
@@ -318,13 +318,13 @@ function getCurrentYearMonth() {
 
 .nav-btn {
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .nav-btn-icon {
 	width: 36rpx;
 	height: 36rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .month-display {
@@ -334,13 +334,13 @@ function getCurrentYearMonth() {
 .month-text {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .stats-overview {
 	display: flex;
 	justify-content: space-around;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	padding: 24rpx;
 	margin: 16rpx;
 	border-radius: 12rpx;
@@ -352,7 +352,7 @@ function getCurrentYearMonth() {
 
 .stat-label {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: block;
 }
 
@@ -364,11 +364,11 @@ function getCurrentYearMonth() {
 }
 
 .expense {
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .income {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .records-list {
@@ -384,12 +384,12 @@ function getCurrentYearMonth() {
 	justify-content: space-between;
 	align-items: center;
 	padding: 16rpx 24rpx;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 }
 
 .date-text {
 	font-size: 26rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .date-total {
@@ -398,7 +398,7 @@ function getCurrentYearMonth() {
 }
 
 .records {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 }
 
 .record-item {
@@ -408,7 +408,7 @@ function getCurrentYearMonth() {
 }
 
 .record-item:active {
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 }
 
 .swipe-container {
@@ -417,7 +417,7 @@ function getCurrentYearMonth() {
 	top: 0;
 	bottom: 0;
 	width: 160rpx;
-	background-color: var(--color-danger);
+	background-color: #dd524d;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -429,7 +429,7 @@ function getCurrentYearMonth() {
 }
 
 .delete-btn {
-	color: var(--color-surface);
+	color: #ffffff;
 	font-size: 28rpx;
 }
 
@@ -437,8 +437,8 @@ function getCurrentYearMonth() {
 	display: flex;
 	align-items: center;
 	padding: 24rpx;
-	background-color: var(--color-surface);
-	border-bottom: 1rpx solid var(--color-background);
+	background-color: #ffffff;
+	border-bottom: 1rpx solid #FDF4E9;
 }
 
 .record-icon {
@@ -462,13 +462,13 @@ function getCurrentYearMonth() {
 
 .record-category {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	display: block;
 }
 
 .record-remark {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 4rpx;
 	display: block;
 }
@@ -481,7 +481,7 @@ function getCurrentYearMonth() {
 .empty-state {
 	text-align: center;
 	padding: 100rpx 0;
-	color: var(--color-text-secondary);
+	color: #666666;
 	font-size: 28rpx;
 }
 
@@ -491,11 +491,11 @@ function getCurrentYearMonth() {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -503,7 +503,7 @@ function getCurrentYearMonth() {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -511,7 +511,7 @@ function getCurrentYearMonth() {
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab {

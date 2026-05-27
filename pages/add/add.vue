@@ -361,7 +361,7 @@ function getToday() {
 <style scoped>
 .add-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 240rpx;
 }
 
@@ -370,36 +370,36 @@ function getToday() {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx 30rpx;
-	background-color: var(--color-surface);
-	border-bottom: 1rpx solid var(--color-border);
+	background-color: #ffffff;
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .page-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .delete-btn {
 	padding: 10rpx 24rpx;
-	background-color: var(--bg-expense);
+	background-color: #FDEBE7;
 	border-radius: 8rpx;
 }
 
 .delete-btn text {
 	font-size: 26rpx;
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .amount-display {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	padding: 40rpx 0;
 	text-align: center;
 }
 
 .amount-label {
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-bottom: 16rpx;
 }
 
@@ -411,14 +411,14 @@ function getToday() {
 
 .currency {
 	font-size: 40rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	margin-right: 8rpx;
 }
 
 .amount {
 	font-size: 72rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .type-switch {
@@ -426,7 +426,7 @@ function getToday() {
 	justify-content: center;
 	gap: 60rpx;
 	padding: 24rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin-bottom: 16rpx;
 }
 
@@ -434,38 +434,38 @@ function getToday() {
 	padding: 12rpx 48rpx;
 	border-radius: 40rpx;
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
-	background-color: var(--color-border);
+	color: #666666;
+	background-color: #f0f0f0;
 	transition: all 0.2s;
 }
 
 .type-btn.active {
-	color: var(--color-surface);
+	color: #ffffff;
 }
 
 .type-btn.active:nth-child(1) {
-	background-color: var(--color-expense);
+	background-color: #C85A53;
 }
 
 .type-btn.active:nth-child(2) {
-	background-color: var(--color-primary);
+	background-color: #07c160;
 }
 
 .section {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin-bottom: 16rpx;
 }
 
 .section-title {
 	padding: 20rpx 24rpx;
 	font-size: 28rpx;
-	color: var(--color-text-primary);
-	border-bottom: 1rpx solid var(--color-border);
+	color: #333333;
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .form-row {
 	display: flex;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	margin-bottom: 16rpx;
 }
 
@@ -476,15 +476,15 @@ function getToday() {
 
 .form-label {
 	font-size: 26rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-bottom: 12rpx;
 }
 
 .picker-value {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	padding: 16rpx 0;
-	border-bottom: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid #f0f0f0;
 	min-height: 88rpx;
 	box-sizing: border-box;
 }
@@ -498,7 +498,7 @@ function getToday() {
 }
 
 .keyboard-wrapper {
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 
@@ -508,11 +508,11 @@ function getToday() {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -520,11 +520,11 @@ function getToday() {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab {

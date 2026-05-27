@@ -156,7 +156,7 @@ export default {
 		const formData = ref({
 			name: '',
 			icon: 'meal',
-			color: 'var(--color-primary)'
+			color: '#07c160'
 		})
 
 		const iconOptions = [
@@ -167,7 +167,7 @@ export default {
 		const colorOptions = [
 			'#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
 			'#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-			'#BB8FCE', '#85C1E9', '#F8B500', 'var(--color-primary)'
+			'#BB8FCE', '#85C1E9', '#F8B500', '#07c160'
 		]
 
 		onMounted(() => {
@@ -188,7 +188,7 @@ export default {
 			formData.value = {
 				name: '',
 				icon: 'meal',
-				color: 'var(--color-primary)'
+				color: '#07c160'
 			}
 			showModal.value = true
 		}
@@ -311,13 +311,13 @@ export default {
 <style scoped>
 .category-page {
 	min-height: 100vh;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
 }
 
 .type-tabs {
 	display: flex;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	padding: 20rpx;
 	gap: 20rpx;
 }
@@ -327,14 +327,14 @@ export default {
 	text-align: center;
 	padding: 20rpx 0;
 	border-radius: 12rpx;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .type-tab.active {
-	background-color: var(--color-primary);
-	color: var(--color-surface);
+	background-color: #07c160;
+	color: #ffffff;
 }
 
 .category-list {
@@ -344,7 +344,7 @@ export default {
 .category-item {
 	display: flex;
 	align-items: center;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	padding: 24rpx;
 	border-radius: 12rpx;
 	margin-bottom: 16rpx;
@@ -371,26 +371,26 @@ export default {
 
 .category-name {
 	font-size: 28rpx;
-	color: var(--color-text-primary);
+	color: #333333;
 	display: block;
 }
 
 .category-code {
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	margin-top: 4rpx;
 	display: block;
 }
 
 .category-arrow {
 	font-size: 24rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .empty-state {
 	text-align: center;
 	padding: 100rpx 0;
-	color: var(--color-text-secondary);
+	color: #666666;
 	font-size: 28rpx;
 }
 
@@ -401,7 +401,7 @@ export default {
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
-	background-color: var(--color-primary);
+	background-color: #07c160;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -410,7 +410,7 @@ export default {
 
 .add-icon {
 	font-size: 48rpx;
-	color: var(--color-surface);
+	color: #ffffff;
 }
 
 /* Modal */
@@ -437,20 +437,20 @@ export default {
 	transform: translate(-50%, -50%);
 	width: 600rpx;
 	max-height: 80vh;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	border-radius: 16rpx;
 	overflow: hidden;
 }
 
 .modal-header {
 	padding: 30rpx;
-	border-bottom: 1rpx solid var(--color-border);
+	border-bottom: 1rpx solid #f0f0f0;
 }
 
 .modal-title {
 	font-size: 32rpx;
 	font-weight: bold;
-	color: var(--color-text-primary);
+	color: #333333;
 }
 
 .modal-body {
@@ -465,13 +465,13 @@ export default {
 
 .form-label {
 	font-size: 28rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 	display: block;
 	margin-bottom: 16rpx;
 }
 
 .form-input {
-	border: 1rpx solid var(--color-border);
+	border: 1rpx solid #f0f0f0;
 	border-radius: 8rpx;
 	padding: 20rpx;
 	font-size: 28rpx;
@@ -487,7 +487,7 @@ export default {
 	width: 80rpx;
 	height: 80rpx;
 	border-radius: 12rpx;
-	background-color: var(--color-background);
+	background-color: #FDF4E9;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -500,7 +500,7 @@ export default {
 
 .icon-item.selected {
 	background-color: var(--bg-income);
-	border: 2rpx solid var(--color-primary);
+	border: 2rpx solid #07c160;
 }
 
 .color-grid {
@@ -519,18 +519,18 @@ export default {
 }
 
 .color-item.selected {
-	border: 3rpx solid var(--color-text-primary);
+	border: 3rpx solid #333333;
 }
 
 .color-check {
-	color: var(--color-surface);
+	color: #ffffff;
 	font-size: 32rpx;
 	font-weight: bold;
 }
 
 .modal-footer {
 	display: flex;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 }
 
 .btn {
@@ -541,16 +541,16 @@ export default {
 }
 
 .cancel-btn {
-	color: var(--color-text-secondary);
-	border-right: 1rpx solid var(--color-border);
+	color: #666666;
+	border-right: 1rpx solid #f0f0f0;
 }
 
 .danger-btn {
-	color: var(--color-danger);
+	color: #dd524d;
 }
 
 .confirm-btn {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .tabbar {
@@ -559,11 +559,11 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 100rpx;
-	background-color: var(--color-surface);
+	background-color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	border-top: 1rpx solid var(--color-border);
+	border-top: 1rpx solid #f0f0f0;
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -571,11 +571,11 @@ export default {
 	flex: 1;
 	text-align: center;
 	font-size: 22rpx;
-	color: var(--color-text-secondary);
+	color: #666666;
 }
 
 .tab-item.active {
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .add-tab {
@@ -586,7 +586,7 @@ export default {
 
 .add-tab-icon {
 	font-size: 56rpx;
-	color: var(--color-primary);
+	color: #07c160;
 }
 
 .tab-icon {
