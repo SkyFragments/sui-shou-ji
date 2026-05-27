@@ -88,14 +88,10 @@
 }
 
 /* ============================================
- * 全局触摸反馈
+ * 全局触摸反馈 - 仅特定元素生效
  * ============================================ */
 
-view:active, text:active, image:active {
-  opacity: 0.8;
-  transform: scale(0.98);
-}
-
+/* 仅按钮类元素需要触摸反馈 */
 .btn:active, .tab-item:active, .menu-item:active, .record-item:active, .template-item:active {
   opacity: 0.85;
   transform: scale(0.95);
