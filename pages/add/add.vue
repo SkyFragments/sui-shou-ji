@@ -21,6 +21,24 @@
 			</view>
 		</view>
 
+		<!-- 支出/收入切换 -->
+		<view class="type-switch">
+			<view
+				class="type-btn"
+				:class="{ active: recordType === 1 }"
+				@click="switchType(1)"
+			>
+				支出
+			</view>
+			<view
+				class="type-btn"
+				:class="{ active: recordType === 2 }"
+				@click="switchType(2)"
+			>
+				收入
+			</view>
+		</view>
+
 		<!-- 分类选择 -->
 		<view class="section">
 			<category-picker
@@ -191,6 +209,9 @@ export default {
 		}
 
 		const onCategorySelect = (category) => {
+			if (category.type) {
+				recordType.value = category.type
+			}
 			selectedCategoryCode.value = category.code
 			selectedCategory.value = category
 		}
