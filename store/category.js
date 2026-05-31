@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { postCategory, putCategory, deleteCategory } from '@/utils/api'
+import { generateId } from '@/utils/db'
 import {
   EXPENSE_CATEGORY_CODES,
   INCOME_CATEGORY_CODES
@@ -99,9 +100,8 @@ export const useCategoryStore = defineStore('category', {
 
     // 添加分类
     addCategory(category) {
-      const now = Date.now()
       const newCategory = {
-        id: now.toString(),
+        id: generateId(),
         code: category.code || '',
         name: category.name || '',
         icon: category.icon || 'box',
@@ -146,11 +146,30 @@ export const useCategoryStore = defineStore('category', {
           console.warn('Cannot delete default category')
           return false
         }
+        const deletedCategory = this.categories[index]
         this.categories.splice(index, 1)
         this.saveCategories()
+
+        // Sync delete to cloud (queue on failure for retry)
+        this.syncDeleteFromCloud(deletedCategory.id).catch(() => {
+          const { useSyncStore } = require('@/store/sync')
+          useSyncStore().addPendingSync('category_delete', { id: deletedCategory.id, ...deletedCategory })
+        })
+
         return true
       }
       return false
+    },
+
+    // 从云端删除分类
+    async syncDeleteFromCloud(id) {
+      try {
+        await deleteCategory(id)
+        return { success: true }
+      } catch (e) {
+        console.error('Sync delete category failed:', e)
+        return { success: false, error: e }
+      }
     },
 
     // 保存到本地存储

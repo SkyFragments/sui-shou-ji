@@ -237,8 +237,9 @@ export function getMonthStats(yearMonth) {
 
 // ========== 工具函数 ==========
 
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
+export function generateId() {
+  // Use full random string (not substr which truncates on short base-36 values)
+  return Date.now().toString(36) + '_' + Math.random().toString(36).replace('0.', '')
 }
 
 export function getCurrentYearMonth() {

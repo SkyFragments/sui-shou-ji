@@ -5,7 +5,8 @@
 
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
-import { getSyncData, postSyncData } from '@/utils/api'
+import { getSyncData } from '@/utils/api'
+import { syncRecordToCloud, syncUpdateToCloud, syncDeleteFromCloud } from '@/utils/db'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
@@ -101,6 +102,9 @@ export const useSyncStore = defineStore('sync', {
         if (allOffline) {
           // 所有云端都不可用，标记待同步
           this.addPendingSync('full_sync', { timestamp: Date.now() })
+          this.lastSyncTime = Date.now()  // update timestamp even when offline to avoid stale pull on reconnect
+          this.setSyncStatus(SYNC_STATUS.SUCCESS)
+          return { success: true, offline: true }
         }
 
         this.lastSyncTime = Date.now()
@@ -127,13 +131,17 @@ export const useSyncStore = defineStore('sync', {
           // 调用云函数获取增量数据
           const res = await getSyncData(this.lastSyncTime || 0)
 
-          if (res.success && res.data) { const cloudData = res.data
+          if (res.success && res.data && res.data.records) {
+            const cloudData = res.data
             this.mergeFromCloud(cloudData)
             this.lastSyncTime = cloudData.server_time || Date.now()
             this.setSyncStatus(SYNC_STATUS.SUCCESS)
             return { success: true, data: cloudData }
+          } else if (res.offline) {
+            return { success: true, offline: true }
           }
 
+          // Server returned success but no records field — treat as legitimate empty sync
           this.setSyncStatus(SYNC_STATUS.SUCCESS)
           return { success: true, data: null }
         } catch (cloudError) {
@@ -215,29 +223,65 @@ export const useSyncStore = defineStore('sync', {
     async syncPendingData() {
       if (this.pendingSync.length === 0) return { success: true }
 
+      const failedItems = []
+
       try {
-        // syncRecordToCloud removed - using API
         const { getStoredUser } = await import('@/utils/auth')
         const user = getStoredUser()
-        
+
         if (!user?.openid) {
           return { success: false, error: 'No user openid' }
         }
 
         for (const item of this.pendingSync) {
-          if (item.type === 'record_add') {
-            await syncRecordToCloud(item.data, user.openid)
-          } else if (item.type === 'record_update') {
-            // syncUpdateToCloud removed
-            await syncUpdateToCloud(item.data, user.openid)
-          } else if (item.type === 'record_delete') {
-            // syncDeleteFromCloud removed
-            await syncDeleteFromCloud(item.data.id, user.openid)
-          } else if (item.type === 'full_sync') {
-            await this.syncToCloud()
+          let result
+          try {
+            if (item.type === 'record_add') {
+              result = await syncRecordToCloud(item.data, user.openid)
+            } else if (item.type === 'record_update') {
+              result = await syncUpdateToCloud(item.data, user.openid)
+            } else if (item.type === 'record_delete') {
+              result = await syncDeleteFromCloud(item.data.id, user.openid)
+            } else if (item.type === 'account_delete') {
+              const { deleteAccount } = await import('@/utils/api')
+              const res = await deleteAccount(item.data.id)
+              // Normalize: throw on falsy/undefined, treat {} as success (empty 2xx body)
+              if (!res) throw new Error('delete account returned falsy')
+              result = { success: true, raw: res }
+            } else if (item.type === 'category_delete') {
+              const { deleteCategory } = await import('@/utils/api')
+              const res = await deleteCategory(item.data.id)
+              if (!res) throw new Error('delete category returned falsy')
+              result = { success: true, raw: res }
+            } else if (item.type === 'full_sync') {
+              result = await this.syncToCloud()
+            } else {
+              failedItems.push(item)
+              continue
+            }
+            // null/undefined result treated as failure (not silently ignored)
+            // API delete returns raw server response: if truthy but no {success,offline} field, assume success
+            const isFailure = !result || result.offline || result.success === false
+            if (isFailure) {
+              // full_sync offline is not a failure — skip re-queue to avoid infinite loop
+              if (!(item.type === 'full_sync' && result?.offline)) {
+                failedItems.push(item)
+              }
+            }
+          } catch (itemErr) {
+            console.error('Failed to sync item:', item.type, itemErr)
+            failedItems.push(item)
           }
         }
-        this.clearPendingSync()
+
+        // 保留失败项目用于重试
+        this.pendingSync = failedItems
+        this.saveSyncStatus()
+
+        if (failedItems.length > 0) {
+          return { success: false, error: '部分同步失败', failedCount: failedItems.length, failedItems }
+        }
+
         return { success: true }
       } catch (error) {
         console.error('Sync pending data failed:', error)
@@ -250,7 +294,11 @@ export const useSyncStore = defineStore('sync', {
       this.isOnline = isOnline
       // 如果恢复在线，尝试同步待同步数据
       if (isOnline && this.pendingSync.length > 0) {
-        this.syncPendingData()
+        this.syncPendingData().then(result => {
+          if (!result.success) {
+            console.warn('Partial sync failure on reconnect:', result.failedCount, 'items failed')
+          }
+        })  // syncPendingData never throws — always returns, so .catch() is unreachable
       }
     },
 
@@ -277,14 +325,26 @@ export const useSyncStore = defineStore('sync', {
         uni.showLoading({ title: '同步中...' })
         const pullResult = await this.pullFromCloud()
 
+        if (pullResult.offline) {
+          // 离线模式，直接成功
+          uni.hideLoading()
+          uni.showToast({ title: '离线模式', icon: 'none' })
+          return { success: true, offline: true }
+        }
+
         if (pullResult.success) {
           if (!pullResult.data) {
             await this.syncToCloud()
           }
+          uni.hideLoading()
+          uni.showToast({ title: '同步完成', icon: 'success' })
+          return { success: true }
+        } else {
+          // pull失败但不是离线错误
+          uni.hideLoading()
+          uni.showToast({ title: '同步失败', icon: 'none' })
+          return { success: false, error: 'pull failed' }
         }
-        uni.hideLoading()
-        uni.showToast({ title: '同步完成', icon: 'success' })
-        return { success: true }
       } catch (e) {
         uni.hideLoading()
         console.error('First sync failed:', e)

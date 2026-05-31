@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { ACCOUNT_CODES } from '@/utils/schema'
 import { postAccount, putAccount, deleteAccount } from '@/utils/api'
+import { generateId } from '@/utils/db'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_accounts'
@@ -67,7 +68,7 @@ export const useAccountStore = defineStore('account', {
     addAccount(account) {
       const now = Date.now()
       const newAccount = {
-        id: now.toString(),
+        id: generateId(),
         code: account.code || '',
         name: account.name || '',
         type: account.type || 'cash',
@@ -114,11 +115,30 @@ export const useAccountStore = defineStore('account', {
           console.warn('Cannot delete default account')
           return false
         }
+        const deletedAccount = this.accounts[index]
         this.accounts.splice(index, 1)
         this.saveAccounts()
+
+        // Sync delete to cloud (queue on failure for retry)
+        this.syncDeleteFromCloud(deletedAccount.id).catch(() => {
+          const { useSyncStore } = require('@/store/sync')
+          useSyncStore().addPendingSync('account_delete', { id: deletedAccount.id, ...deletedAccount })
+        })
+
         return true
       }
       return false
+    },
+
+    // 从云端删除账户
+    async syncDeleteFromCloud(id) {
+      try {
+        await deleteAccount(id)
+        return { success: true }
+      } catch (e) {
+        console.error('Sync delete account failed:', e)
+        return { success: false, error: e }
+      }
     },
 
     // 设置默认账户

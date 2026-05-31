@@ -6,11 +6,13 @@
 const STORAGE_KEY_USER = 'ssj_users'
 const STORAGE_KEY_TOKEN = 'ssj_auth_token'
 
+import { login as apiLogin } from './api'
+
 /**
  * 微信一键登录
  * @returns {Promise<{openid, session_key, unionid}>}
  */
-export function login() {
+export async function login() {
 	return new Promise((resolve, reject) => {
 		wx.login({
 			success: async (res) => {
@@ -19,10 +21,16 @@ export function login() {
 					return
 				}
 
-				// 后端 API 不可用，直接使用模拟登录
-				console.warn('Using mock login (API not available)')
-				const mockInfo = await mockLogin(res.code)
-				resolve(mockInfo)
+				try {
+					// 尝试云端登录
+					const result = await cloudLogin(res.code)
+					resolve(result)
+				} catch (cloudError) {
+					// 云端登录失败，使用模拟登录
+					console.warn('Cloud login failed, using mock:', cloudError.message)
+					const mockInfo = await mockLogin(res.code)
+					resolve(mockInfo)
+				}
 			},
 			fail: (err) => {
 				reject(new Error('wx.login 调用失败: ' + err.errMsg))
@@ -57,8 +65,7 @@ async function mockLogin(code) {
  */
 export async function cloudLogin(code) {
 	try {
-		const { login } = require('./api')
-		const res = await login(code)
+		const res = await apiLogin(code)
 
 		if (res.openid) {
 			if (res.token) {
@@ -66,10 +73,12 @@ export async function cloudLogin(code) {
 			}
 			const userData = {
 				openid: res.openid,
+				session_key: res.session_key || null,
+				unionid: res.unionid || null,
 				create_time: Date.now()
 			}
 			uni.setStorageSync(STORAGE_KEY_USER, userData)
-			return { openid: res.openid }
+			return userData
 		} else {
 			throw new Error('服务器返回无 openid')
 		}

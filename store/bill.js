@@ -6,7 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { useSyncStore } from '@/store/sync'
-import { postRecord, putRecord, deleteRecord } from '@/utils/api'
+import { generateId } from '@/utils/db'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_records'
@@ -67,7 +67,7 @@ export const useBillStore = defineStore('bill', {
     addRecord(record) {
       const now = Date.now()
       const newRecord = {
-        id: now.toString(),
+        id: generateId(),
         type: record.type || 1,
         amount: record.amount || 0,
         category_code: record.category_code || '',
@@ -208,9 +208,10 @@ export const useBillStore = defineStore('bill', {
     },
 
     // 同步到云端（添加记录后调用）
-    // 现在由 REST API 处理，这个方法保留作为向后兼容
     async syncToCloudAfterAdd() {
-      return { success: true, offline: false }
+      // Stub: always report offline so syncToCloud() can detect allOffline correctly.
+      // Real sync is handled by syncUpdateInCloud (on update) and syncDeleteFromCloud (on delete).
+      return { success: true, offline: true }
     },
 
     // 从云端同步数据
