@@ -8,7 +8,7 @@
 		<!-- 页面标题 -->
 		<view class="page-header">
 			<text class="page-title">{{ isEdit ? '编辑账单' : '记一笔' }}</text>
-			<view class="delete-btn" v-if="isEdit" @click="onDelete">
+			<view class="delete-btn" v-if="isEdit" @click="onDeleteRecord">
 				<text>删除</text>
 			</view>
 		</view>
@@ -91,7 +91,7 @@
 		<view class="keyboard-wrapper">
 			<amount-keyboard
 				@onInput="onInput"
-				@onDelete="onDelete"
+				@onDelete="onBackspace"
 				@onClear="onClear"
 				@onConfirm="onSave"
 			/>
@@ -202,6 +202,12 @@ export default {
 		})
 
 		// 方法
+		const onBackspace = () => {
+			if (amount.value.length > 0) {
+				amount.value = amount.value.slice(0, -1)
+			}
+		}
+
 		const switchType = (type) => {
 			recordType.value = type
 			selectedCategoryCode.value = ''
@@ -245,12 +251,6 @@ export default {
 			if (num > 999999.99) return
 
 			amount.value = newAmount
-		}
-
-		const onDelete = () => {
-			if (amount.value.length > 0) {
-				amount.value = amount.value.slice(0, -1)
-			}
 		}
 
 		const onClear = () => {
@@ -358,9 +358,9 @@ export default {
 			onAccountChange,
 			onDateChange,
 			onInput,
-			onDelete,
+			onBackspace,
 			onClear,
-			onDelete: onDeleteRecord,
+			onDeleteRecord,
 			onSave,
 			goToIndex,
 			goToRecords,
