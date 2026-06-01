@@ -21,15 +21,12 @@ export async function login() {
 					return
 				}
 
+				// 直传错误，不静默回退到 mock — 静默回退会让真用户数据被孤立在另一个 mock openid 下
 				try {
-					// 尝试云端登录
 					const result = await cloudLogin(res.code)
 					resolve(result)
 				} catch (cloudError) {
-					// 云端登录失败，使用模拟登录
-					console.warn('Cloud login failed, using mock:', cloudError.message)
-					const mockInfo = await mockLogin(res.code)
-					resolve(mockInfo)
+					reject(cloudError)
 				}
 			},
 			fail: (err) => {
@@ -41,9 +38,11 @@ export async function login() {
 
 /**
  * 模拟登录（本地演示用）
- * 实际项目中应替换为云函数调用
+ * 注：已禁用。直接调会污染真实用户数据 — 仅供开发态手动测试。
+ * 生产代码不应触发此函数。
  */
 async function mockLogin(code) {
+	console.warn('[auth] mockLogin called — this should not happen in production')
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			const openid = 'mock_openid_' + code.substring(0, 16)

@@ -116,10 +116,10 @@ export const useSyncStore = defineStore('sync', {
 
         const allOffline = catResult.offline && accResult.offline && budgetResult.offline
         if (allOffline) {
-          // 所有云端都不可用，标记待同步
+          // 所有云端都不可用，标记待同步；状态置 IDLE 而非 SUCCESS，避免 UI 绿勾误导
           this.addPendingSync('full_sync', { timestamp: Date.now() })
           this.lastSyncTime = Date.now()  // update timestamp even when offline to avoid stale pull on reconnect
-          this.setSyncStatus(SYNC_STATUS.SUCCESS)
+          this.setSyncStatus(SYNC_STATUS.IDLE)
           return { success: true, offline: true }
         }
 
@@ -149,24 +149,35 @@ export const useSyncStore = defineStore('sync', {
           }
 
           // 调用云函数获取增量数据
-          const res = await getSyncData(this.lastSyncTime || 0)
-
-          if (res.success && res.data && res.data.records) {
-            const cloudData = res.data
-            this.mergeFromCloud(cloudData)
-            this.lastSyncTime = cloudData.server_time || Date.now()
-            this.setSyncStatus(SYNC_STATUS.SUCCESS)
-            return { success: true, data: cloudData }
-          } else if (res.offline) {
-            return { success: true, offline: true }
+          // 服务端可能分页（has_more），循环拉直到 has_more=false，避免大账号漏数据
+          const allCloudData = { records: [], categories: [], accounts: [], budgets: [] }
+          let cursor = this.lastSyncTime || 0
+          let serverTime = Date.now()
+          // 防呆：单次 pull 最多 100 页 = 10 万条，防止服务端死循环/客户端卡死
+          const MAX_PAGES = 100
+          for (let page = 0; page < MAX_PAGES; page++) {
+            const res = await getSyncData(cursor)
+            if (!res || !res.success || !res.data) break
+            const pageData = res.data
+            allCloudData.records.push(...(pageData.records || []))
+            if (pageData.categories) allCloudData.categories = pageData.categories
+            if (pageData.accounts) allCloudData.accounts = pageData.accounts
+            if (pageData.budgets) allCloudData.budgets = pageData.budgets
+            if (pageData.server_time) serverTime = pageData.server_time
+            if (!pageData.has_more) break
+            // 下一轮用本批最后一条记录的 update_time 作 cursor
+            const last = allCloudData.records[allCloudData.records.length - 1]
+            cursor = last?.update_time || serverTime
           }
-
-          // Server returned success but no records field — treat as legitimate empty sync
+          // 全部分页拉完后再合并，确保原子
+          this.mergeFromCloud(allCloudData)
+          this.lastSyncTime = serverTime
           this.setSyncStatus(SYNC_STATUS.SUCCESS)
-          return { success: true, data: null }
+          return { success: true, data: allCloudData }
         } catch (cloudError) {
-          console.warn('Cloud pull not available')
-          this.setSyncStatus(SYNC_STATUS.SUCCESS)
+          console.warn('Cloud pull not available:', cloudError.message)
+          // 拉数据失败：保持 SYNCING 容易误导，改成 IDLE 等待下次触发
+          this.setSyncStatus(SYNC_STATUS.IDLE)
           return { success: true, offline: true }
         }
       } catch (error) {
@@ -178,10 +189,25 @@ export const useSyncStore = defineStore('sync', {
 
     // 从云端合并数据（带时间戳冲突解决）
     mergeFromCloud(cloudData) {
+      // 清洗：服务端记录带 openid 字段，本地无，混入会污染本地数据形状
+      const stripOpenid = (records) => {
+        if (!Array.isArray(records)) return records
+        return records.map(r => {
+          if (!('openid' in r)) return r
+          const { openid, ...rest } = r
+          return rest
+        })
+      }
+      const cleanCloudData = {
+        records: stripOpenid(cloudData.records),
+        categories: stripOpenid(cloudData.categories),
+        accounts: stripOpenid(cloudData.accounts),
+        budgets: stripOpenid(cloudData.budgets)
+      }
+
       // Helper to merge arrays with timestamp-based conflict resolution
       const mergeWithTimestamp = (localData, cloudData) => {
         const localMap = new Map(localData.map(r => [r.id, r]))
-        const cloudMap = new Map(cloudData.map(r => [r.id, r]))
         const merged = [...localData]
 
         for (const cloudRecord of cloudData) {
@@ -196,28 +222,28 @@ export const useSyncStore = defineStore('sync', {
         return merged
       }
 
-      if (cloudData.records) {
+      if (cleanCloudData.records) {
         const localRecords = getStorage('ssj_records') || []
-        const merged = mergeWithTimestamp(localRecords, cloudData.records)
+        const merged = mergeWithTimestamp(localRecords, cleanCloudData.records)
         setStorage('ssj_records', merged)
         // Reload store after merge
         useBillStore().loadRecords()
       }
-      if (cloudData.categories) {
+      if (cleanCloudData.categories) {
         const localCats = getStorage('ssj_categories') || []
-        const merged = mergeWithTimestamp(localCats, cloudData.categories)
+        const merged = mergeWithTimestamp(localCats, cleanCloudData.categories)
         setStorage('ssj_categories', merged)
         useCategoryStore().loadCategories()
       }
-      if (cloudData.accounts) {
+      if (cleanCloudData.accounts) {
         const localAccounts = getStorage('ssj_accounts') || []
-        const merged = mergeWithTimestamp(localAccounts, cloudData.accounts)
+        const merged = mergeWithTimestamp(localAccounts, cleanCloudData.accounts)
         setStorage('ssj_accounts', merged)
         useAccountStore().loadAccounts()
       }
-      if (cloudData.budgets) {
+      if (cleanCloudData.budgets) {
         const localBudgets = getStorage('ssj_budgets') || []
-        const merged = mergeWithTimestamp(localBudgets, cloudData.budgets)
+        const merged = mergeWithTimestamp(localBudgets, cleanCloudData.budgets)
         setStorage('ssj_budgets', merged)
         useBudgetStore().loadBudgets()
       }

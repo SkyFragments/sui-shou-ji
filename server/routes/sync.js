@@ -59,6 +59,7 @@ router.post('/', verifyToken, wrap(async (req, res) => {
     await conn.beginTransaction()
 
     // 合并 records (按 (openid,id) 更新或插入，以 update_time 为准)
+    // 服务端记录比客户端新 → 拒绝写入，告知客户端冲突，事务回滚避免半同步
     for (const record of records) {
       const [existing] = await conn.execute(
         'SELECT update_time FROM records WHERE openid = ? AND id = ?',
@@ -76,36 +77,50 @@ router.post('/', verifyToken, wrap(async (req, res) => {
            WHERE openid=? AND id=?`,
           [record.type, record.amount, record.category_code, record.category_name, record.account_code, record.remark, record.record_date, record.update_time, openid, record.id]
         )
+      } else {
+        // 服务端记录更新，拒绝写入，触发客户端冲突处理
+        throw Object.assign(new Error('record conflict: server has newer version'), { code: 'CONFLICT', id: record.id, serverUpdateTime: existing[0].update_time, clientUpdateTime: record.update_time })
       }
     }
 
-    // 合并 categories
-    for (const cat of categories) {
-      await conn.execute(
+    // 合并 categories — 用 executemany 一次性写，N 条记录 1 次往返
+    if (categories.length > 0) {
+      const catRows = categories.map(cat => [
+        cat.id, openid, cat.code, cat.name, cat.icon, cat.color, cat.type,
+        cat.sort || 0, cat.is_default || 0, cat.create_time || now, cat.update_time || now
+      ])
+      await conn.query(
         `INSERT INTO categories (id, openid, code, name, icon, color, type, sort, is_default, create_time, update_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         VALUES ?
          ON DUPLICATE KEY UPDATE name=VALUES(name), icon=VALUES(icon), color=VALUES(color), sort=VALUES(sort), update_time=VALUES(update_time)`,
-        [cat.id, openid, cat.code, cat.name, cat.icon, cat.color, cat.type, cat.sort || 0, cat.is_default || 0, cat.create_time || now, cat.update_time || now]
+        [catRows]
       )
     }
 
-    // 合并 accounts
-    for (const acc of accounts) {
-      await conn.execute(
+    // 合并 accounts — executemany 批量
+    if (accounts.length > 0) {
+      const accRows = accounts.map(acc => [
+        acc.id, openid, acc.code, acc.name, acc.type, acc.balance || 0, acc.sort || 0,
+        acc.is_default || 0, acc.create_time, acc.update_time
+      ])
+      await conn.query(
         `INSERT INTO accounts (id, openid, code, name, type, balance, sort, is_default, create_time, update_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         VALUES ?
          ON DUPLICATE KEY UPDATE name=VALUES(name), type=VALUES(type), balance=VALUES(balance), sort=VALUES(sort), is_default=VALUES(is_default), update_time=VALUES(update_time)`,
-        [acc.id, openid, acc.code, acc.name, acc.type, acc.balance || 0, acc.sort || 0, acc.is_default || 0, acc.create_time, acc.update_time]
+        [accRows]
       )
     }
 
-    // 合并 budgets
-    for (const bud of budgets) {
-      await conn.execute(
+    // 合并 budgets — executemany 批量
+    if (budgets.length > 0) {
+      const budRows = budgets.map(bud => [
+        bud.id, openid, bud.year_month, bud.total_budget, bud.create_time, bud.update_time
+      ])
+      await conn.query(
         `INSERT INTO budgets (id, openid, year_month, total_budget, create_time, update_time)
-         VALUES (?, ?, ?, ?, ?, ?)
+         VALUES ?
          ON DUPLICATE KEY UPDATE total_budget=VALUES(total_budget), update_time=VALUES(update_time)`,
-        [bud.id, openid, bud.year_month, bud.total_budget, bud.create_time, bud.update_time]
+        [budRows]
       )
     }
 

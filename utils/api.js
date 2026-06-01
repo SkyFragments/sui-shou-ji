@@ -3,13 +3,23 @@
  * 替换 uniCloud 调用
  */
 
-// API 基础地址优先级：
+// API 基础地址优先级（懒求值：避免模块加载时 uni/process 未就绪导致 ReferenceError）：
 //  1) process.env.VUE_APP_API_BASE  (H5 Vite/Webpack 构建注入)
 //  2) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
 //  3) 默认线上地址
-const API_BASE = process.env.VUE_APP_API_BASE
-  || (typeof uni !== 'undefined' && uni.getStorageSync && uni.getStorageSync('ssj_api_base'))
-  || 'https://txwh.online/api'
+const DEFAULT_API_BASE = 'https://txwh.online/api'
+function getApiBase() {
+  if (typeof process !== 'undefined' && process.env && process.env.VUE_APP_API_BASE) {
+    return process.env.VUE_APP_API_BASE
+  }
+  if (typeof uni !== 'undefined' && uni.getStorageSync) {
+    try {
+      const stored = uni.getStorageSync('ssj_api_base')
+      if (stored) return stored
+    } catch (e) { /* 忽略 */ }
+  }
+  return DEFAULT_API_BASE
+}
 
 // 请求超时（毫秒）；H5 路径无内置超时，必须显式传 timeout 才生效
 const REQUEST_TIMEOUT_MS = 15000
@@ -47,7 +57,7 @@ async function request(url, method = 'GET', data = null) {
     const res = await Promise.race([
       new Promise((resolve, reject) => {
         uni.request({
-          url: API_BASE + url,
+          url: getApiBase() + url,
           method,
           data,
           header,

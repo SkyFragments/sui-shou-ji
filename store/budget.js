@@ -132,29 +132,19 @@ export const useBudgetStore = defineStore('budget', {
       this.saveBudgets()
     },
 
-    // 同步单个预算到云端
+    // 同步单个预算到云端：调真实 REST，失败抛错让外层 .catch 排队
     async syncBudget(budget) {
-      try {
-        const res = await postBudget(budget)
-        return { success: true }
-      } catch (e) {
-        console.error('Sync budget failed:', e)
-        return { success: false, error: e }
-      }
+      await postBudget(budget)
+      return { success: true }
     },
 
-    // 同步所有预算到云端
+    // 同步所有预算到云端：失败抛错让外层 .catch 处理
     async syncToCloud() {
-      try {
-        const budgetsArray = Object.values(this.budgets)
-        for (const budget of budgetsArray) {
-          await postBudget(budget)
-        }
-        return { success: true }
-      } catch (e) {
-        console.error('Sync budgets failed:', e)
-        return { success: false, error: e }
+      const budgetsArray = Object.values(this.budgets)
+      for (const budget of budgetsArray) {
+        await postBudget(budget)
       }
+      return { success: true }
     }
   }
 })

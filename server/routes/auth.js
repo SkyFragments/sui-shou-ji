@@ -51,7 +51,7 @@ router.post('/login', wrap(async (req, res) => {
   // 更新用户 token
   await pool.execute('UPDATE users SET token = ? WHERE id = ?', [token, userId])
 
-  res.json({ success: true, token, openid, session_key, unionid })
+  res.json({ success: true, token, openid, unionid })
 }))
 
 export default router

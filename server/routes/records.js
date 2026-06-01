@@ -25,9 +25,10 @@ router.get('/', verifyToken, wrap(async (req, res) => {
   }
   query += ' ORDER BY record_date DESC, create_time DESC'
 
-  // 分页：page 从 1 开始，page_size 上限 MAX_PAGE_SIZE
-  const size = Math.min(Number(page_size) || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
-  const offset = ((Number(page) || 1) - 1) * size
+  // 分页：page 从 1 开始，page_size 上限 MAX_PAGE_SIZE；下限 1 防止负数/0/NaN 触发 SQL 报错
+  const size = Math.max(1, Math.min(Number(page_size) || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE))
+  const pageNum = Math.max(1, Number(page) || 1)
+  const offset = (pageNum - 1) * size
   query += ' LIMIT ? OFFSET ?'
   params.push(size, offset)
 
@@ -71,15 +72,19 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
   if (type !== undefined && type !== 1 && type !== 2) {
     return res.status(400).json({ error: 'type must be 1 or 2' })
   }
-  if (amount !== undefined && (typeof amount !== 'number' || amount <= 0)) {
+  if (amount !== undefined && (typeof amount !== 'number' || amount <= 0 || !Number.isFinite(amount))) {
     return res.status(400).json({ error: 'amount must be a positive number' })
   }
 
-  await pool.execute(
+  const [result] = await pool.execute(
     `UPDATE records SET type=?, amount=?, category_code=?, category_name=?, account_code=?, remark=?, record_date=?, update_time=?, sync_status=1
      WHERE id=? AND openid=?`,
     [type, amount, category_code, category_name, account_code, remark, record_date, update_time || Date.now(), id, openid]
   )
+  // 0 行影响 = 记录不存在或不属于此 openid，告知客户端而不是假成功
+  if (result.affectedRows === 0) {
+    return res.status(404).json({ error: 'record not found' })
+  }
   res.json({ success: true })
 }))
 

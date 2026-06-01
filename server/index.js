@@ -12,9 +12,6 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// 把 async route handler 的 reject 自动转 next(err)，让统一错误兜底真能跑到
-const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
-
 // 简易 CORS：H5 端跨域会需要；小程序不强制。生产建议换成按 origin 白名单
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*')
@@ -24,10 +21,10 @@ app.use((req, res, next) => {
   next()
 })
 
-// JSON body 限 256KB，避免恶意大包打爆内存
-app.use(express.json({ limit: '256kb' }))
+// JSON body 限 5MB：批量同步 1000 条记录约 300KB，给 5MB 留余量；过大可单独排查
+app.use(express.json({ limit: '5mb' }))
 
-// 路由（用 wrap 包装，让 4xx/5xx 之外的 throw 也走统一兜底）
+// 路由（路由内已用 middleware/wrap.js 包装 async handler）
 app.use('/api/auth', authRoutes)
 app.use('/api/sync', syncRoutes)
 app.use('/api/records', recordsRoutes)
