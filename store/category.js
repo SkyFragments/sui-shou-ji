@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
-import { postCategory, putCategory, deleteCategory } from '@/utils/api'
+import { postCategory, putCategory, deleteCategory, upsertByPutPost } from '@/utils/api'
 import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
 import {
@@ -190,17 +190,11 @@ export const useCategoryStore = defineStore('category', {
 
     // 同步单个分类到云端
     async syncCategory(category) {
-      // 先尝试 PUT，失败回退 POST（处理新建 vs 更新）
-      const { id, ...rest } = category
       try {
-        await putCategory(id, rest)
+        await upsertByPutPost(putCategory, postCategory, category)
         return { success: true }
       } catch (e) {
-        if (e && (e.statusCode === 404 || e.statusCode === 400)) {
-          await postCategory(category)
-          return { success: true }
-        }
-        throw e
+        return { success: false, error: e }
       }
     },
 

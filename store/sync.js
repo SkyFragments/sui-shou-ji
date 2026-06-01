@@ -17,7 +17,8 @@ import {
   putAccount,
   postAccount,
   putCategory,
-  postCategory
+  postCategory,
+  upsertByPutPost
 } from '@/utils/api'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
@@ -142,8 +143,10 @@ export const useSyncStore = defineStore('sync', {
 
         const anyFailed = !catResult.success || !accResult.success || !budgetResult.success
         if (anyFailed) {
-          // 部分失败：状态置 IDLE 让 UI 不显示成功勾；具体失败项已被各 store 内部抛回或记 pendingSync
+          // 部分失败：状态置 IDLE 让 UI 不显示成功勾；具体失败项已被各 store 内部吞掉
+          // 入队 full_sync 让下次有机会整体重试
           console.warn('[sync] 部分配置同步失败：', { catResult, accResult, budgetResult })
+          this.addPendingSync('full_sync', { timestamp: Date.now(), reason: 'partial_failure' })
           this.setSyncStatus(SYNC_STATUS.IDLE)
           return { success: false, partial: true }
         }
@@ -168,9 +171,9 @@ export const useSyncStore = defineStore('sync', {
           const user = getStoredUser()
 
           if (!user?.openid) {
-            // 没登录就是 IDLE，不是 SUCCESS，避免 UI 误导
+            // 没登录用 reason 区分，避免与网络离线混淆
             this.setSyncStatus(SYNC_STATUS.IDLE)
-            return { success: true, data: null, offline: true }
+            return { success: true, data: null, reason: 'no_user' }
           }
 
           // 调用云函数获取增量数据
@@ -181,6 +184,7 @@ export const useSyncStore = defineStore('sync', {
           let serverTime = Date.now()
           // 防呆：单次 pull 最多 100 页 = 10 万条，防止服务端死循环/客户端卡死
           const MAX_PAGES = 100
+          let truncated = false
           for (let page = 0; page < MAX_PAGES; page++) {
             const res = await getSyncData(cursor)
             if (!res || !res.success || !res.data) break
@@ -193,12 +197,27 @@ export const useSyncStore = defineStore('sync', {
             if (!pageData.has_more) break
             // 用服务端 next_cursor 续拉，复合游标能精准定位到同 update_time 内的下一条
             cursor = pageData.next_cursor || { last_sync_time: serverTime, last_id: '' }
+            if (page === MAX_PAGES - 1 && pageData.has_more) {
+              // 达到硬上限且服务端仍说有更多数据
+              truncated = true
+            }
+          }
+          if (truncated) {
+            console.warn(`[sync] pullFromCloud 达到 MAX_PAGES=${MAX_PAGES} 上限，可能仍有未拉取数据；不更新 lastSyncTime 以便下次续拉`)
           }
           // 全部分页拉完后再合并，确保原子
           this.mergeFromCloud(allCloudData)
-          this.lastSyncTime = serverTime
+          // 用实际拉到的最后一条记录的 update_time 作游标，而非响应的 server_time
+          // 避免「server_time 刚好等于某条记录 update_time」导致下次又拉回来
+          const lastPulled = allCloudData.records[allCloudData.records.length - 1]
+          if (lastPulled && !truncated) {
+            this.lastSyncTime = lastPulled.update_time
+          } else if (!truncated) {
+            this.lastSyncTime = serverTime
+          }
+          // truncated 时 lastSyncTime 不前进，下次 pull 从同位置续拉
           this.setSyncStatus(SYNC_STATUS.SUCCESS)
-          return { success: true, data: allCloudData }
+          return { success: true, data: allCloudData, truncated }
         } catch (cloudError) {
           console.warn('Cloud pull not available:', cloudError.message)
           // 拉数据失败：保持 SYNCING 容易误导，改成 IDLE 等待下次触发
@@ -296,7 +315,8 @@ export const useSyncStore = defineStore('sync', {
             }
             return true
           })
-          this.appendDeadLetter(toDeadLetter)
+          // appendDeadLetter 不写盘；本函数末尾统一 saveSyncStatus + saveDeadLetter，避免双写
+          this._appendDeadLetterNoSave(toDeadLetter)
         }
       }
       this.pendingSync.push({
@@ -305,6 +325,7 @@ export const useSyncStore = defineStore('sync', {
         timestamp: Date.now()
       })
       this.saveSyncStatus()
+      this.saveDeadLetter()
     },
 
     // 清空待同步队列
@@ -341,36 +362,11 @@ export const useSyncStore = defineStore('sync', {
             } else if (item.type === 'category_delete') {
               await deleteCategory(item.data.id)
             } else if (item.type === 'category_upsert') {
-              const { id, ...rest } = item.data
-              try {
-                await putCategory(id, rest)
-              } catch (e) {
-                if (e && (e.statusCode === 404 || e.statusCode === 400)) {
-                  await postCategory(item.data)
-                } else {
-                  throw e
-                }
-              }
+              await upsertByPutPost(putCategory, postCategory, item.data)
             } else if (item.type === 'account_upsert') {
-              const { id, ...rest } = item.data
-              try {
-                await putAccount(id, rest)
-              } catch (e) {
-                if (e && (e.statusCode === 404 || e.statusCode === 400)) {
-                  await postAccount(item.data)
-                } else {
-                  throw e
-                }
-              }
+              await upsertByPutPost(putAccount, postAccount, item.data)
             } else if (item.type === 'budget_upsert') {
-              // 用 update_time 判定新建还是更新，避免重复 POST 触发 PK 冲突
-              const { id, ...rest } = item.data
-              const res = await putBudget(id, rest).catch(err => {
-                if (err && (err.statusCode === 404 || err.statusCode === 400)) {
-                  return postBudget(item.data)
-                }
-                throw err
-              })
+              await upsertByPutPost(putBudget, postBudget, item.data)
             } else if (item.type === 'full_sync') {
               const r = await this.syncToCloud()
               // 仅在非离线状态下视为成功；离线保留以便重试
@@ -440,8 +436,9 @@ export const useSyncStore = defineStore('sync', {
       setStorage(STORAGE_KEY_DEAD_LETTER, this.deadLetter)
     },
 
-    // 追加死信；超 MAX_DEAD_LETTER 时丢最早的并 console.error
-    appendDeadLetter(items) {
+    // 追加死信（不写盘）；调用方负责 saveDeadLetter
+    // 把这个跟 saveDeadLetter 解耦是为了在 addPendingSync 等批量场景避免双写
+    _appendDeadLetterNoSave(items) {
       if (!items || items.length === 0) return
       this.deadLetter.push(...items)
       if (this.deadLetter.length > MAX_DEAD_LETTER) {
@@ -449,6 +446,12 @@ export const useSyncStore = defineStore('sync', {
         this.deadLetter.splice(0, overflow)
         console.error(`[sync] deadLetter 超出 ${MAX_DEAD_LETTER}，已丢弃最旧 ${overflow} 条`)
       }
+    },
+
+    // 公开的追加死信：内部走 _appendDeadLetterNoSave + saveDeadLetter
+    // 适用于不与 pendingSync 同步保存的场景（如 syncPendingData 内的未知类型）
+    appendDeadLetter(items) {
+      this._appendDeadLetterNoSave(items)
       this.saveDeadLetter()
     },
 
@@ -458,15 +461,43 @@ export const useSyncStore = defineStore('sync', {
       this.saveDeadLetter()
     },
 
-    // 把死信全部重新塞回 pendingSync（用户主动重试）
+    // 把死信按 type 分组重新塞回 pendingSync（用户主动重试）
+    // 受每类型 MAX_PENDING_PER_TYPE 上限约束；放不下的留在 dead-letter
+    // 防止「一键重试 = 立即再超限 = 又回流死信」的循环
     requeueDeadLetter() {
       if (this.deadLetter.length === 0) return 0
-      const count = this.deadLetter.length
-      this.pendingSync.push(...this.deadLetter)
-      this.deadLetter = []
+      // 按 type 分组并保留原相对顺序
+      const grouped = new Map()
+      for (const item of this.deadLetter) {
+        if (!grouped.has(item.type)) grouped.set(item.type, [])
+        grouped.get(item.type).push(item)
+      }
+      const overflow = []
+      let requeued = 0
+      for (const [type, items] of grouped) {
+        const currentCount = this.pendingSync.filter(it => it.type === type).length
+        const room = MAX_PENDING_PER_TYPE - currentCount
+        if (room <= 0) {
+          // 该类型 pendingSync 已满，整组留在 dead-letter
+          overflow.push(...items)
+          continue
+        }
+        if (items.length <= room) {
+          this.pendingSync.push(...items)
+          requeued += items.length
+        } else {
+          this.pendingSync.push(...items.slice(0, room))
+          overflow.push(...items.slice(room))
+          requeued += room
+        }
+      }
+      this.deadLetter = overflow
       this.saveDeadLetter()
       this.saveSyncStatus()
-      return count
+      if (overflow.length > 0) {
+        console.warn(`[sync] requeueDeadLetter 重试 ${requeued} 条，${overflow.length} 条仍超限留在 dead-letter`)
+      }
+      return requeued
     },
 
     // 重置同步状态
@@ -483,6 +514,12 @@ export const useSyncStore = defineStore('sync', {
         uni.showLoading({ title: '同步中...' })
         const pullResult = await this.pullFromCloud()
 
+        // 区分「未登录」与「网络离线」：之前共用 offline 标志导致提示文案不准
+        if (pullResult.reason === 'no_user') {
+          uni.hideLoading()
+          uni.showToast({ title: '请先登录', icon: 'none' })
+          return { success: true, needLogin: true }
+        }
         if (pullResult.offline) {
           uni.hideLoading()
           uni.showToast({ title: '离线模式', icon: 'none' })
@@ -501,7 +538,10 @@ export const useSyncStore = defineStore('sync', {
           } else {
             uni.showToast({ title: '同步完成', icon: 'success' })
           }
-          return { success: true, pending: pendingResult }
+          if (pullResult.truncated) {
+            uni.showToast({ title: '已拉取部分数据，请稍后再同步', icon: 'none' })
+          }
+          return { success: true, pending: pendingResult, truncated: pullResult.truncated }
         } else {
           uni.hideLoading()
           uni.showToast({ title: '同步失败', icon: 'none' })

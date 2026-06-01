@@ -76,6 +76,15 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
     return res.status(400).json({ error: 'amount must be a positive number' })
   }
 
+  // 全部字段都没提供：no-op，不动 update_time（否则增量同步会把这个记录当作「刚改过」重复拉）
+  const hasAnyField = type !== undefined || amount !== undefined
+    || category_code !== undefined || category_name !== undefined
+    || account_code !== undefined || remark !== undefined
+    || record_date !== undefined
+  if (!hasAnyField && update_time === undefined) {
+    return res.json({ success: true, noop: true })
+  }
+
   // 部分更新：只覆盖 req.body 里实际存在的字段，未提供的字段保持原值
   // 否则 mysql2 把 undefined 绑成 NULL，会把 NOT NULL 列清空
   const [result] = await pool.execute(

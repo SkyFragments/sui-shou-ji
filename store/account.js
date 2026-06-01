@@ -6,7 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { ACCOUNT_CODES } from '@/utils/schema'
-import { postAccount, putAccount, deleteAccount } from '@/utils/api'
+import { postAccount, putAccount, deleteAccount, upsertByPutPost } from '@/utils/api'
 import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
 
@@ -147,6 +147,9 @@ export const useAccountStore = defineStore('account', {
 
     // 设置默认账户
     setDefaultAccount(code) {
+      // 记录旧默认（如果有）以便把它 is_default=0 的变化也同步到云端
+      // 否则旧默认在云端仍 is_default=1，下次 pull 会覆盖本地的切换
+      const previous = this.accounts.find(a => a.is_default === 1 && a.code !== code)
       this.accounts.forEach(a => {
         a.is_default = a.code === code ? 1 : 0
       })
@@ -158,6 +161,15 @@ export const useAccountStore = defineStore('account', {
         this.syncAccount(updated).catch(() => {
           useSyncStore().addPendingSync('account_upsert', updated)
         })
+      }
+      // 旧默认的 is_default 现在是 0，必须同步清掉
+      if (previous) {
+        const previousNow = this.accounts.find(a => a.code === previous.code)
+        if (previousNow) {
+          this.syncAccount(previousNow).catch(() => {
+            useSyncStore().addPendingSync('account_upsert', previousNow)
+          })
+        }
       }
     },
 
@@ -190,17 +202,11 @@ export const useAccountStore = defineStore('account', {
 
     // 同步单个账户到云端
     async syncAccount(account) {
-      // 先 PUT，失败回退 POST（处理新建 vs 更新）
-      const { id, ...rest } = account
       try {
-        await putAccount(id, rest)
+        await upsertByPutPost(putAccount, postAccount, account)
         return { success: true }
       } catch (e) {
-        if (e && (e.statusCode === 404 || e.statusCode === 400)) {
-          await postAccount(account)
-          return { success: true }
-        }
-        throw e
+        return { success: false, error: e }
       }
     },
 

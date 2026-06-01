@@ -82,11 +82,13 @@ router.post('/', verifyToken, wrap(async (req, res) => {
     // 服务端记录比客户端新 → 写入 conflicts 数组，不阻断本批其余写入
     // 新老统一走 INSERT...ON DUPLICATE KEY UPDATE，由 JS 预筛掉老于服务端的项
     if (records.length > 0) {
-      // 先批量查服务端现状
+      // 先批量查服务端现状；FOR UPDATE 锁住这些行，防 TOCTOU 竞态
+      // 没有锁的话，并发连接在我们 SELECT 后 INSERT 前提交了更新的 update_time，
+      // 我们的 INSERT...ON DUPLICATE KEY UPDATE 会用旧值覆盖新值
       const ids = records.map(r => r.id)
       const placeholders = ids.map(() => '?').join(',')
       const [existingRows] = await conn.query(
-        `SELECT id, update_time FROM records WHERE openid = ? AND id IN (${placeholders})`,
+        `SELECT id, update_time FROM records WHERE openid = ? AND id IN (${placeholders}) FOR UPDATE`,
         [openid, ...ids]
       )
       const existingMap = new Map(existingRows.map(r => [r.id, r.update_time]))
@@ -94,8 +96,10 @@ router.post('/', verifyToken, wrap(async (req, res) => {
       const toUpsert = []
       for (const record of records) {
         const serverTime = existingMap.get(record.id)
-        if (serverTime !== undefined && serverTime >= record.update_time) {
-          // 服务端更新或平于客户端：交给客户端从 conflicts 重拉重并
+        // 严格 > 而非 >=：同 ms 的幂等重试应当真正落到 upsert（无变化即可）
+        // 老于服务端的才视为冲突
+        if (serverTime !== undefined && serverTime > record.update_time) {
+          // 服务端更新：交给客户端从 conflicts 重拉重并
           conflicts.push({ id: record.id, serverUpdateTime: serverTime, clientUpdateTime: record.update_time })
           continue
         }

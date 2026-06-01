@@ -14,12 +14,16 @@ const PORT = process.env.PORT || 3000
 
 // CORS：Authorization 头不属于 simple header，配合通配 origin 浏览器会拒掉预检
 // 显式回显请求 origin；多 origin 用逗号分隔。生产务必设置 CORS_ORIGIN
+// 注意：动态 origin 必须配 Vary: Origin，否则 CDN/代理会按 URL 缓存导致跨域泄露
 const CORS_ORIGIN = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)
 app.use((req, res, next) => {
   const reqOrigin = req.headers.origin
   if (CORS_ORIGIN.length === 0) {
     // 未配置：回显请求 origin（非 *，兼容带 Authorization 的预检）
-    if (reqOrigin) res.header('Access-Control-Allow-Origin', reqOrigin)
+    if (reqOrigin) {
+      res.header('Access-Control-Allow-Origin', reqOrigin)
+      res.header('Vary', 'Origin')
+    }
   } else if (reqOrigin && CORS_ORIGIN.includes(reqOrigin)) {
     res.header('Access-Control-Allow-Origin', reqOrigin)
     res.header('Vary', 'Origin')

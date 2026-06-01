@@ -108,6 +108,24 @@ export async function getSyncData(cursor = 0) {
   return request(`/sync?last_sync_time=${cursor}`)
 }
 
+/**
+ * 通用 PUT→POST 兜底 upsert
+ * 先尝试 PUT(id, rest)，404/400 时回退 POST(data)
+ * 服务端 r5/r6 起：PUT 在 0 affected rows 时返回 404（既含「不存在」也含「无变化」）
+ * 任何非 404/400 错误透传
+ */
+export async function upsertByPutPost(putFn, postFn, data) {
+  const { id, ...rest } = data
+  try {
+    return await putFn(id, rest)
+  } catch (e) {
+    if (e && (e.statusCode === 404 || e.statusCode === 400)) {
+      return await postFn(data)
+    }
+    throw e
+  }
+}
+
 // Records
 export async function getRecords(startDate, endDate) {
   let url = '/records'
