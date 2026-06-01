@@ -84,6 +84,8 @@
 				v-model="remark"
 				placeholder="选填，最多256字符"
 				maxlength="256"
+				:cursor-spacing="100"
+				:adjust-position="true"
 			/>
 		</view>
 
