@@ -321,7 +321,9 @@ export default {
 .index-page {
 	min-height: 100vh;
 	background-color: #FDF4E9;
-	padding-bottom: 120rpx;
+	/* 留出悬浮「记一笔」按钮（100rpx 高，bottom:180rpx）+ tabbar(100rpx) + 余量，
+	   否则最后一条账单记录会被按钮盖住右侧金额 */
+	padding-bottom: 320rpx;
 }
 
 .overview-section {
