@@ -7,8 +7,8 @@
 //  1) import.meta.env.VITE_API_BASE  (H5 Vite 构建注入，Vite 标准)
 //  2) process.env.VUE_APP_API_BASE  (老 Vue CLI / Webpack 兼容)
 //  3) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
-//  4) 默认线上地址
-const DEFAULT_API_BASE = 'https://txwh.online/api'
+//  4) 默认线上地址 — 直接用 IP 避免域名 DNS/劫持不稳
+const DEFAULT_API_BASE = 'https://1.12.234.7/api'
 function getApiBase() {
   try {
     // Vite 在 ESM 下注入 import.meta.env；process.env 在 Vite 客户端构建中是空的
