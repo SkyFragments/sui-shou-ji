@@ -183,7 +183,6 @@ export const useAccountStore = defineStore('account', {
     // 同步单个账户到云端
     async syncAccount(account) {
       // 先 PUT，失败回退 POST（处理新建 vs 更新）
-      const { putAccount, postAccount } = await import('@/utils/api')
       const { id, ...rest } = account
       try {
         await putAccount(id, rest)

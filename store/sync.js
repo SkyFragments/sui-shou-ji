@@ -391,7 +391,6 @@ export const useSyncStore = defineStore('sync', {
         const pullResult = await this.pullFromCloud()
 
         if (pullResult.offline) {
-          // 离线模式，直接成功
           uni.hideLoading()
           uni.showToast({ title: '离线模式', icon: 'none' })
           return { success: true, offline: true }
@@ -401,11 +400,16 @@ export const useSyncStore = defineStore('sync', {
           if (!pullResult.data) {
             await this.syncToCloud()
           }
+          // 手动同步入口也要 flush pending 队列（不依赖网络变化事件）
+          const pendingResult = await this.syncPendingData()
           uni.hideLoading()
-          uni.showToast({ title: '同步完成', icon: 'success' })
-          return { success: true }
+          if (pendingResult.failedCount) {
+            uni.showToast({ title: `已同步，${pendingResult.failedCount} 项待重试`, icon: 'none' })
+          } else {
+            uni.showToast({ title: '同步完成', icon: 'success' })
+          }
+          return { success: true, pending: pendingResult }
         } else {
-          // pull失败但不是离线错误
           uni.hideLoading()
           uni.showToast({ title: '同步失败', icon: 'none' })
           return { success: false, error: 'pull failed' }

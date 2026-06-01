@@ -191,7 +191,6 @@ export const useCategoryStore = defineStore('category', {
     // 同步单个分类到云端
     async syncCategory(category) {
       // 先尝试 PUT，失败回退 POST（处理新建 vs 更新）
-      const { putCategory, postCategory } = await import('@/utils/api')
       const { id, ...rest } = category
       try {
         await putCategory(id, rest)
