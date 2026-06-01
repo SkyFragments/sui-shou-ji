@@ -30,10 +30,13 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
   const { id } = req.params
   const { name, type, balance, sort, is_default } = req.body
-  await pool.execute(
+  const [result] = await pool.execute(
     'UPDATE accounts SET name=?, type=?, balance=?, sort=?, is_default=?, update_time=? WHERE id=? AND openid=?',
     [name, type, balance, sort, is_default, Date.now(), id, openid]
   )
+  if (result.affectedRows === 0) {
+    return res.status(404).json({ error: 'account not found' })
+  }
   res.json({ success: true })
 }))
 

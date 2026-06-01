@@ -26,9 +26,13 @@ import { useBudgetStore } from '@/store/budget'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_sync_status'
+const STORAGE_KEY_DEAD_LETTER = 'ssj_sync_dead_letter'
 
-// 单类型最多保留多少待重试项目；超出视为死信丢弃，避免存储无限增长
+// 单类型最多保留多少待重试项目；超出转 dead-letter 不再静默丢
 const MAX_PENDING_PER_TYPE = 50
+
+// dead-letter 本身也限流：防止死信本身撑爆 LocalStorage
+const MAX_DEAD_LETTER = 500
 
 // 未知类型重试次数上限：超过后 dead-letter 丢弃并 console.error 提示
 const UNKNOWN_TYPE_MAX_RETRIES = 5
@@ -46,7 +50,10 @@ export const useSyncStore = defineStore('sync', {
     syncStatus: SYNC_STATUS.IDLE,
     lastSyncTime: null,
     isOnline: true,
-    pendingSync: []
+    pendingSync: [],
+    // 死信队列：pendingSync 超限时转存到这里，用户可见、可手动重试或丢弃
+    // 数据形状与 pendingSync 一致
+    deadLetter: []
   }),
 
   getters: {
@@ -58,6 +65,9 @@ export const useSyncStore = defineStore('sync', {
 
     // 是否有待同步数据
     hasPendingSync: (state) => state.pendingSync.length > 0,
+
+    // 是否有死信待处理（给 UI 弹提示用）
+    hasDeadLetter: (state) => state.deadLetter.length > 0,
 
     // 获取最后同步时间格式化
     lastSyncTimeFormatted: (state) => {
@@ -75,6 +85,11 @@ export const useSyncStore = defineStore('sync', {
         this.syncStatus = data.syncStatus || SYNC_STATUS.IDLE
         this.lastSyncTime = data.lastSyncTime || null
         this.pendingSync = data.pendingSync || []
+      }
+      // 死信单独一个 key，独立加载避免污染主状态
+      const dead = getStorage(STORAGE_KEY_DEAD_LETTER)
+      if (Array.isArray(dead)) {
+        this.deadLetter = dead
       }
       return this
     },
@@ -108,10 +123,12 @@ export const useSyncStore = defineStore('sync', {
         const budgetStore = useBudgetStore()
 
         // 仅同步配置类数据（category/account/budget），记录由 addRecord 单独走 REST
+        // 各 store 的 syncToCloud 内部 try/catch 返回 {success:false, error}，不会 throw
+        // 这里再加一层 catch 兜底网络异常，标 offline 让上层分支正确走 IDLE 而非 SUCCESS
         const [catResult, accResult, budgetResult] = await Promise.all([
-          categoryStore.syncToCloud().catch(() => ({ offline: true })),
-          accountStore.syncToCloud().catch(() => ({ offline: true })),
-          budgetStore.syncToCloud().catch(() => ({ offline: true }))
+          categoryStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e })),
+          accountStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e })),
+          budgetStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e }))
         ])
 
         const allOffline = catResult.offline && accResult.offline && budgetResult.offline
@@ -121,6 +138,14 @@ export const useSyncStore = defineStore('sync', {
           this.lastSyncTime = Date.now()  // update timestamp even when offline to avoid stale pull on reconnect
           this.setSyncStatus(SYNC_STATUS.IDLE)
           return { success: true, offline: true }
+        }
+
+        const anyFailed = !catResult.success || !accResult.success || !budgetResult.success
+        if (anyFailed) {
+          // 部分失败：状态置 IDLE 让 UI 不显示成功勾；具体失败项已被各 store 内部抛回或记 pendingSync
+          console.warn('[sync] 部分配置同步失败：', { catResult, accResult, budgetResult })
+          this.setSyncStatus(SYNC_STATUS.IDLE)
+          return { success: false, partial: true }
         }
 
         this.lastSyncTime = Date.now()
@@ -150,8 +175,9 @@ export const useSyncStore = defineStore('sync', {
 
           // 调用云函数获取增量数据
           // 服务端可能分页（has_more），循环拉直到 has_more=false，避免大账号漏数据
+          // 使用服务端返回的 next_cursor（复合游标 update_time + id）以正确处理同毫秒写多条的边界
           const allCloudData = { records: [], categories: [], accounts: [], budgets: [] }
-          let cursor = this.lastSyncTime || 0
+          let cursor = { last_sync_time: this.lastSyncTime || 0, last_id: '' }
           let serverTime = Date.now()
           // 防呆：单次 pull 最多 100 页 = 10 万条，防止服务端死循环/客户端卡死
           const MAX_PAGES = 100
@@ -165,9 +191,8 @@ export const useSyncStore = defineStore('sync', {
             if (pageData.budgets) allCloudData.budgets = pageData.budgets
             if (pageData.server_time) serverTime = pageData.server_time
             if (!pageData.has_more) break
-            // 下一轮用本批最后一条记录的 update_time 作 cursor
-            const last = allCloudData.records[allCloudData.records.length - 1]
-            cursor = last?.update_time || serverTime
+            // 用服务端 next_cursor 续拉，复合游标能精准定位到同 update_time 内的下一条
+            cursor = pageData.next_cursor || { last_sync_time: serverTime, last_id: '' }
           }
           // 全部分页拉完后再合并，确保原子
           this.mergeFromCloud(allCloudData)
@@ -258,16 +283,20 @@ export const useSyncStore = defineStore('sync', {
       } else {
         const sameType = this.pendingSync.filter(it => it.type === type)
         if (sameType.length >= MAX_PENDING_PER_TYPE) {
-          // 丢最早的，避免队列爆炸
+          // 超出容量：把最旧的转 dead-letter 而不是直接丢
+          // dead-letter 在 UI 可见，用户可手动重试或丢弃
           const dropCount = sameType.length - MAX_PENDING_PER_TYPE + 1
+          const toDeadLetter = []
           let dropped = 0
           this.pendingSync = this.pendingSync.filter(it => {
             if (it.type === type && dropped < dropCount) {
               dropped++
+              toDeadLetter.push(it)
               return false
             }
             return true
           })
+          this.appendDeadLetter(toDeadLetter)
         }
       }
       this.pendingSync.push({
@@ -349,11 +378,11 @@ export const useSyncStore = defineStore('sync', {
                 failedItems.push(item)
               }
             } else {
-              // 未知类型：用 retryCount 累计，超过上限 dead-letter 丢弃并打 error
+              // 未知类型：用 retryCount 累计，超过上限入 dead-letter
               const retries = (item.data && item.data.__retries) || 0
               if (retries >= UNKNOWN_TYPE_MAX_RETRIES) {
-                console.error('[sync] Dead-letter unknown type, dropping:', item.type)
-                // 不 push 进 failedItems → 写回时该 item 消失
+                console.error('[sync] Unknown type 达到重试上限，入 dead-letter:', item.type)
+                this.appendDeadLetter([item])
               } else {
                 failedItems.push({ ...item, data: { ...(item.data || {}), __retries: retries + 1 } })
               }
@@ -391,6 +420,10 @@ export const useSyncStore = defineStore('sync', {
           }
         })  // syncPendingData never throws — always returns, so .catch() is unreachable
       }
+      // 死信有内容时提示用户；UI 层可订阅 hasDeadLetter 显示 banner
+      if (isOnline && this.deadLetter.length > 0) {
+        console.warn(`[sync] 死信队列有 ${this.deadLetter.length} 条待处理；调 requeueDeadLetter() 重试或 clearDeadLetter() 丢弃`)
+      }
     },
 
     // 保存同步状态到本地
@@ -400,6 +433,40 @@ export const useSyncStore = defineStore('sync', {
         lastSyncTime: this.lastSyncTime,
         pendingSync: this.pendingSync
       })
+    },
+
+    // 保存死信队列
+    saveDeadLetter() {
+      setStorage(STORAGE_KEY_DEAD_LETTER, this.deadLetter)
+    },
+
+    // 追加死信；超 MAX_DEAD_LETTER 时丢最早的并 console.error
+    appendDeadLetter(items) {
+      if (!items || items.length === 0) return
+      this.deadLetter.push(...items)
+      if (this.deadLetter.length > MAX_DEAD_LETTER) {
+        const overflow = this.deadLetter.length - MAX_DEAD_LETTER
+        this.deadLetter.splice(0, overflow)
+        console.error(`[sync] deadLetter 超出 ${MAX_DEAD_LETTER}，已丢弃最旧 ${overflow} 条`)
+      }
+      this.saveDeadLetter()
+    },
+
+    // 清空死信（用户主动放弃）
+    clearDeadLetter() {
+      this.deadLetter = []
+      this.saveDeadLetter()
+    },
+
+    // 把死信全部重新塞回 pendingSync（用户主动重试）
+    requeueDeadLetter() {
+      if (this.deadLetter.length === 0) return 0
+      const count = this.deadLetter.length
+      this.pendingSync.push(...this.deadLetter)
+      this.deadLetter = []
+      this.saveDeadLetter()
+      this.saveSyncStatus()
+      return count
     },
 
     // 重置同步状态

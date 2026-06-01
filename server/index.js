@@ -12,9 +12,18 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// 简易 CORS：H5 端跨域会需要；小程序不强制。生产建议换成按 origin 白名单
+// CORS：Authorization 头不属于 simple header，配合通配 origin 浏览器会拒掉预检
+// 显式回显请求 origin；多 origin 用逗号分隔。生产务必设置 CORS_ORIGIN
+const CORS_ORIGIN = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*')
+  const reqOrigin = req.headers.origin
+  if (CORS_ORIGIN.length === 0) {
+    // 未配置：回显请求 origin（非 *，兼容带 Authorization 的预检）
+    if (reqOrigin) res.header('Access-Control-Allow-Origin', reqOrigin)
+  } else if (reqOrigin && CORS_ORIGIN.includes(reqOrigin)) {
+    res.header('Access-Control-Allow-Origin', reqOrigin)
+    res.header('Vary', 'Origin')
+  }
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization')
   if (req.method === 'OPTIONS') return res.sendStatus(204)

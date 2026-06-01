@@ -35,10 +35,13 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
   const { id } = req.params
   const { total_budget, update_time } = req.body
-  await pool.execute(
+  const [result] = await pool.execute(
     'UPDATE budgets SET total_budget=?, update_time=? WHERE id=? AND openid=?',
     [total_budget, update_time || Date.now(), id, openid]
   )
+  if (result.affectedRows === 0) {
+    return res.status(404).json({ error: 'budget not found' })
+  }
   res.json({ success: true })
 }))
 

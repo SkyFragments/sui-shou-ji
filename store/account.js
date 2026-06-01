@@ -37,8 +37,8 @@ export const useAccountStore = defineStore('account', {
   }),
 
   getters: {
-    // 获取所有账户
-    allAccounts: (state) => state.accounts.sort((a, b) => a.sort - b.sort),
+    // 获取所有账户（不可变排序：Array.sort 会原地变更 state.accounts 并绕过 Vue 响应式）
+    allAccounts: (state) => [...state.accounts].sort((a, b) => a.sort - b.sort),
 
     // 获取默认账户
     defaultAccount(state) {
@@ -151,6 +151,14 @@ export const useAccountStore = defineStore('account', {
         a.is_default = a.code === code ? 1 : 0
       })
       this.saveAccounts()
+
+      // 默认账户切换必须上行：is_default 改了但云端没改的话，下次 pullFromCloud 会被云端旧值覆盖
+      const updated = this.accounts.find(a => a.code === code)
+      if (updated) {
+        this.syncAccount(updated).catch(() => {
+          useSyncStore().addPendingSync('account_upsert', updated)
+        })
+      }
     },
 
     // 更新账户余额

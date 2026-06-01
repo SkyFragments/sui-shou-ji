@@ -32,10 +32,14 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
   const { id } = req.params
   const { name, icon, color, sort, is_default } = req.body
-  await pool.execute(
+  const [result] = await pool.execute(
     'UPDATE categories SET name=?, icon=?, color=?, sort=?, is_default=? WHERE id=? AND openid=?',
     [name, icon, color, sort, is_default, id, openid]
   )
+  // 0 行影响 = 分类不存在或不属于此 openid，让客户端的 PUT→POST 回退能触发
+  if (result.affectedRows === 0) {
+    return res.status(404).json({ error: 'category not found' })
+  }
   res.json({ success: true })
 }))
 

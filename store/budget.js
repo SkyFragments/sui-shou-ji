@@ -26,12 +26,14 @@ export const useBudgetStore = defineStore('budget', {
     currentBudget(state) {
       const yearMonth = getCurrentYearMonth()
       const budget = state.budgets[yearMonth]
-      return budget?.total_budget || DEFAULT_BUDGET
+      // ?? 保留 0 合法值；|| 会把 0 误判为「未设置」并回退到 3000
+      return budget?.total_budget ?? DEFAULT_BUDGET
     },
 
     // 获取指定月份预算
     getBudgetByMonth: (state) => (yearMonth) => {
-      return state.budgets[yearMonth] || DEFAULT_BUDGET
+      const budget = state.budgets[yearMonth]
+      return budget?.total_budget ?? DEFAULT_BUDGET
     },
 
     // 获取当前月份已使用金额
@@ -98,7 +100,7 @@ export const useBudgetStore = defineStore('budget', {
     // 获取月度预算
     getBudget(yearMonth) {
       const budget = this.budgets[yearMonth]
-      return budget?.total_budget || DEFAULT_BUDGET
+      return budget?.total_budget ?? DEFAULT_BUDGET
     },
 
     // 计算预算使用情况

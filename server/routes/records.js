@@ -76,12 +76,22 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
     return res.status(400).json({ error: 'amount must be a positive number' })
   }
 
+  // 部分更新：只覆盖 req.body 里实际存在的字段，未提供的字段保持原值
+  // 否则 mysql2 把 undefined 绑成 NULL，会把 NOT NULL 列清空
   const [result] = await pool.execute(
-    `UPDATE records SET type=?, amount=?, category_code=?, category_name=?, account_code=?, remark=?, record_date=?, update_time=?, sync_status=1
+    `UPDATE records SET
+       type          = COALESCE(?, type),
+       amount        = COALESCE(?, amount),
+       category_code = COALESCE(?, category_code),
+       category_name = COALESCE(?, category_name),
+       account_code  = COALESCE(?, account_code),
+       remark        = COALESCE(?, remark),
+       record_date   = COALESCE(?, record_date),
+       update_time   = ?,
+       sync_status   = 1
      WHERE id=? AND openid=?`,
     [type, amount, category_code, category_name, account_code, remark, record_date, update_time || Date.now(), id, openid]
   )
-  // 0 行影响 = 记录不存在或不属于此 openid，告知客户端而不是假成功
   if (result.affectedRows === 0) {
     return res.status(404).json({ error: 'record not found' })
   }

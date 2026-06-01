@@ -4,11 +4,18 @@
  */
 
 // API 基础地址优先级（懒求值：避免模块加载时 uni/process 未就绪导致 ReferenceError）：
-//  1) process.env.VUE_APP_API_BASE  (H5 Vite/Webpack 构建注入)
-//  2) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
-//  3) 默认线上地址
+//  1) import.meta.env.VITE_API_BASE  (H5 Vite 构建注入，Vite 标准)
+//  2) process.env.VUE_APP_API_BASE  (老 Vue CLI / Webpack 兼容)
+//  3) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
+//  4) 默认线上地址
 const DEFAULT_API_BASE = 'https://txwh.online/api'
 function getApiBase() {
+  try {
+    // Vite 在 ESM 下注入 import.meta.env；process.env 在 Vite 客户端构建中是空的
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) {
+      return import.meta.env.VITE_API_BASE
+    }
+  } catch (e) { /* ignore */ }
   if (typeof process !== 'undefined' && process.env && process.env.VUE_APP_API_BASE) {
     return process.env.VUE_APP_API_BASE
   }
@@ -66,7 +73,10 @@ async function request(url, method = 'GET', data = null) {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               resolve(res.data)
             } else if (res.statusCode === 401) {
+              // 401 不光清 token，也要清 user 对象，否则 sync 仍会用 user?.openid 判定为已登录
+              // 形成「无 token → 401 → 清 token → 仍认为已登录」的死循环
               uni.removeStorageSync(STORAGE_KEY_TOKEN)
+              try { uni.removeStorageSync('ssj_users') } catch (e) { /* ignore */ }
               reject(Object.assign(new Error('Unauthorized'), { statusCode: 401 }))
             } else {
               const msg = (res.data && (res.data.error || res.data.message)) || `HTTP ${res.statusCode}`
@@ -89,9 +99,13 @@ export async function login(code) {
   return request('/auth/login', 'POST', { code })
 }
 
-// Sync
-export async function getSyncData(lastSyncTime = 0) {
-  return request(`/sync?last_sync_time=${lastSyncTime}`)
+// Sync — 接受 number（旧版兼容）或 {last_sync_time, last_id}（新版复合游标）
+export async function getSyncData(cursor = 0) {
+  if (typeof cursor === 'object' && cursor !== null) {
+    const params = `last_sync_time=${encodeURIComponent(cursor.last_sync_time || 0)}&last_id=${encodeURIComponent(cursor.last_id || '')}`
+    return request(`/sync?${params}`)
+  }
+  return request(`/sync?last_sync_time=${cursor}`)
 }
 
 // Records
