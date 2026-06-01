@@ -6,6 +6,8 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { useBillStore } from './bill'
+import { useSyncStore } from '@/store/sync'
+import { generateId } from '@/utils/db'
 import { postBudget, putBudget, deleteBudget } from '@/utils/api'
 
 // 存储键名
@@ -73,16 +75,23 @@ export const useBudgetStore = defineStore('budget', {
 
     // 设置月度预算
     setBudget(yearMonth, amount) {
+      const now = Date.now()
+      const existing = this.budgets[yearMonth]
       this.budgets[yearMonth] = {
+        // id + create_time 是服务端复合主键必填，缺一即 INSERT 失败
+        id: existing?.id || generateId(),
         year_month: yearMonth,
         total_budget: amount,
-        update_time: Date.now()
+        create_time: existing?.create_time || now,
+        update_time: now
       }
       this.saveBudgets()
-      
-      // Sync to cloud
-      this.syncBudget(this.budgets[yearMonth]).catch(() => {})
-      
+
+      // Sync to cloud; failure queues for retry via syncPendingData
+      this.syncBudget(this.budgets[yearMonth]).catch(err => {
+        useSyncStore().addPendingSync('budget_upsert', this.budgets[yearMonth])
+      })
+
       return this.budgets[yearMonth]
     },
 

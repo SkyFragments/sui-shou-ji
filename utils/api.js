@@ -3,7 +3,8 @@
  * 替换 uniCloud 调用
  */
 
-const API_BASE = 'https://txwh.online/api'
+// API 基础地址可通过构建配置覆盖，否则用线上地址
+const API_BASE = process.env.VUE_APP_API_BASE || 'https://txwh.online/api'
 
 const STORAGE_KEY_TOKEN = 'ssj_auth_token'
 
@@ -15,7 +16,7 @@ function getToken() {
 }
 
 /**
- * 请求封装
+ * 请求封装：4xx/5xx 统一 reject，避免 200 之外的错误被当作成功
  */
 async function request(url, method = 'GET', data = null) {
   const token = getToken()
@@ -26,29 +27,28 @@ async function request(url, method = 'GET', data = null) {
     header['Authorization'] = `Bearer ${token}`
   }
 
-  try {
-    const res = await new Promise((resolve, reject) => {
-      uni.request({
-        url: API_BASE + url,
-        method,
-        data,
-        header,
-        success: (res) => {
-          if (res.statusCode === 401) {
-            uni.removeStorageSync(STORAGE_KEY_TOKEN)
-            reject(new Error('Unauthorized'))
-          } else {
-            resolve(res.data)
-          }
-        },
-        fail: (err) => reject(err)
-      })
+  const res = await new Promise((resolve, reject) => {
+    uni.request({
+      url: API_BASE + url,
+      method,
+      data,
+      header,
+      success: (res) => {
+        // 仅 2xx 视为成功；401 清 token 并抛未授权；其余 4xx/5xx 抛带状态码的错误
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(res.data)
+        } else if (res.statusCode === 401) {
+          uni.removeStorageSync(STORAGE_KEY_TOKEN)
+          reject(Object.assign(new Error('Unauthorized'), { statusCode: 401 }))
+        } else {
+          const msg = (res.data && (res.data.error || res.data.message)) || `HTTP ${res.statusCode}`
+          reject(Object.assign(new Error(msg), { statusCode: res.statusCode, data: res.data }))
+        }
+      },
+      fail: (err) => reject(Object.assign(new Error(err.errMsg || 'Network error'), { networkError: true }))
     })
-    return res
-  } catch (err) {
-    console.error('API request failed:', err)
-    throw err
-  }
+  })
+  return res
 }
 
 // Auth
@@ -59,10 +59,6 @@ export async function login(code) {
 // Sync
 export async function getSyncData(lastSyncTime = 0) {
   return request(`/sync?last_sync_time=${lastSyncTime}`)
-}
-
-export async function postSyncData(data) {
-  return request('/sync', 'POST', data)
 }
 
 // Records

@@ -5,8 +5,16 @@
 
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
-import { getSyncData } from '@/utils/api'
-import { syncRecordToCloud, syncUpdateToCloud, syncDeleteFromCloud } from '@/utils/db'
+import {
+  getSyncData,
+  postRecord,
+  putRecord,
+  deleteRecord,
+  deleteAccount,
+  deleteCategory,
+  postBudget,
+  putBudget
+} from '@/utils/api'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
@@ -85,20 +93,18 @@ export const useSyncStore = defineStore('sync', {
       try {
         this.setSyncStatus(SYNC_STATUS.SYNCING)
 
-        const billStore = useBillStore()
         const categoryStore = useCategoryStore()
         const accountStore = useAccountStore()
         const budgetStore = useBudgetStore()
 
-        // 并行调用各store的syncToCloud
-        const [billResult, catResult, accResult, budgetResult] = await Promise.all([
-          billStore.syncToCloudAfterAdd().catch(() => ({ offline: true })),
+        // 仅同步配置类数据（category/account/budget），记录由 addRecord 单独走 REST
+        const [catResult, accResult, budgetResult] = await Promise.all([
           categoryStore.syncToCloud().catch(() => ({ offline: true })),
           accountStore.syncToCloud().catch(() => ({ offline: true })),
           budgetStore.syncToCloud().catch(() => ({ offline: true }))
         ])
 
-        const allOffline = billResult.offline && catResult.offline && accResult.offline && budgetResult.offline
+        const allOffline = catResult.offline && accResult.offline && budgetResult.offline
         if (allOffline) {
           // 所有云端都不可用，标记待同步
           this.addPendingSync('full_sync', { timestamp: Date.now() })
@@ -234,41 +240,39 @@ export const useSyncStore = defineStore('sync', {
         }
 
         for (const item of this.pendingSync) {
-          let result
           try {
             if (item.type === 'record_add') {
-              result = await syncRecordToCloud(item.data, user.openid)
+              await postRecord(item.data)
             } else if (item.type === 'record_update') {
-              result = await syncUpdateToCloud(item.data, user.openid)
+              const { id, ...rest } = item.data
+              await putRecord(id, rest)
             } else if (item.type === 'record_delete') {
-              result = await syncDeleteFromCloud(item.data.id, user.openid)
+              await deleteRecord(item.data.id)
             } else if (item.type === 'account_delete') {
-              const { deleteAccount } = await import('@/utils/api')
-              const res = await deleteAccount(item.data.id)
-              // Normalize: throw on falsy/undefined, treat {} as success (empty 2xx body)
-              if (!res) throw new Error('delete account returned falsy')
-              result = { success: true, raw: res }
+              await deleteAccount(item.data.id)
             } else if (item.type === 'category_delete') {
-              const { deleteCategory } = await import('@/utils/api')
-              const res = await deleteCategory(item.data.id)
-              if (!res) throw new Error('delete category returned falsy')
-              result = { success: true, raw: res }
+              await deleteCategory(item.data.id)
+            } else if (item.type === 'budget_upsert') {
+              // 用 update_time 判定新建还是更新，避免重复 POST 触发 PK 冲突
+              const { id, ...rest } = item.data
+              const res = await putBudget(id, rest).catch(err => {
+                if (err && (err.statusCode === 404 || err.statusCode === 400)) {
+                  return postBudget(item.data)
+                }
+                throw err
+              })
             } else if (item.type === 'full_sync') {
-              result = await this.syncToCloud()
-            } else {
-              failedItems.push(item)
-              continue
-            }
-            // null/undefined result treated as failure (not silently ignored)
-            // API delete returns raw server response: if truthy but no {success,offline} field, assume success
-            const isFailure = !result || result.offline || result.success === false
-            if (isFailure) {
-              // full_sync offline is not a failure — skip re-queue to avoid infinite loop
-              if (!(item.type === 'full_sync' && result?.offline)) {
+              const r = await this.syncToCloud()
+              // 仅在非离线状态下视为成功；离线保留以便重试
+              if (r && r.offline) {
                 failedItems.push(item)
               }
+            } else {
+              // 未知类型，保留以便诊断
+              failedItems.push(item)
             }
           } catch (itemErr) {
+            // api.js 现在 4xx/5xx 抛错，network fail 也抛错，全部进重试
             console.error('Failed to sync item:', item.type, itemErr)
             failedItems.push(item)
           }

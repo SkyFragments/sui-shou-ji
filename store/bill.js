@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
+import { postRecord, putRecord, deleteRecord } from '@/utils/api'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_records'
@@ -74,20 +75,21 @@ export const useBillStore = defineStore('bill', {
         category_name: record.category_name || '',
         account_code: record.account_code || 'cash',
         remark: record.remark || '',
-        record_date: record.record_date || new Date().toISOString().split('T')[0],
+        // 用本地日期而非 UTC：toISOString() 会在东八区凌晨把当天划到前一天
+        record_date: record.record_date || formatLocalDate(new Date()),
         create_time: now,
         update_time: now,
         sync_status: 0
       }
       this.records.unshift(newRecord)
       this.saveRecords()
-      
+
       // Sync to cloud (fire-and-forget, queue on failure)
-      this.syncToCloudAfterAdd().catch(err => {
+      this.syncToCloudAfterAdd(newRecord).catch(err => {
         const syncStore = useSyncStore()
         syncStore.addPendingSync('record_add', newRecord)
       })
-      
+
       return newRecord
     },
 
@@ -102,30 +104,24 @@ export const useBillStore = defineStore('bill', {
           sync_status: 0
         }
         this.saveRecords()
-        
-        // Sync update to cloud (fire-and-forget, queue on failure)
-        this.syncUpdateInCloud(this.records[index]).catch(err => {
+
+        // Sync update to cloud via REST API; queue on failure
+        const updated = this.records[index]
+        this.syncUpdateInCloud(updated).catch(err => {
           const syncStore = useSyncStore()
-          syncStore.addPendingSync('record_update', this.records[index])
+          syncStore.addPendingSync('record_update', updated)
         })
-        
-        return this.records[index]
+
+        return updated
       }
       return null
     },
-    
-    // 更新云端记录
+
+    // 更新云端记录：调真实 REST，失败抛错让外层 .catch 排队
     async syncUpdateInCloud(record) {
-      try {
-        const { syncUpdateToCloud } = await import('@/utils/db')
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { success: false, offline: true }
-        return await syncUpdateToCloud(record, user.openid)
-      } catch (e) {
-        console.error('Sync update failed:', e)
-        return { success: false, error: e }
-      }
+      const { id, ...rest } = record
+      await putRecord(id, rest)
+      return { success: true }
     },
 
     // 删除账单
@@ -135,30 +131,22 @@ export const useBillStore = defineStore('bill', {
         const deletedRecord = this.records[index]
         this.records.splice(index, 1)
         this.saveRecords()
-        
-        // Sync delete to cloud (fire-and-forget, queue on failure)
+
+        // Sync delete to cloud via REST API; queue on failure
         this.syncDeleteFromCloud(id).catch(err => {
           const syncStore = useSyncStore()
           syncStore.addPendingSync('record_delete', { id, ...deletedRecord })
         })
-        
+
         return true
       }
       return false
     },
-    
-    // 从云端删除记录
+
+    // 从云端删除记录：调真实 REST，失败抛错让外层 .catch 排队
     async syncDeleteFromCloud(id) {
-      try {
-        const { syncDeleteFromCloud } = await import('@/utils/db')
-        const { getStoredUser } = await import('@/utils/auth')
-        const user = getStoredUser()
-        if (!user?.openid) return { success: false, offline: true }
-        return await syncDeleteFromCloud(id, user.openid)
-      } catch (e) {
-        console.error('Sync delete failed:', e)
-        return { success: false, error: e }
-      }
+      await deleteRecord(id)
+      return { success: true }
     },
 
     // 保存到本地存储
@@ -207,14 +195,21 @@ export const useBillStore = defineStore('bill', {
       return Object.values(stats)
     },
 
-    // 同步到云端（添加记录后调用）
-    async syncToCloudAfterAdd() {
-      // Stub: always report offline so syncToCloud() can detect allOffline correctly.
-      // Real sync is handled by syncUpdateInCloud (on update) and syncDeleteFromCloud (on delete).
-      return { success: true, offline: true }
+    // 同步到云端（添加记录后调用）：真实调 REST，失败抛错让外层 .catch 排队
+    async syncToCloudAfterAdd(record) {
+      await postRecord(record)
+      return { success: true }
     },
 
     // 从云端同步数据
     // syncFromCloud is now handled by sync store
   }
 })
+
+/**
+ * 格式化本地日期为 YYYY-MM-DD（不转 UTC）
+ * 替代 toISOString().split('T')[0]，避免东八区凌晨记到前一天
+ */
+function formatLocalDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}

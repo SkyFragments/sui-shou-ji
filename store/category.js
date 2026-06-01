@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { postCategory, putCategory, deleteCategory } from '@/utils/api'
+import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
 import {
   EXPENSE_CATEGORY_CODES,
@@ -76,10 +77,10 @@ export const useCategoryStore = defineStore('category', {
     loadCategories() {
       const data = getStorage(STORAGE_KEY)
       if (!data || data.length === 0) {
-        // 初始化默认分类
-        this.categories = initCategories()
+        // 初始化默认分类，必须带 id 才能上行到 (openid,id) 复合主键的表
+        this.categories = initCategories().map(cat => ({ ...cat, id: cat.id || generateId() }))
       } else {
-        // 迁移旧数据：把 emoji 图标替换为 SVG 名称
+        // 迁移旧数据：把 emoji 图标替换为 SVG 名称，并补 id
         const emojiToIcon = {
           '🍜': 'meal', '🚗': 'car', '🛒': 'shopping', '🎮': 'game',
           '🏠': 'home', '💊': 'health', '📚': 'box', '📱': 'phone',
@@ -88,8 +89,9 @@ export const useCategoryStore = defineStore('category', {
         }
         this.categories = data.map(cat => {
           const newCat = { ...cat }
-          if (emojiToIcon[cat.icon]) {
-            newCat.icon = emojiToIcon[cat.icon]
+          if (!newCat.id) newCat.id = generateId()
+          if (emojiToIcon[newCat.icon]) {
+            newCat.icon = emojiToIcon[newCat.icon]
           }
           return newCat
         })
@@ -152,7 +154,6 @@ export const useCategoryStore = defineStore('category', {
 
         // Sync delete to cloud (queue on failure for retry)
         this.syncDeleteFromCloud(deletedCategory.id).catch(() => {
-          const { useSyncStore } = require('@/store/sync')
           useSyncStore().addPendingSync('category_delete', { id: deletedCategory.id, ...deletedCategory })
         })
 

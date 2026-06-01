@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { getStorage, setStorage } from '@/utils/storage'
 import { ACCOUNT_CODES } from '@/utils/schema'
 import { postAccount, putAccount, deleteAccount } from '@/utils/api'
+import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
 
 // 存储键名
@@ -121,7 +122,6 @@ export const useAccountStore = defineStore('account', {
 
         // Sync delete to cloud (queue on failure for retry)
         this.syncDeleteFromCloud(deletedAccount.id).catch(() => {
-          const { useSyncStore } = require('@/store/sync')
           useSyncStore().addPendingSync('account_delete', { id: deletedAccount.id, ...deletedAccount })
         })
 
