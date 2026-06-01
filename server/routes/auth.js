@@ -16,11 +16,21 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'code required' })
     }
 
+    // 缺 appid/secret 走不通，直接 500 提示运维，而不是把错误吞掉
+    if (!process.env.WECHAT_APPID || !process.env.WECHAT_SECRET) {
+      console.error('WECHAT_APPID / WECHAT_SECRET not configured')
+      return res.status(500).json({ error: 'WeChat credentials not configured' })
+    }
+
     // 调用微信接口获取 openid
     const wxUrl = `https://api.weixin.qq.com/sns/jscode2session?appid=${process.env.WECHAT_APPID}&secret=${process.env.WECHAT_SECRET}&js_code=${code}&grant_type=authorization_code`
-    const wxRes = await axios.get(wxUrl)
-    const { openid, session_key, unionid } = wxRes.data
+    const wxRes = await axios.get(wxUrl, { timeout: 5000 })
+    const { openid, session_key, unionid, errcode, errmsg } = wxRes.data
 
+    // 微信返回 errcode 表示 code 无效/过期/超限，不要一棍子当 500
+    if (errcode) {
+      return res.status(400).json({ error: 'Invalid code', wechatErrcode: errcode, wechatErrmsg: errmsg })
+    }
     if (!openid) {
       return res.status(400).json({ error: 'Invalid code' })
     }
@@ -41,7 +51,7 @@ router.post('/login', async (req, res) => {
     // 更新用户 token
     await pool.execute('UPDATE users SET token = ? WHERE id = ?', [token, userId])
 
-    res.json({ success: true, token, openid })
+    res.json({ success: true, token, openid, session_key, unionid })
   } catch (err) {
     console.error('Login error:', err)
     res.status(500).json({ error: 'Login failed' })

@@ -32,8 +32,12 @@ router.post('/', verifyToken, async (req, res) => {
   try {
     const openid = req.user.openid
     const { id, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'id required' })
+    }
     const now = Date.now()
 
+    // Composite (openid, id) PK makes ON DUPLICATE KEY UPDATE tenant-safe.
     await pool.execute(
       `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)

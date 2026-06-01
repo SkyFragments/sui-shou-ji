@@ -10,8 +10,12 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Composite (openid, id) PK on every business table so MySQL itself enforces
+-- tenant isolation on upsert conflict. Without this, ON DUPLICATE KEY UPDATE
+-- keyed on id alone would let any user's POST overwrite another user's row.
+
 CREATE TABLE IF NOT EXISTS records (
-  id VARCHAR(32) PRIMARY KEY,
+  id VARCHAR(32) NOT NULL,
   openid VARCHAR(64) NOT NULL,
   type INT NOT NULL COMMENT '1=支出 2=收入',
   amount DECIMAL(10,2) NOT NULL,
@@ -23,13 +27,14 @@ CREATE TABLE IF NOT EXISTS records (
   create_time BIGINT NOT NULL,
   update_time BIGINT NOT NULL,
   sync_status INT DEFAULT 0,
+  PRIMARY KEY (openid, id),
   INDEX idx_openid (openid),
   INDEX idx_record_date (record_date),
   INDEX idx_update_time (update_time)
 );
 
 CREATE TABLE IF NOT EXISTS categories (
-  id VARCHAR(32) PRIMARY KEY,
+  id VARCHAR(32) NOT NULL,
   openid VARCHAR(64) NOT NULL,
   code VARCHAR(16) NOT NULL,
   name VARCHAR(32) NOT NULL,
@@ -38,12 +43,12 @@ CREATE TABLE IF NOT EXISTS categories (
   type INT NOT NULL COMMENT '1=支出 2=收入',
   sort INT DEFAULT 0,
   is_default INT DEFAULT 0,
-  UNIQUE INDEX idx_openid_code (openid, code),
-  INDEX idx_openid (openid)
+  PRIMARY KEY (openid, id),
+  UNIQUE INDEX idx_openid_code (openid, code)
 );
 
 CREATE TABLE IF NOT EXISTS accounts (
-  id VARCHAR(32) PRIMARY KEY,
+  id VARCHAR(32) NOT NULL,
   openid VARCHAR(64) NOT NULL,
   code VARCHAR(16) NOT NULL,
   name VARCHAR(32) NOT NULL,
@@ -53,17 +58,17 @@ CREATE TABLE IF NOT EXISTS accounts (
   is_default INT DEFAULT 0,
   create_time BIGINT,
   update_time BIGINT,
-  UNIQUE INDEX idx_openid_code (openid, code),
-  INDEX idx_openid (openid)
+  PRIMARY KEY (openid, id),
+  UNIQUE INDEX idx_openid_code (openid, code)
 );
 
 CREATE TABLE IF NOT EXISTS budgets (
-  id VARCHAR(32) PRIMARY KEY,
+  id VARCHAR(32) NOT NULL,
   openid VARCHAR(64) NOT NULL,
   year_month VARCHAR(7) NOT NULL,
   total_budget DECIMAL(10,2) NOT NULL,
   create_time BIGINT,
   update_time BIGINT,
-  UNIQUE INDEX idx_openid_month (openid, year_month),
-  INDEX idx_openid (openid)
+  PRIMARY KEY (openid, id),
+  UNIQUE INDEX idx_openid_month (openid, year_month)
 );

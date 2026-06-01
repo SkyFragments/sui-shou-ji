@@ -50,9 +50,12 @@ router.post('/', verifyToken, async (req, res) => {
     const { records = [], categories = [], accounts = [], budgets = [] } = req.body
     const now = Date.now()
 
-    // 合并 records (按 id 更新或插入，以 update_time 为准)
+    // 合并 records (按 (openid,id) 更新或插入，以 update_time 为准)
     for (const record of records) {
-      const [existing] = await pool.execute('SELECT update_time FROM records WHERE id = ?', [record.id])
+      const [existing] = await pool.execute(
+        'SELECT update_time FROM records WHERE openid = ? AND id = ?',
+        [openid, record.id]
+      )
       if (existing.length === 0) {
         await pool.execute(
           `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status)
@@ -62,8 +65,8 @@ router.post('/', verifyToken, async (req, res) => {
       } else if (existing[0].update_time < record.update_time) {
         await pool.execute(
           `UPDATE records SET type=?, amount=?, category_code=?, category_name=?, account_code=?, remark=?, record_date=?, update_time=?, sync_status=1
-           WHERE id=?`,
-          [record.type, record.amount, record.category_code, record.category_name, record.account_code, record.remark, record.record_date, record.update_time, record.id]
+           WHERE openid=? AND id=?`,
+          [record.type, record.amount, record.category_code, record.category_name, record.account_code, record.remark, record.record_date, record.update_time, openid, record.id]
         )
       }
     }
