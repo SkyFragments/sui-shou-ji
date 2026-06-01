@@ -3,8 +3,16 @@
  * 替换 uniCloud 调用
  */
 
-// API 基础地址可通过构建配置覆盖，否则用线上地址
-const API_BASE = process.env.VUE_APP_API_BASE || 'https://txwh.online/api'
+// API 基础地址优先级：
+//  1) process.env.VUE_APP_API_BASE  (H5 Vite/Webpack 构建注入)
+//  2) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
+//  3) 默认线上地址
+const API_BASE = process.env.VUE_APP_API_BASE
+  || (typeof uni !== 'undefined' && uni.getStorageSync && uni.getStorageSync('ssj_api_base'))
+  || 'https://txwh.online/api'
+
+// 请求超时（毫秒）；H5 路径无内置超时，必须显式传 timeout 才生效
+const REQUEST_TIMEOUT_MS = 15000
 
 const STORAGE_KEY_TOKEN = 'ssj_auth_token'
 
@@ -27,28 +35,43 @@ async function request(url, method = 'GET', data = null) {
     header['Authorization'] = `Bearer ${token}`
   }
 
-  const res = await new Promise((resolve, reject) => {
-    uni.request({
-      url: API_BASE + url,
-      method,
-      data,
-      header,
-      success: (res) => {
-        // 仅 2xx 视为成功；401 清 token 并抛未授权；其余 4xx/5xx 抛带状态码的错误
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(res.data)
-        } else if (res.statusCode === 401) {
-          uni.removeStorageSync(STORAGE_KEY_TOKEN)
-          reject(Object.assign(new Error('Unauthorized'), { statusCode: 401 }))
-        } else {
-          const msg = (res.data && (res.data.error || res.data.message)) || `HTTP ${res.statusCode}`
-          reject(Object.assign(new Error(msg), { statusCode: res.statusCode, data: res.data }))
-        }
-      },
-      fail: (err) => reject(Object.assign(new Error(err.errMsg || 'Network error'), { networkError: true }))
-    })
+  // 自己写一层超时 race：uni.request 的 timeout 在某些平台不触发 fail
+  let timeoutId
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(Object.assign(new Error('Request timeout'), { timeout: true }))
+    }, REQUEST_TIMEOUT_MS)
   })
-  return res
+
+  try {
+    const res = await Promise.race([
+      new Promise((resolve, reject) => {
+        uni.request({
+          url: API_BASE + url,
+          method,
+          data,
+          header,
+          timeout: REQUEST_TIMEOUT_MS,
+          success: (res) => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              resolve(res.data)
+            } else if (res.statusCode === 401) {
+              uni.removeStorageSync(STORAGE_KEY_TOKEN)
+              reject(Object.assign(new Error('Unauthorized'), { statusCode: 401 }))
+            } else {
+              const msg = (res.data && (res.data.error || res.data.message)) || `HTTP ${res.statusCode}`
+              reject(Object.assign(new Error(msg), { statusCode: res.statusCode, data: res.data }))
+            }
+          },
+          fail: (err) => reject(Object.assign(new Error(err.errMsg || 'Network error'), { networkError: true }))
+        })
+      }),
+      timeoutPromise
+    ])
+    return res
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 // Auth

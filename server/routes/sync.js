@@ -74,10 +74,10 @@ router.post('/', verifyToken, async (req, res) => {
     // 合并 categories
     for (const cat of categories) {
       await pool.execute(
-        `INSERT INTO categories (id, openid, code, name, icon, color, type, sort, is_default)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE name=VALUES(name), icon=VALUES(icon), color=VALUES(color), sort=VALUES(sort)`,
-        [cat.id, openid, cat.code, cat.name, cat.icon, cat.color, cat.type, cat.sort, cat.is_default]
+        `INSERT INTO categories (id, openid, code, name, icon, color, type, sort, is_default, create_time, update_time)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE name=VALUES(name), icon=VALUES(icon), color=VALUES(color), sort=VALUES(sort), update_time=VALUES(update_time)`,
+        [cat.id, openid, cat.code, cat.name, cat.icon, cat.color, cat.type, cat.sort, cat.is_default, cat.create_time || now, cat.update_time || now]
       )
     }
 
@@ -86,7 +86,7 @@ router.post('/', verifyToken, async (req, res) => {
       await pool.execute(
         `INSERT INTO accounts (id, openid, code, name, type, balance, sort, is_default, create_time, update_time)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE name=VALUES(name), type=VALUES(type), balance=VALUES(balance), sort=VALUES(sort)`,
+         ON DUPLICATE KEY UPDATE name=VALUES(name), type=VALUES(type), balance=VALUES(balance), sort=VALUES(sort), update_time=VALUES(update_time)`,
         [acc.id, openid, acc.code, acc.name, acc.type, acc.balance, acc.sort, acc.is_default, acc.create_time, acc.update_time]
       )
     }

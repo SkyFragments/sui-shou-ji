@@ -5,7 +5,7 @@ USE suishouji;
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   openid VARCHAR(64) UNIQUE NOT NULL,
-  token VARCHAR(256),
+  token VARCHAR(512),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS records (
   INDEX idx_openid (openid),
   INDEX idx_record_date (record_date),
   INDEX idx_update_time (update_time)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS categories (
   id VARCHAR(32) NOT NULL,
@@ -43,9 +43,11 @@ CREATE TABLE IF NOT EXISTS categories (
   type INT NOT NULL COMMENT '1=支出 2=收入',
   sort INT DEFAULT 0,
   is_default INT DEFAULT 0,
+  create_time BIGINT NOT NULL DEFAULT 0,
+  update_time BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (openid, id),
   UNIQUE INDEX idx_openid_code (openid, code)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS accounts (
   id VARCHAR(32) NOT NULL,
@@ -60,7 +62,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   update_time BIGINT,
   PRIMARY KEY (openid, id),
   UNIQUE INDEX idx_openid_code (openid, code)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS budgets (
   id VARCHAR(32) NOT NULL,
@@ -71,4 +73,4 @@ CREATE TABLE IF NOT EXISTS budgets (
   update_time BIGINT,
   PRIMARY KEY (openid, id),
   UNIQUE INDEX idx_openid_month (openid, year_month)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

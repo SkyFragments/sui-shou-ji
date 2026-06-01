@@ -22,8 +22,8 @@ router.post('/login', async (req, res) => {
       return res.status(500).json({ error: 'WeChat credentials not configured' })
     }
 
-    // 调用微信接口获取 openid
-    const wxUrl = `https://api.weixin.qq.com/sns/jscode2session?appid=${process.env.WECHAT_APPID}&secret=${process.env.WECHAT_SECRET}&js_code=${code}&grant_type=authorization_code`
+    // 调用微信接口获取 openid；code 必须 URL-encode 否则 '&'/'#' 等字符会截断参数
+    const wxUrl = `https://api.weixin.qq.com/sns/jscode2session?appid=${encodeURIComponent(process.env.WECHAT_APPID)}&secret=${encodeURIComponent(process.env.WECHAT_SECRET)}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`
     const wxRes = await axios.get(wxUrl, { timeout: 5000 })
     const { openid, session_key, unionid, errcode, errmsg } = wxRes.data
 

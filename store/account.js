@@ -81,10 +81,12 @@ export const useAccountStore = defineStore('account', {
       }
       this.accounts.push(newAccount)
       this.saveAccounts()
-      
-      // Sync to cloud
-      this.syncAccount(newAccount).catch(() => {})
-      
+
+      // Sync to cloud; failure queues for retry
+      this.syncAccount(newAccount).catch(() => {
+        useSyncStore().addPendingSync('account_upsert', newAccount)
+      })
+
       return newAccount
     },
 
@@ -98,10 +100,12 @@ export const useAccountStore = defineStore('account', {
           update_time: Date.now()
         }
         this.saveAccounts()
-        
-        // Sync to cloud
-        this.syncAccount(this.accounts[index]).catch(() => {})
-        
+
+        // Sync to cloud; failure queues for retry
+        this.syncAccount(this.accounts[index]).catch(() => {
+          useSyncStore().addPendingSync('account_upsert', this.accounts[index])
+        })
+
         return this.accounts[index]
       }
       return null
@@ -178,12 +182,18 @@ export const useAccountStore = defineStore('account', {
 
     // 同步单个账户到云端
     async syncAccount(account) {
+      // 先 PUT，失败回退 POST（处理新建 vs 更新）
+      const { putAccount, postAccount } = await import('@/utils/api')
+      const { id, ...rest } = account
       try {
-        const res = await postAccount(account)
+        await putAccount(id, rest)
         return { success: true }
       } catch (e) {
-        console.error('Sync account failed:', e)
-        return { success: false, error: e }
+        if (e && (e.statusCode === 404 || e.statusCode === 400)) {
+          await postAccount(account)
+          return { success: true }
+        }
+        throw e
       }
     },
 

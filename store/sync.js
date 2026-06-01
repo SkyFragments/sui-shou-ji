@@ -13,7 +13,11 @@ import {
   deleteAccount,
   deleteCategory,
   postBudget,
-  putBudget
+  putBudget,
+  putAccount,
+  postAccount,
+  putCategory,
+  postCategory
 } from '@/utils/api'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
@@ -22,6 +26,12 @@ import { useBudgetStore } from '@/store/budget'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_sync_status'
+
+// 单类型最多保留多少待重试项目；超出视为死信丢弃，避免存储无限增长
+const MAX_PENDING_PER_TYPE = 50
+
+// 未知类型重试次数上限：超过后 dead-letter 丢弃并 console.error 提示
+const UNKNOWN_TYPE_MAX_RETRIES = 5
 
 // 同步状态
 export const SYNC_STATUS = {
@@ -132,7 +142,11 @@ export const useSyncStore = defineStore('sync', {
           const { getStoredUser } = await import('@/utils/auth')
           const user = getStoredUser()
 
-          if (!user?.openid) { return { success: true, data: null, offline: true } }
+          if (!user?.openid) {
+            // 没登录就是 IDLE，不是 SUCCESS，避免 UI 误导
+            this.setSyncStatus(SYNC_STATUS.IDLE)
+            return { success: true, data: null, offline: true }
+          }
 
           // 调用云函数获取增量数据
           const res = await getSyncData(this.lastSyncTime || 0)
@@ -211,6 +225,25 @@ export const useSyncStore = defineStore('sync', {
 
     // 添加待同步项
     addPendingSync(type, data) {
+      // 同一 type 只保留最新一条（full_sync 之类幂等性高的去重）
+      // 其它类型仍按事件顺序排队，但同 type 累积到 MAX_PENDING_PER_TYPE 上限后丢最早的
+      if (type === 'full_sync') {
+        this.pendingSync = this.pendingSync.filter(it => it.type !== 'full_sync')
+      } else {
+        const sameType = this.pendingSync.filter(it => it.type === type)
+        if (sameType.length >= MAX_PENDING_PER_TYPE) {
+          // 丢最早的，避免队列爆炸
+          const dropCount = sameType.length - MAX_PENDING_PER_TYPE + 1
+          let dropped = 0
+          this.pendingSync = this.pendingSync.filter(it => {
+            if (it.type === type && dropped < dropCount) {
+              dropped++
+              return false
+            }
+            return true
+          })
+        }
+      }
       this.pendingSync.push({
         type,
         data,
@@ -252,6 +285,28 @@ export const useSyncStore = defineStore('sync', {
               await deleteAccount(item.data.id)
             } else if (item.type === 'category_delete') {
               await deleteCategory(item.data.id)
+            } else if (item.type === 'category_upsert') {
+              const { id, ...rest } = item.data
+              try {
+                await putCategory(id, rest)
+              } catch (e) {
+                if (e && (e.statusCode === 404 || e.statusCode === 400)) {
+                  await postCategory(item.data)
+                } else {
+                  throw e
+                }
+              }
+            } else if (item.type === 'account_upsert') {
+              const { id, ...rest } = item.data
+              try {
+                await putAccount(id, rest)
+              } catch (e) {
+                if (e && (e.statusCode === 404 || e.statusCode === 400)) {
+                  await postAccount(item.data)
+                } else {
+                  throw e
+                }
+              }
             } else if (item.type === 'budget_upsert') {
               // 用 update_time 判定新建还是更新，避免重复 POST 触发 PK 冲突
               const { id, ...rest } = item.data
@@ -268,8 +323,14 @@ export const useSyncStore = defineStore('sync', {
                 failedItems.push(item)
               }
             } else {
-              // 未知类型，保留以便诊断
-              failedItems.push(item)
+              // 未知类型：用 retryCount 累计，超过上限 dead-letter 丢弃并打 error
+              const retries = (item.data && item.data.__retries) || 0
+              if (retries >= UNKNOWN_TYPE_MAX_RETRIES) {
+                console.error('[sync] Dead-letter unknown type, dropping:', item.type)
+                // 不 push 进 failedItems → 写回时该 item 消失
+              } else {
+                failedItems.push({ ...item, data: { ...(item.data || {}), __retries: retries + 1 } })
+              }
             }
           } catch (itemErr) {
             // api.js 现在 4xx/5xx 抛错，network fail 也抛错，全部进重试

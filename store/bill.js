@@ -35,13 +35,13 @@ export const useBillStore = defineStore('bill', {
 
     // 获取今日账单
     todayRecords(state) {
-      const today = new Date().toISOString().split('T')[0]
+      const today = formatLocalDate(new Date())
       return state.records.filter(r => r.record_date === today)
     },
 
     // 获取今日支出
     todayExpense(state) {
-      const today = new Date().toISOString().split('T')[0]
+      const today = formatLocalDate(new Date())
       return state.records
         .filter(r => r.record_date === today && r.type === 1)
         .reduce((sum, r) => sum + r.amount, 0)
@@ -49,7 +49,7 @@ export const useBillStore = defineStore('bill', {
 
     // 获取今日收入
     todayIncome(state) {
-      const today = new Date().toISOString().split('T')[0]
+      const today = formatLocalDate(new Date())
       return state.records
         .filter(r => r.record_date === today && r.type === 2)
         .reduce((sum, r) => sum + r.amount, 0)

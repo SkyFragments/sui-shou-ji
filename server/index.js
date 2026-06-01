@@ -12,6 +12,9 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
+// 把 async route handler 的 reject 自动转 next(err)，让统一错误兜底真能跑到
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
+
 // 简易 CORS：H5 端跨域会需要；小程序不强制。生产建议换成按 origin 白名单
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*')
@@ -24,7 +27,7 @@ app.use((req, res, next) => {
 // JSON body 限 256KB，避免恶意大包打爆内存
 app.use(express.json({ limit: '256kb' }))
 
-// 路由
+// 路由（用 wrap 包装，让 4xx/5xx 之外的 throw 也走统一兜底）
 app.use('/api/auth', authRoutes)
 app.use('/api/sync', syncRoutes)
 app.use('/api/records', recordsRoutes)
@@ -36,9 +39,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: Date.now() })
 })
 
-// 统一错误兜底：把未捕获的异常映射成 500，不泄漏 stack
+// 统一错误兜底：4xx 之外的 throw 都映射成 500，不泄漏 stack
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err)
+  if (res.headersSent) return next(err)
   res.status(500).json({ error: 'Internal server error' })
 })
 

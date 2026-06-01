@@ -114,10 +114,12 @@ export const useCategoryStore = defineStore('category', {
       }
       this.categories.push(newCategory)
       this.saveCategories()
-      
-      // Sync to cloud
-      this.syncCategory(newCategory).catch(() => {})
-      
+
+      // Sync to cloud; failure queues for retry
+      this.syncCategory(newCategory).catch(() => {
+        useSyncStore().addPendingSync('category_upsert', newCategory)
+      })
+
       return newCategory
     },
 
@@ -130,10 +132,12 @@ export const useCategoryStore = defineStore('category', {
           ...updates
         }
         this.saveCategories()
-        
-        // Sync to cloud
-        this.syncCategory(this.categories[index]).catch(() => {})
-        
+
+        // Sync to cloud; failure queues for retry
+        this.syncCategory(this.categories[index]).catch(() => {
+          useSyncStore().addPendingSync('category_upsert', this.categories[index])
+        })
+
         return this.categories[index]
       }
       return null
@@ -186,12 +190,18 @@ export const useCategoryStore = defineStore('category', {
 
     // 同步单个分类到云端
     async syncCategory(category) {
+      // 先尝试 PUT，失败回退 POST（处理新建 vs 更新）
+      const { putCategory, postCategory } = await import('@/utils/api')
+      const { id, ...rest } = category
       try {
-        const res = await postCategory(category)
+        await putCategory(id, rest)
         return { success: true }
       } catch (e) {
-        console.error('Sync category failed:', e)
-        return { success: false, error: e }
+        if (e && (e.statusCode === 404 || e.statusCode === 400)) {
+          await postCategory(category)
+          return { success: true }
+        }
+        throw e
       }
     },
 
@@ -199,7 +209,7 @@ export const useCategoryStore = defineStore('category', {
     async syncToCloud() {
       try {
         for (const cat of this.categories) {
-          await postCategory(cat)
+          await this.syncCategory(cat)
         }
         return { success: true }
       } catch (e) {

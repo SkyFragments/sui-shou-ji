@@ -9,15 +9,15 @@ const STORAGE_KEY_TOKEN = 'ssj_auth_token'
 import { login as apiLogin } from './api'
 
 /**
- * 微信一键登录
+ * 微信一键登录（兼容小程序和 H5，用 uni 跨端 API）
  * @returns {Promise<{openid, session_key, unionid}>}
  */
 export async function login() {
 	return new Promise((resolve, reject) => {
-		wx.login({
+		uni.login({
 			success: async (res) => {
 				if (!res.code) {
-					reject(new Error('wx.login 失败，无 code'))
+					reject(new Error('uni.login 失败，无 code'))
 					return
 				}
 
@@ -33,7 +33,7 @@ export async function login() {
 				}
 			},
 			fail: (err) => {
-				reject(new Error('wx.login 调用失败: ' + err.errMsg))
+				reject(new Error('uni.login 调用失败: ' + (err && (err.errMsg || err.message))))
 			}
 		})
 	})
@@ -89,10 +89,11 @@ export async function cloudLogin(code) {
 }
 
 /**
- * 检查登录态
+ * 检查登录态（仅小程序有效，H5 直接返回本地是否有 user）
  */
 export function checkSession() {
 	return new Promise((resolve) => {
+		// #ifdef MP-WEIXIN
 		wx.checkSession({
 			success: () => {
 				const user = getStoredUser()
@@ -102,6 +103,11 @@ export function checkSession() {
 				resolve(false)
 			}
 		})
+		// #endif
+		// #ifndef MP-WEIXIN
+		const user = getStoredUser()
+		resolve(!!user && !!user.openid)
+		// #endif
 	})
 }
 
@@ -118,10 +124,11 @@ export function getStoredUser() {
 }
 
 /**
- * 获取用户信息（需授权）
+ * 获取用户信息（需授权，仅小程序）
  */
 export function getUserInfo() {
 	return new Promise((resolve, reject) => {
+		// #ifdef MP-WEIXIN
 		wx.getUserProfile({
 			desc: '用于展示用户信息',
 			success: (res) => {
@@ -134,6 +141,10 @@ export function getUserInfo() {
 				reject(new Error('用户拒绝授权: ' + err.errMsg))
 			}
 		})
+		// #endif
+		// #ifndef MP-WEIXIN
+		reject(new Error('getUserInfo 仅支持微信小程序'))
+		// #endif
 	})
 }
 
