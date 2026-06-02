@@ -31,8 +31,9 @@
 			>
 				<view class="category-icon" :style="{ backgroundColor: category.color }">
 					<image :src="getIconPath(category.icon)" class="category-icon-img" />
+					<view v-if="selectedCode === category.code" class="check-badge">✓</view>
 				</view>
-				<text class="category-name">{{ category.name }}</text>
+				<text class="category-name" :class="{ selected: selectedCode === category.code }">{{ category.name }}</text>
 			</view>
 		</view>
 	</view>
