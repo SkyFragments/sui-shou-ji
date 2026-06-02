@@ -5,11 +5,18 @@
  */
 <template>
 	<view class="add-page">
-		<!-- 页面标题 -->
-		<view class="page-header">
-			<text class="page-title">{{ isEdit ? '编辑账单' : '记一笔' }}</text>
-			<view class="delete-btn" v-if="isEdit" @click="onDeleteRecord">
-				<text>删除</text>
+		<!-- 顶部导航栏 -->
+		<view class="navbar">
+			<view class="navbar-left" @click="goBack">
+				<text class="navbar-back">‹</text>
+			</view>
+			<text class="navbar-title">{{ isEdit ? '编辑账单' : '记一笔' }}</text>
+			<view class="navbar-right">
+				<text
+					v-if="isEdit"
+					class="navbar-action danger"
+					@click="onDeleteRecord"
+				>删除</text>
 			</view>
 		</view>
 
@@ -21,21 +28,21 @@
 			</view>
 		</view>
 
-		<!-- 支出/收入切换 -->
-		<view class="type-switch">
+		<!-- 支出/收入 段控件（一体的胶囊式容器） -->
+		<view class="segmented">
 			<view
-				class="type-btn"
+				class="segmented-item"
 				:class="{ active: recordType === 1 }"
 				@click="switchType(1)"
 			>
-				支出
+				<text>支出</text>
 			</view>
 			<view
-				class="type-btn"
+				class="segmented-item"
 				:class="{ active: recordType === 2 }"
 				@click="switchType(2)"
 			>
-				收入
+				<text>收入</text>
 			</view>
 		</view>
 
@@ -343,6 +350,15 @@ export default {
 			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
+		const goBack = () => {
+			const pages = getCurrentPages()
+			if (pages && pages.length > 1) {
+				uni.navigateBack()
+			} else {
+				uni.reLaunch({ url: '/pages/index/index' })
+			}
+		}
+
 		return {
 			isEdit,
 			recordType,
@@ -364,6 +380,7 @@ export default {
 			onClear,
 			onDeleteRecord,
 			onSave,
+			goBack,
 			goToIndex,
 			goToRecords,
 			goToStats,
@@ -388,29 +405,53 @@ function getToday() {
 	padding-bottom: 240rpx;
 }
 
-.page-header {
+.navbar {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	padding: 20rpx 30rpx;
+	justify-content: space-between;
+	height: 88rpx;
+	padding: 0 24rpx;
 	background-color: #ffffff;
 	border-bottom: 1rpx solid #f0f0f0;
+	position: sticky;
+	top: 0;
+	z-index: 10;
 }
 
-.page-title {
-	font-size: 32rpx;
-	font-weight: bold;
+.navbar-left,
+.navbar-right {
+	min-width: 80rpx;
+	display: flex;
+	align-items: center;
+}
+
+.navbar-right {
+	justify-content: flex-end;
+}
+
+.navbar-back {
+	font-size: 56rpx;
+	line-height: 1;
 	color: #333333;
+	font-weight: 300;
+	padding: 0 8rpx;
 }
 
-.delete-btn {
-	padding: 10rpx 24rpx;
-	background-color: #FDEBE7;
-	border-radius: 8rpx;
+.navbar-title {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #333333;
+	flex: 1;
+	text-align: center;
 }
 
-.delete-btn text {
-	font-size: 26rpx;
+.navbar-action {
+	font-size: 28rpx;
+	color: #333333;
+	padding: 8rpx 16rpx;
+}
+
+.navbar-action.danger {
 	color: #dd524d;
 }
 
@@ -444,34 +485,40 @@ function getToday() {
 	color: #333333;
 }
 
-.type-switch {
+/* 段控件：单容器包裹两段，整体是一个胶囊 */
+.segmented {
 	display: flex;
-	justify-content: center;
-	gap: 60rpx;
-	padding: 24rpx;
-	background-color: #ffffff;
-	margin-bottom: 16rpx;
+	margin: 16rpx 30rpx;
+	padding: 6rpx;
+	background-color: #f0f0f0;
+	border-radius: 999rpx;
 }
 
-.type-btn {
-	padding: 12rpx 48rpx;
-	border-radius: 40rpx;
+.segmented-item {
+	flex: 1;
+	height: 64rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999rpx;
 	font-size: 28rpx;
 	color: #666666;
-	background-color: #f0f0f0;
 	transition: all 0.2s;
 }
 
-.type-btn.active {
-	color: #ffffff;
+.segmented-item.active {
+	background-color: #ffffff;
+	color: #333333;
+	font-weight: 600;
+	box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.08);
 }
 
-.type-btn.active:nth-child(1) {
-	background-color: #C85A53;
+.segmented-item.active:nth-child(1) {
+	color: #C85A53;
 }
 
-.type-btn.active:nth-child(2) {
-	background-color: #07c160;
+.segmented-item.active:nth-child(2) {
+	color: #07c160;
 }
 
 .section {
