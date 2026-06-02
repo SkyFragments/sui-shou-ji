@@ -271,33 +271,32 @@ export default {
 		}
 
 		const onSync = async () => {
-			uni.showToast({ title: '同步中...', icon: 'loading' })
-			try {
-				// 获取当前数据状态（演示用）
-				const records = billStore.records
-				const categories = categoryStore.categories
-				const accounts = accountStore.accounts
-
-				// 模拟同步过程
-				await new Promise(resolve => setTimeout(resolve, 1500))
-
-				// 演示模式：显示同步结果摘要
-				const syncSummary = {
-					records: records.length,
-					categories: categories.length,
-					accounts: accounts.length,
-					timestamp: new Date().toLocaleString('zh-CN')
-				}
-
-				uni.showModal({
-					title: '同步成功',
-					content: `数据同步完成\n\n设备信息\n• 记录数量：${syncSummary.records} 条\n• 分类数量：${syncSummary.categories} 条\n• 账户数量：${syncSummary.accounts} 条\n\n同步时间：${syncSummary.timestamp}\n\n提示：当前为演示模式，实际云同步需接入微信云开发环境`,
-					showCancel: false,
-					confirmText: '确定'
-				})
-			} catch (e) {
-				uni.showToast({ title: '同步失败', icon: 'none' })
+			// 走真实 REST 同步：pull + push + flush pending
+			// store/sync.js 的 triggerFirstSync 已处理 loading / 登录守卫 / 离线分支 / truncated
+			const result = await syncStore.triggerFirstSync()
+			if (result.needLogin) {
+				uni.showToast({ title: '请先登录', icon: 'none' })
+				return
 			}
+			if (result.offline) {
+				uni.showToast({ title: '离线模式', icon: 'none' })
+				return
+			}
+			if (result.truncated) {
+				uni.showToast({ title: '已拉取部分数据，请稍后再同步', icon: 'none' })
+				return
+			}
+			// 拉取并合并完成后显示真实统计
+			const records = billStore.records
+			const categories = categoryStore.categories
+			const accounts = accountStore.accounts
+			const pending = syncStore.pendingSync.length
+			uni.showModal({
+				title: '同步完成',
+				content: `数据同步完成\n\n设备信息\n• 记录数量：${records.length} 条\n• 分类数量：${categories.length} 条\n• 账户数量：${accounts.length} 条\n\n同步时间：${new Date(syncStore.lastSyncTime || Date.now()).toLocaleString('zh-CN')}${pending ? `\n\n${pending} 项待重试` : ''}`,
+				showCancel: false,
+				confirmText: '确定'
+			})
 		}
 
 		return {
@@ -332,6 +331,7 @@ export default {
 	align-items: center;
 	background-color: #07c160;
 	padding: 40rpx 30rpx;
+	padding-top: calc(40rpx + env(safe-area-inset-top));
 }
 
 .profile-logged-in,
@@ -419,8 +419,8 @@ export default {
 }
 
 .menu-icon-svg {
-	width: 40rpx;
-	height: 40rpx;
+	width: 48rpx;
+	height: 48rpx;
 	margin-right: 16rpx;
 }
 
@@ -505,8 +505,8 @@ export default {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -517,8 +517,8 @@ export default {
 }
 
 .tab-icon {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 	margin-bottom: 4rpx;
 }
 

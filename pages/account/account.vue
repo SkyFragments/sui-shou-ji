@@ -306,6 +306,7 @@ export default {
 .account-page {
 	min-height: 100vh;
 	background-color: #FDF4E9;
+	padding-top: env(safe-area-inset-top);
 	padding-bottom: 120rpx;
 }
 
@@ -546,8 +547,8 @@ export default {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {

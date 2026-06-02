@@ -5,8 +5,11 @@
  */
 <template>
 	<view class="add-page">
+		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
+		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
+
 		<!-- 顶部导航栏 -->
-		<view class="navbar">
+		<view class="navbar" :style="{ top: statusBarH + 'px' }">
 			<view class="navbar-left" @click="goBack">
 				<text class="navbar-back">‹</text>
 			</view>
@@ -149,6 +152,13 @@ export default {
 		const billStore = useBillStore()
 		const categoryStore = useCategoryStore()
 		const accountStore = useAccountStore()
+
+		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
+		const statusBarH = ref(20)
+		try {
+			const info = uni.getSystemInfoSync()
+			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
+		} catch (e) {}
 
 		// 初始化 stores
 		categoryStore.loadCategories()
@@ -360,6 +370,7 @@ export default {
 		}
 
 		return {
+			statusBarH,
 			isEdit,
 			recordType,
 			amount,
@@ -411,11 +422,17 @@ function getToday() {
 	justify-content: space-between;
 	height: 88rpx;
 	padding: 0 24rpx;
+	box-sizing: border-box;
 	background-color: #ffffff;
 	border-bottom: 1rpx solid #f0f0f0;
 	position: sticky;
 	top: 0;
 	z-index: 10;
+}
+
+.status-bar-placeholder {
+	width: 100%;
+	background-color: #ffffff;
 }
 
 .navbar-left,
@@ -618,8 +635,8 @@ function getToday() {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -629,7 +646,7 @@ function getToday() {
 	line-height: 1;
 }
 
-.tab-icon { width: 44rpx; height: 44rpx; margin-bottom: 4rpx; } 
+.tab-icon { width: 56rpx; height: 56rpx; margin-bottom: 4rpx; } 
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

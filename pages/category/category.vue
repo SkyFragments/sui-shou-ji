@@ -4,6 +4,9 @@
  */
 <template>
 	<view class="category-page">
+		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
+		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
+
 		<!-- 类型切换 -->
 		<view class="type-tabs animate-slide-up">
 			<view
@@ -148,6 +151,13 @@ export default {
 	setup() {
 		const categoryStore = useCategoryStore()
 
+		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
+		const statusBarH = ref(20)
+		try {
+			const info = uni.getSystemInfoSync()
+			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
+		} catch (e) {}
+
 		const currentType = ref(1)
 		const showModal = ref(false)
 		const isEdit = ref(false)
@@ -282,6 +292,7 @@ export default {
 		}
 
 		return {
+			statusBarH,
 			currentType,
 			showModal,
 			isEdit,
@@ -313,6 +324,11 @@ export default {
 	min-height: 100vh;
 	background-color: #FDF4E9;
 	padding-bottom: 120rpx;
+}
+
+.status-bar-placeholder {
+	width: 100%;
+	background-color: #ffffff;
 }
 
 .type-tabs {
@@ -351,8 +367,8 @@ export default {
 }
 
 .category-icon {
-	width: 80rpx;
-	height: 80rpx;
+	width: 96rpx;
+	height: 96rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -398,7 +414,7 @@ export default {
 .add-btn {
 	position: fixed;
 	right: 30rpx;
-	bottom: 150rpx;
+	bottom: calc(120rpx + env(safe-area-inset-bottom));
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
@@ -481,13 +497,13 @@ export default {
 .icon-grid {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16rpx;
+	gap: 20rpx;
 }
 
 .icon-item {
-	width: 80rpx;
-	height: 80rpx;
-	border-radius: 12rpx;
+	width: 110rpx;
+	height: 110rpx;
+	border-radius: 16rpx;
 	background-color: #FDF4E9;
 	display: flex;
 	align-items: center;
@@ -495,8 +511,8 @@ export default {
 }
 
 .icon-option-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 68rpx;
+	height: 68rpx;
 }
 
 .icon-item.selected {
@@ -600,8 +616,8 @@ export default {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -617,16 +633,16 @@ export default {
 }
 
 .tab-icon {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 	margin-bottom: 4rpx;
 }
 
 
 
 .icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 56rpx;
+	height: 56rpx;
 }
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);

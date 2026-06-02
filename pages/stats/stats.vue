@@ -7,13 +7,13 @@
 		<!-- 月份选择器 -->
 		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
-				<text class="nav-btn"><</text>
+				<image src="/static/icon/icon-arrow-left.svg" class="nav-btn-icon" />
 			</view>
 			<view class="month-display">
 				<text class="month-text">{{ displayMonth }}</text>
 			</view>
 			<view class="month-nav" @click="nextMonth">
-				<text class="nav-btn">></text>
+				<image src="/static/icon/icon-arrow-right.svg" class="nav-btn-icon" />
 			</view>
 		</view>
 
@@ -308,6 +308,7 @@ function getCurrentYearMonth() {
 	justify-content: space-between;
 	background-color: #ffffff;
 	padding: 20rpx 30rpx;
+	padding-top: calc(20rpx + env(safe-area-inset-top));
 }
 
 .month-nav {
@@ -317,6 +318,11 @@ function getCurrentYearMonth() {
 .nav-btn {
 	font-size: 34rpx;
 	color: #666666;
+}
+
+.nav-btn-icon {
+	width: 32rpx;
+	height: 32rpx;
 }
 
 .month-display {
@@ -544,8 +550,8 @@ function getCurrentYearMonth() {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -561,8 +567,8 @@ function getCurrentYearMonth() {
 }
 
 .tab-icon {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 	margin-bottom: 4rpx;
 }
 

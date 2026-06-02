@@ -148,8 +148,8 @@ export default {
 }
 
 .category-icon {
-	width: 80rpx;
-	height: 80rpx;
+	width: 96rpx;
+	height: 96rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -159,8 +159,8 @@ export default {
 }
 
 .category-icon-img {
-	width: 48rpx;
-	height: 48rpx;
+	width: 56rpx;
+	height: 56rpx;
 }
 
 .category-item.selected .category-icon {

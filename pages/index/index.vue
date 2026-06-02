@@ -335,6 +335,7 @@ export default {
 .overview-section {
 	background-color: #07c160;
 	padding: 30rpx 30rpx 40rpx;
+	padding-top: calc(30rpx + env(safe-area-inset-top));
 	color: #ffffff;
 }
 
@@ -511,8 +512,8 @@ export default {
 }
 
 .template-icon {
-	width: 80rpx;
-	height: 80rpx;
+	width: 96rpx;
+	height: 96rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -587,8 +588,8 @@ export default {
 }
 
 .record-icon-svg {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 }
 
 .record-info {
@@ -630,7 +631,7 @@ export default {
 .add-btn {
 	position: fixed;
 	right: 30rpx;
-	bottom: 180rpx;
+	bottom: calc(130rpx + env(safe-area-inset-bottom));
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
@@ -707,8 +708,8 @@ export default {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab:active {
@@ -717,8 +718,8 @@ export default {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 	filter: brightness(0) invert(1);
 }
 
@@ -730,14 +731,14 @@ export default {
 }
 
 .tab-icon {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 	margin-bottom: 4rpx;
 }
 
 .icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 56rpx;
+	height: 56rpx;
 }
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);

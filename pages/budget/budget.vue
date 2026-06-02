@@ -4,6 +4,9 @@
  */
 <template>
 	<view class="budget-page">
+		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
+		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
+
 		<!-- 月份选择器 -->
 		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
@@ -296,6 +299,7 @@ function getCurrentYearMonth() {
 	justify-content: space-between;
 	background-color: #ffffff;
 	padding: 20rpx 30rpx;
+	padding-top: calc(20rpx + env(safe-area-inset-top));
 }
 
 .month-nav {
@@ -549,8 +553,8 @@ function getCurrentYearMonth() {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -560,7 +564,7 @@ function getCurrentYearMonth() {
 	line-height: 1;
 }
 
-.tab-icon { width: 44rpx; height: 44rpx; margin-bottom: 4rpx; } 
+.tab-icon { width: 56rpx; height: 56rpx; margin-bottom: 4rpx; } 
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

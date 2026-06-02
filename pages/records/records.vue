@@ -310,6 +310,7 @@ function getCurrentYearMonth() {
 	justify-content: space-between;
 	background-color: #ffffff;
 	padding: 20rpx 30rpx;
+	padding-top: calc(20rpx + env(safe-area-inset-top));
 }
 
 .month-nav {
@@ -452,8 +453,8 @@ function getCurrentYearMonth() {
 }
 
 .record-icon-svg {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 }
 
 .record-info {
@@ -535,8 +536,8 @@ function getCurrentYearMonth() {
 }
 
 .add-tab-icon-svg {
-	width: 48rpx;
-	height: 48rpx;
+	width: 52rpx;
+	height: 52rpx;
 }
 
 .add-tab-icon {
@@ -547,8 +548,8 @@ function getCurrentYearMonth() {
 }
 
 .tab-icon {
-	width: 44rpx;
-	height: 44rpx;
+	width: 56rpx;
+	height: 56rpx;
 	margin-bottom: 4rpx;
 }
 
