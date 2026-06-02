@@ -142,6 +142,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useBillStore } from '@/store/bill'
 import { useBudgetStore } from '@/store/budget'
 import { useCategoryStore } from '@/store/category'
+import { useAccountStore } from '@/store/account'
 import { useTemplateStore } from '@/store/template'
 import RingChart from '@/components/ring-chart/ring-chart.vue'
 
@@ -153,6 +154,7 @@ export default {
 		const billStore = useBillStore()
 		const budgetStore = useBudgetStore()
 		const categoryStore = useCategoryStore()
+		const accountStore = useAccountStore()
 		const templateStore = useTemplateStore()
 
 		// 快捷模板：从 store 读取（首页只显示前 N 个，store getter 已 slice）
@@ -163,6 +165,7 @@ export default {
 			billStore.loadRecords()
 			budgetStore.loadBudgets()
 			categoryStore.loadCategories()
+			accountStore.loadAccounts()
 			templateStore.loadTemplates()
 		})
 
@@ -250,7 +253,7 @@ export default {
 				amount: template.amount,
 				category_code: template.category_code,
 				category_name: category?.name || template.name,
-				account_code: 'cash',
+				account_code: accountStore.defaultAccount?.code || 'cash',
 				remark: '',
 				record_date: recordDate
 			}

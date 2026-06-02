@@ -77,9 +77,11 @@
 			<view class="form-item">
 				<view class="form-label">日期</view>
 				<picker
-					mode="date"
-					:value="recordDate"
+					mode="multiSelector"
+					:range="datePickerColumns"
+					:value="datePickerIndex"
 					@change="onDateChange"
+					@columnchange="onDateColumnChange"
 				>
 					<view class="picker-value">
 						{{ recordDate }}
@@ -176,7 +178,7 @@ export default {
 		const amount = ref('')
 		const selectedCategoryCode = ref('')
 		const selectedCategory = ref(null)
-		const selectedAccountCode = ref('')
+		const selectedAccountCode = ref(accountStore.defaultAccount?.code || '')
 		const recordDate = ref(getToday())
 		const remark = ref('')
 
@@ -252,7 +254,28 @@ export default {
 		}
 
 		const onDateChange = (e) => {
-			recordDate.value = e.detail.value
+			// multiSelector: e.detail.value = [yearIdx, monthIdx, dayIdx]
+			const [yi, mi, di] = e.detail.value
+			const year = datePickerColumns.value[0][yi]
+			const month = datePickerColumns.value[1][mi]
+			const day = datePickerColumns.value[2][di]
+			recordDate.value = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+		}
+
+		const onDateColumnChange = (e) => {
+			// 同步更新 day 列（月份切换时天数可能变）
+			const { column, value } = e.detail
+			if (column === 0 || column === 1) {
+				const yi = column === 0 ? value : datePickerIndex.value[0]
+				const mi = column === 1 ? value : datePickerIndex.value[1]
+				const year = datePickerColumns.value[0][yi]
+				const month = datePickerColumns.value[1][mi]
+				const days = getDaysInMonth(year, month)
+				datePickerColumns.value[2] = Array.from({ length: days }, (_, i) => i + 1)
+				if (datePickerIndex.value[2] >= days) {
+					datePickerIndex.value[2] = days - 1
+				}
+			}
 		}
 
 		const onInput = (value) => {
