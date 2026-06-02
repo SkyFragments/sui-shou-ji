@@ -21,9 +21,11 @@
 					@touchstart="onTouch"
 				></canvas>
 				<!-- 数据点 + 触摸提示 -->
-				<view v-for="(p, i) in points" :key="'p-' + i" class="point" :style="getPointStyle(p)">
-					<view class="dot"></view>
-				</view>
+				<template v-for="(p, i) in points" :key="'p-' + i">
+					<view class="point" :style="getPointStyle(p)">
+						<view class="dot"></view>
+					</view>
+				</template>
 				<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
 					<text class="tooltip-day">{{ hoverInfo.day }}</text>
 					<text class="tooltip-val">¥{{ hoverInfo.value }}</text>
