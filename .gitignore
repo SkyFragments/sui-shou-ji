@@ -2,3 +2,10 @@ node_modules/
 unpackage/
 .hbuilderx/
 .DS_Store
+
+# Editor backups
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
