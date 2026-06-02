@@ -9,7 +9,8 @@
 		{
 			"path": "pages/add/add",
 			"style": {
-				"navigationBarTitleText": "记账"
+				"navigationBarTitleText": "记账",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -27,19 +28,22 @@
 		{
 			"path": "pages/budget/budget",
 			"style": {
-				"navigationBarTitleText": "预算"
+				"navigationBarTitleText": "预算",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/account/account",
 			"style": {
-				"navigationBarTitleText": "账户管理"
+				"navigationBarTitleText": "账户管理",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/category/category",
 			"style": {
-				"navigationBarTitleText": "分类管理"
+				"navigationBarTitleText": "分类管理",
+				"navigationStyle": "custom"
 			}
 		},
 		{
