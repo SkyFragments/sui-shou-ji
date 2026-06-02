@@ -98,6 +98,12 @@ async function request(url, method = 'GET', data = null) {
               // 形成「无 token → 401 → 清 token → 仍认为已登录」的死循环
               uni.removeStorageSync(STORAGE_KEY_TOKEN)
               try { uni.removeStorageSync('ssj_users') } catch (e) { /* ignore */ }
+              // 同时清同步队列：旧 token 期间累积的 pending/dead-letter 是用旧身份
+              // 排队的，重登后 push 会污染新账号
+              try {
+                uni.removeStorageSync('ssj_sync_status')
+                uni.removeStorageSync('ssj_sync_dead_letter')
+              } catch (e) { /* ignore */ }
               reject(Object.assign(new Error('Unauthorized'), { statusCode: 401 }))
             } else {
               const msg = (res.data && (res.data.error || res.data.message)) || `HTTP ${res.statusCode}`

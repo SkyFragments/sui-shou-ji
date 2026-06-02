@@ -119,7 +119,9 @@ export const useCategoryStore = defineStore('category', {
       this.saveCategories()
 
       // Sync to cloud; failure queues for retry
-      this.syncCategory(newCategory).catch(() => {
+      this.syncCategory(newCategory).catch((err) => {
+        // 401：api.js 已清队列 + token + user；不再入队
+        if (err && err.statusCode === 401) return
         useSyncStore().addPendingSync('category_upsert', newCategory)
       })
 
@@ -137,7 +139,9 @@ export const useCategoryStore = defineStore('category', {
         this.saveCategories()
 
         // Sync to cloud; failure queues for retry
-        this.syncCategory(this.categories[index]).catch(() => {
+        this.syncCategory(this.categories[index]).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           useSyncStore().addPendingSync('category_upsert', this.categories[index])
         })
 
@@ -160,7 +164,9 @@ export const useCategoryStore = defineStore('category', {
         this.saveCategories()
 
         // Sync delete to cloud (queue on failure for retry)
-        this.syncDeleteFromCloud(deletedCategory.id).catch(() => {
+        this.syncDeleteFromCloud(deletedCategory.id).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           useSyncStore().addPendingSync('category_delete', { id: deletedCategory.id, ...deletedCategory })
         })
 
@@ -203,6 +209,8 @@ export const useCategoryStore = defineStore('category', {
         try {
           await this.syncCategory(cat)
         } catch (e) {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (e && e.statusCode === 401) continue
           allOk = false
           sync.addPendingSync('category_upsert', cat)
         }

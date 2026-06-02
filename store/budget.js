@@ -91,6 +91,8 @@ export const useBudgetStore = defineStore('budget', {
 
       // Sync to cloud; failure queues for retry via syncPendingData
       this.syncBudget(this.budgets[yearMonth]).catch(err => {
+        // 401：api.js 已清队列 + token + user；不再入队
+        if (err && err.statusCode === 401) return
         useSyncStore().addPendingSync('budget_upsert', this.budgets[yearMonth])
       })
 

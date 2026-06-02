@@ -157,8 +157,13 @@ export function isLoggedIn() {
 
 /**
  * 退出登录
+ * 清 token + user + 同步队列，避免旧账号的脏数据在重新登录后推到新账号云端
  */
 export function logout() {
 	uni.removeStorageSync(STORAGE_KEY_USER)
 	uni.removeStorageSync(STORAGE_KEY_TOKEN)
+	// 清同步状态：pending / dead-letter / lastSyncTime
+	// 直接清 storage key，不走 Pinia store（utils 文件可能从非组件上下文调）
+	uni.removeStorageSync('ssj_sync_status')
+	uni.removeStorageSync('ssj_sync_dead_letter')
 }

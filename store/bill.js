@@ -89,6 +89,8 @@ export const useBillStore = defineStore('bill', {
 
       // Sync to cloud (fire-and-forget, queue on failure)
       this.syncToCloudAfterAdd(newRecord).catch(err => {
+        // 401：api.js 已清队列 + token + user；不再入队，否则会立刻填回去
+        if (err && err.statusCode === 401) return
         const syncStore = useSyncStore()
         syncStore.addPendingSync('record_add', newRecord)
       })
@@ -111,6 +113,8 @@ export const useBillStore = defineStore('bill', {
         // Sync update to cloud via REST API; queue on failure
         const updated = this.records[index]
         this.syncUpdateInCloud(updated).catch(err => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           const syncStore = useSyncStore()
           syncStore.addPendingSync('record_update', updated)
         })
@@ -137,6 +141,8 @@ export const useBillStore = defineStore('bill', {
 
         // Sync delete to cloud via REST API; queue on failure
         this.syncDeleteFromCloud(id).catch(err => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           const syncStore = useSyncStore()
           syncStore.addPendingSync('record_delete', { id, ...deletedRecord })
         })

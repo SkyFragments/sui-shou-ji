@@ -95,7 +95,9 @@ export const useTemplateStore = defineStore('template', {
       this.saveTemplates()
 
       // 云同步：失败入 pendingSync 重试（syncTemplate 不内部 catch，让 .catch 真正触发）
-      this.syncTemplate(newTemplate).catch(() => {
+      this.syncTemplate(newTemplate).catch((err) => {
+        // 401：api.js 已清队列 + token + user；不再入队
+        if (err && err.statusCode === 401) return
         getSyncStore().addPendingSync('template_upsert', newTemplate)
       })
 
@@ -115,7 +117,9 @@ export const useTemplateStore = defineStore('template', {
       this.saveTemplates()
 
       const updated = this.templates[index]
-      this.syncTemplate(updated).catch(() => {
+      this.syncTemplate(updated).catch((err) => {
+        // 401：api.js 已清队列 + token + user；不再入队
+        if (err && err.statusCode === 401) return
         getSyncStore().addPendingSync('template_upsert', updated)
       })
 
@@ -132,7 +136,9 @@ export const useTemplateStore = defineStore('template', {
 
       // 云同步删除
       if (removed) {
-        this.syncDeleteFromCloud(removed.id).catch(() => {
+        this.syncDeleteFromCloud(removed.id).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           getSyncStore().addPendingSync('template_delete', { id: removed.id, ...removed })
         })
       }
@@ -181,7 +187,9 @@ export const useTemplateStore = defineStore('template', {
       const sync = getSyncStore()
       // 删除旧云端模板，失败入队
       for (const id of oldIds) {
-        this.syncDeleteFromCloud(id).catch(() => {
+        this.syncDeleteFromCloud(id).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           sync.addPendingSync('template_delete', { id })
         })
       }
@@ -219,6 +227,8 @@ export const useTemplateStore = defineStore('template', {
         try {
           await this.syncTemplate(tpl)
         } catch (e) {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (e && e.statusCode === 401) continue
           allOk = false
           // 失败者入 pendingSync，下次网络恢复时重试
           sync.addPendingSync('template_upsert', tpl)

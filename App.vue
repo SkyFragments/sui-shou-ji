@@ -1,5 +1,6 @@
 <script>
 	import { initAllData } from './utils/init-data'
+	import { useSyncStore } from './store/sync'
 
 	export default {
 		onLaunch: function() {
@@ -7,6 +8,11 @@
 			console.log('页面数量:', getCurrentPages().length)
 			// 初始化默认数据
 			initAllData()
+			// 初始化同步：loadSyncStatus 恢复 pending/dead-letter，
+			// initNetworkListener 让断网→恢复时自动 retry pending
+			const syncStore = useSyncStore()
+			syncStore.loadSyncStatus()
+			syncStore.initNetworkListener()
 			// 验证 CSS 变量 - 使用 dom 获取 computed style
 			const bgColor = '#FDF4E9'
 			console.log('[App] 背景色变量验证:', bgColor)

@@ -83,7 +83,9 @@ export const useAccountStore = defineStore('account', {
       this.saveAccounts()
 
       // Sync to cloud; failure queues for retry
-      this.syncAccount(newAccount).catch(() => {
+      this.syncAccount(newAccount).catch((err) => {
+        // 401：api.js 已清队列 + token + user；不再入队
+        if (err && err.statusCode === 401) return
         useSyncStore().addPendingSync('account_upsert', newAccount)
       })
 
@@ -102,7 +104,9 @@ export const useAccountStore = defineStore('account', {
         this.saveAccounts()
 
         // Sync to cloud; failure queues for retry
-        this.syncAccount(this.accounts[index]).catch(() => {
+        this.syncAccount(this.accounts[index]).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           useSyncStore().addPendingSync('account_upsert', this.accounts[index])
         })
 
@@ -125,7 +129,9 @@ export const useAccountStore = defineStore('account', {
         this.saveAccounts()
 
         // Sync delete to cloud (queue on failure for retry)
-        this.syncDeleteFromCloud(deletedAccount.id).catch(() => {
+        this.syncDeleteFromCloud(deletedAccount.id).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           useSyncStore().addPendingSync('account_delete', { id: deletedAccount.id, ...deletedAccount })
         })
 
@@ -158,7 +164,9 @@ export const useAccountStore = defineStore('account', {
       // 默认账户切换必须上行：is_default 改了但云端没改的话，下次 pullFromCloud 会被云端旧值覆盖
       const updated = this.accounts.find(a => a.code === code)
       if (updated) {
-        this.syncAccount(updated).catch(() => {
+        this.syncAccount(updated).catch((err) => {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (err && err.statusCode === 401) return
           useSyncStore().addPendingSync('account_upsert', updated)
         })
       }
@@ -166,7 +174,9 @@ export const useAccountStore = defineStore('account', {
       if (previous) {
         const previousNow = this.accounts.find(a => a.code === previous.code)
         if (previousNow) {
-          this.syncAccount(previousNow).catch(() => {
+          this.syncAccount(previousNow).catch((err) => {
+            // 401：api.js 已清队列 + token + user；不再入队
+            if (err && err.statusCode === 401) return
             useSyncStore().addPendingSync('account_upsert', previousNow)
           })
         }
