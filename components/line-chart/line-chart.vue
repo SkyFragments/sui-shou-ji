@@ -14,12 +14,9 @@
 		<view class="chart-container">
 			<view class="line-canvas" :style="canvasWrapStyle">
 				<canvas class="real-canvas" :canvas-id="canvasId" :id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
-				<!-- 数据点 + 触摸提示 -->
-				<template v-for="(p, i) in points" :key="'p-' + i">
-					<view class="point" :style="getPointStyle(p)">
-						<view class="dot"></view>
-					</view>
-				</template>
+				<!-- 数据点 -->
+				<view v-for="(p, i) in points" :key="i" class="point" :style="getPointStyle(p)" />
+				<!-- 触摸提示 -->
 				<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
 					<text class="tooltip-day">{{ hoverInfo.day }}</text>
 					<text class="tooltip-val">¥{{ hoverInfo.value }}</text>
