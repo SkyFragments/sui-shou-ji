@@ -5,14 +5,11 @@
  * 数据形状参见 utils/schema.js TEMPLATE_COLUMNS
  * 本地持久化 + 云同步：本地立即写盘，云端失败入 pendingSync 重试
  *
- * 循环依赖说明：
- *   sync.js 顶层 import useTemplateStore；本文件也顶层 import useSyncStore
- *   Pinia 的 defineStore 返回 hook 函数（非实例），ESM 加载只解析函数引用，
- *   实例化发生在 useFoo() 调用瞬间，cycle 在「函数引用层面」无害
- *   与 category/account/budget store 现行模式一致
- *
- *   早期尝试动态 import('@/store/sync') 在小程序构建里 @/ 别名不解析 →
- *   useSyncStore 为 undefined 触发 TypeError，故回退顶层 import
+ * 循环依赖修复 (v2)：
+ *   旧版顶层 import useSyncStore 在小程序运行时偶发 undefined
+ *   （sync.js 顶层又 import useTemplateStore，cycle 顶层求值时序不稳）
+ *   改为懒解析：useSyncStore 在 action 调用时通过 require 拿，避开 cycle
+ *   @/ 别名在动态 import 中不解析，故用相对路径 './sync'
  */
 
 import { defineStore } from 'pinia'
@@ -21,7 +18,13 @@ import { generateId } from '@/utils/db'
 import { TABLE_NAMES, HOME_TEMPLATE_VISIBLE_LIMIT } from '@/utils/schema'
 import { initTemplates } from '@/utils/init-data'
 import { postTemplate, putTemplate, deleteTemplate, upsertByPutPost } from '@/utils/api'
-import { useSyncStore } from '@/store/sync'
+
+// 懒解析 useSyncStore：避免顶层 cycle，调用时再 require
+// 必须在所有 action 之前定义
+const getSyncStore = () => {
+  // eslint-disable-next-line
+  return require('./sync').useSyncStore()
+}
 
 const STORAGE_KEY = TABLE_NAMES.TEMPLATE
 
@@ -93,7 +96,7 @@ export const useTemplateStore = defineStore('template', {
 
       // 云同步：失败入 pendingSync 重试（syncTemplate 不内部 catch，让 .catch 真正触发）
       this.syncTemplate(newTemplate).catch(() => {
-        useSyncStore().addPendingSync('template_upsert', newTemplate)
+        getSyncStore().addPendingSync('template_upsert', newTemplate)
       })
 
       return newTemplate
@@ -113,7 +116,7 @@ export const useTemplateStore = defineStore('template', {
 
       const updated = this.templates[index]
       this.syncTemplate(updated).catch(() => {
-        useSyncStore().addPendingSync('template_upsert', updated)
+        getSyncStore().addPendingSync('template_upsert', updated)
       })
 
       return updated
@@ -130,7 +133,7 @@ export const useTemplateStore = defineStore('template', {
       // 云同步删除
       if (removed) {
         this.syncDeleteFromCloud(removed.id).catch(() => {
-          useSyncStore().addPendingSync('template_delete', { id: removed.id, ...removed })
+          getSyncStore().addPendingSync('template_delete', { id: removed.id, ...removed })
         })
       }
 
@@ -175,7 +178,7 @@ export const useTemplateStore = defineStore('template', {
       }))
       this.saveTemplates()
 
-      const sync = useSyncStore()
+      const sync = getSyncStore()
       // 删除旧云端模板，失败入队
       for (const id of oldIds) {
         this.syncDeleteFromCloud(id).catch(() => {
@@ -211,7 +214,7 @@ export const useTemplateStore = defineStore('template', {
     // 此方法内部需要兜底：失败的模板**单独**入 pendingSync，不让整体失败拖累其他配置类
     async syncToCloud() {
       let allOk = true
-      const sync = useSyncStore()
+      const sync = getSyncStore()
       for (const tpl of this.templates) {
         try {
           await this.syncTemplate(tpl)
