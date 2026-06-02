@@ -13,13 +13,7 @@
 		</view>
 		<view class="chart-container">
 			<view class="line-canvas" :style="canvasWrapStyle">
-				<canvas
-					:canvas-id="canvasId"
-					:id="canvasId"
-					class="real-canvas"
-					:style="canvasStyle"
-					@touchstart="onTouch"
-				></canvas>
+				<canvas class="real-canvas" :canvas-id="canvasId" :id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
 				<!-- 数据点 + 触摸提示 -->
 				<template v-for="(p, i) in points" :key="'p-' + i">
 					<view class="point" :style="getPointStyle(p)">
