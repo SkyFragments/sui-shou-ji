@@ -77,6 +77,9 @@ export const useBillStore = defineStore('bill', {
         remark: record.remark || '',
         // 用本地日期而非 UTC：toISOString() 会在东八区凌晨把当天划到前一天
         record_date: record.record_date || formatLocalDate(new Date()),
+        // 视觉覆盖：快捷记账保留模板 icon/color；普通记账传 null，渲染层回退 category
+        icon: record.icon || null,
+        color: record.color || null,
         create_time: now,
         update_time: now,
         sync_status: 0

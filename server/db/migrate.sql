@@ -158,3 +158,28 @@ CREATE TABLE IF NOT EXISTS templates (
 -- MODIFY COLUMN 幂等：已是 VARCHAR(16) 重跑无害
 -- ============================================================
 ALTER TABLE categories MODIFY COLUMN icon VARCHAR(16);
+
+-- ============================================================
+-- records 加 icon/color 列（v1.2）— 快捷记账保留模板视觉
+-- 用 stored proc 防止已加过列时 ALTER 报错
+-- ============================================================
+DROP PROCEDURE IF EXISTS migrate_records_v1_2;
+DELIMITER //
+CREATE PROCEDURE migrate_records_v1_2()
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'suishouji' AND table_name = 'records' AND column_name = 'icon'
+  ) THEN
+    ALTER TABLE records ADD COLUMN icon VARCHAR(16) DEFAULT NULL AFTER record_date;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'suishouji' AND table_name = 'records' AND column_name = 'color'
+  ) THEN
+    ALTER TABLE records ADD COLUMN color VARCHAR(16) DEFAULT NULL AFTER icon;
+  END IF;
+END //
+DELIMITER ;
+CALL migrate_records_v1_2();
+DROP PROCEDURE migrate_records_v1_2;

@@ -225,6 +225,28 @@ export default {
 			return accountStore.accounts.find(a => a.code === selectedAccountCode.value) || null
 		})
 
+		// 自定义日期 picker (3 列：年/月/日，全数字，浏览器 locale 无关)
+		const getDaysInMonth = (year, month) => {
+			return new Date(year, month, 0).getDate()
+		}
+		const datePickerColumns = computed(() => {
+			const [y, m, d] = recordDate.value.split('-').map(Number)
+			const years = []
+			const curYear = new Date().getFullYear()
+			for (let i = curYear - 5; i <= curYear + 1; i++) years.push(i)
+			const months = Array.from({ length: 12 }, (_, i) => i + 1)
+			const days = Array.from({ length: getDaysInMonth(y, m) }, (_, i) => i + 1)
+			return [years, months, days]
+		})
+		const datePickerIndex = computed(() => {
+			const [y, m, d] = recordDate.value.split('-').map(Number)
+			const years = datePickerColumns.value[0]
+			const yi = Math.max(0, years.indexOf(y))
+			const mi = m - 1
+			const di = Math.min(d - 1, datePickerColumns.value[2].length - 1)
+			return [yi, mi, di]
+		})
+
 		// 方法
 		const onBackspace = () => {
 			if (amount.value.length > 0) {
@@ -408,6 +430,9 @@ export default {
 			accountOptions,
 			accountIndex,
 			selectedAccount,
+			datePickerColumns,
+			datePickerIndex,
+			onDateColumnChange,
 			switchType,
 			onCategorySelect,
 			onAccountChange,

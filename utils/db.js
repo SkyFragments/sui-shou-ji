@@ -51,6 +51,9 @@ export function insertRecord(record) {
     account_code: record.account_code,
     remark: record.remark || '',
     record_date: record.record_date,
+    // 视觉覆盖字段：快捷记账存模板 icon/color；普通记账留 null，显示层回退到 category
+    icon: record.icon || null,
+    color: record.color || null,
     create_time: Date.now(),
     update_time: Date.now(),
     sync_status: 0

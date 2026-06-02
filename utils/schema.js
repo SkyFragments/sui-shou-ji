@@ -9,10 +9,12 @@
  *    - type: 类型 (1=支出, 2=收入)
  *    - amount: 金额
  *    - category_code: 分类编码
- *    - category_name: 分类名称
+ *    - category_name: 分类名称（快捷记账时存模板名作为记录标签）
  *    - account_code: 账户编码
  *    - remark: 备注
  *    - record_date: 记录日期 (YYYY-MM-DD)
+ *    - icon: 图标覆盖（快捷记账存模板 icon；null/空时显示层回退到 category.icon）
+ *    - color: 颜色覆盖（同 icon 语义）
  *    - create_time: 创建时间
  *    - update_time: 更新时间
  *    - sync_status: 同步状态 (0=未同步, 1=已同步)
@@ -86,6 +88,8 @@ export const RECORD_COLUMNS = {
   ACCOUNT_CODE: 'account_code',
   REMARK: 'remark',
   RECORD_DATE: 'record_date',
+  ICON: 'icon',
+  COLOR: 'color',
   CREATE_TIME: 'create_time',
   UPDATE_TIME: 'update_time',
   SYNC_STATUS: 'sync_status'

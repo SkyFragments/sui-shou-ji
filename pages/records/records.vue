@@ -59,8 +59,8 @@
 							<view class="delete-btn" @click="deleteRecord(record)">删除</view>
 						</view>
 						<view class="record-content" @click="editRecord(record)">
-							<view class="record-icon" :style="{ backgroundColor: getCategoryColor(record.category_code) }">
-								<image :src="getCategoryIconPath(record.category_code)" class="record-icon-svg" />
+							<view class="record-icon" :style="{ backgroundColor: getRecordColor(record) }">
+								<image :src="getRecordIconPath(record)" class="record-icon-svg" />
 							</view>
 							<view class="record-info">
 								<text class="record-category">{{ record.category_name }}</text>
@@ -184,6 +184,17 @@ export default {
 			return `/static/icon/icon-${iconName}.svg`
 		}
 
+		// 优先用 record 自带的 icon/color（快捷记账保留模板视觉），缺则回退 category
+		const getRecordColor = (record) => {
+			if (record.color) return record.color
+			return getCategoryColor(record.category_code)
+		}
+
+		const getRecordIconPath = (record) => {
+			if (record.icon) return `/static/icon/icon-${record.icon}.svg`
+			return getCategoryIconPath(record.category_code)
+		}
+
 		const prevMonth = () => {
 			const [year, month] = currentYearMonth.value.split('-').map(Number)
 			if (month === 1) {
@@ -273,6 +284,8 @@ export default {
 			getCategoryColor,
 			getCategoryIcon,
 			getCategoryIconPath,
+			getRecordColor,
+			getRecordIconPath,
 			prevMonth,
 			nextMonth,
 			onMonthChange,

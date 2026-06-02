@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS records (
   account_code VARCHAR(16) NOT NULL,
   remark TEXT,
   record_date DATE NOT NULL,
+  icon VARCHAR(16) DEFAULT NULL COMMENT '快捷记账保留模板 icon；NULL 时显示层回退 category.icon',
+  color VARCHAR(16) DEFAULT NULL COMMENT '快捷记账保留模板 color；NULL 时显示层回退 category.color',
   create_time BIGINT NOT NULL,
   update_time BIGINT NOT NULL,
   sync_status INT DEFAULT 0,

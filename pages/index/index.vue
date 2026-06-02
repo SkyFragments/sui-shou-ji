@@ -90,8 +90,8 @@
 					:key="record.id"
 					@click="editRecord(record)"
 				>
-					<view class="record-icon" :style="{ backgroundColor: getCategoryColor(record.category_code) }">
-						<image :src="getCategoryIconPath(record.category_code)" class="record-icon-svg" />
+					<view class="record-icon" :style="{ backgroundColor: getRecordColor(record) }">
+						<image :src="getRecordIconPath(record)" class="record-icon-svg" />
 					</view>
 					<view class="record-info">
 						<text class="record-category">{{ record.category_name }}</text>
@@ -221,6 +221,19 @@ export default {
 		})
 
 		// 方法
+		// 优先用 record 自带的 icon/color（快捷记账带来的模板视觉覆盖），缺时回退 category
+		const getRecordColor = (record) => {
+			if (record.color) return record.color
+			const category = categoryStore.getCategoryByCode(record.category_code)
+			return category?.color || '#999'
+		}
+
+		const getRecordIconPath = (record) => {
+			if (record.icon) return `/static/icon/icon-${record.icon}.svg`
+			const category = categoryStore.getCategoryByCode(record.category_code)
+			return `/static/icon/icon-${category?.icon || 'box'}.svg`
+		}
+
 		const getCategoryColor = (code) => {
 			const category = categoryStore.getCategoryByCode(code)
 			return category?.color || '#999'
@@ -252,10 +265,14 @@ export default {
 				type: template.type || 1, // 跟随模板 type；旧硬编码默认支出
 				amount: template.amount,
 				category_code: template.category_code,
-				category_name: category?.name || template.name,
+				// 用模板名作为记录显示名（而非 category 默认名），首页+账单页才能看出是「咖啡」而不是泛泛「餐饮」
+				category_name: template.name || category?.name || '',
 				account_code: accountStore.defaultAccount?.code || 'cash',
 				remark: '',
-				record_date: recordDate
+				record_date: recordDate,
+				// 视觉覆盖：保留模板自定义 icon/color；显示层优先用这俩，缺则回退 category
+				icon: template.icon || null,
+				color: template.color || null
 			}
 			try {
 				await billStore.addRecord(record)
@@ -312,6 +329,8 @@ export default {
 			getCategoryColor,
 			getCategoryIcon,
 			getCategoryIconPath,
+			getRecordColor,
+			getRecordIconPath,
 			formatTime,
 			quickAdd,
 			goToAdd,
