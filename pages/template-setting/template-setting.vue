@@ -237,7 +237,8 @@ export default {
 		const statusBarH = ref(20)
 		const safeBottom = ref(0)
 		try {
-			const info = uni.getSystemInfoSync()
+			// 优先用新 API（消除 wx.getSystemInfoSync 废弃告警），旧基础库兜底
+			const info = (uni.getWindowInfo && uni.getWindowInfo()) || uni.getSystemInfoSync()
 			statusBarH.value = info.statusBarHeight || 20
 			safeBottom.value = info.safeAreaInsets?.bottom || info.safeArea?.bottom || 0
 		} catch (e) {}

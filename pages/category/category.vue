@@ -154,7 +154,8 @@ export default {
 		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
 		const statusBarH = ref(20)
 		try {
-			const info = uni.getSystemInfoSync()
+			// 优先用新 API（消除 wx.getSystemInfoSync 废弃告警），旧基础库兜底
+			const info = (uni.getWindowInfo && uni.getWindowInfo()) || uni.getSystemInfoSync()
 			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
 		} catch (e) {}
 
