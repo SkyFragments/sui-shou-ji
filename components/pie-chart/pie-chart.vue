@@ -21,6 +21,14 @@
 					class="leader"
 					:style="getLeaderStyle(slice)"
 				></view>
+				<view
+					v-for="slice in slices"
+					:key="'lbl-' + slice.code"
+					class="slice-label"
+					:style="getLabelPosition(slice)"
+				>
+					<text class="label-percent">{{ slice.percentage }}%</text>
+				</view>
 			</view>
 		</view>
 		<view class="legend">
