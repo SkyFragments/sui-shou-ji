@@ -38,7 +38,7 @@ router.get('/', verifyToken, wrap(async (req, res) => {
 
 router.post('/', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
-  const { id, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time } = req.body
+  const { id, type, amount, category_code, category_name, account_code, remark, record_date, icon, color, create_time, update_time } = req.body
   if (!id) {
     return res.status(400).json({ error: 'id required' })
   }
@@ -55,11 +55,12 @@ router.post('/', verifyToken, wrap(async (req, res) => {
   const now = Date.now()
 
   // Composite (openid, id) PK makes ON DUPLICATE KEY UPDATE tenant-safe.
+  // icon/color 用于快捷记账模板视觉覆盖；普通记账客户端传 null，列允许 NULL
   await pool.execute(
-    `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-     ON DUPLICATE KEY UPDATE type=VALUES(type), amount=VALUES(amount), category_code=VALUES(category_code), category_name=VALUES(category_name), account_code=VALUES(account_code), remark=VALUES(remark), record_date=VALUES(record_date), update_time=VALUES(update_time), sync_status=1`,
-    [id, openid, type, amount, category_code, category_name, account_code, remark, record_date, create_time || now, update_time || now]
+    `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, icon, color, create_time, update_time, sync_status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+     ON DUPLICATE KEY UPDATE type=VALUES(type), amount=VALUES(amount), category_code=VALUES(category_code), category_name=VALUES(category_name), account_code=VALUES(account_code), remark=VALUES(remark), record_date=VALUES(record_date), icon=VALUES(icon), color=VALUES(color), update_time=VALUES(update_time), sync_status=1`,
+    [id, openid, type, amount, category_code, category_name, account_code, remark, record_date, icon || null, color || null, create_time || now, update_time || now]
   )
   res.json({ success: true })
 }))
@@ -67,7 +68,7 @@ router.post('/', verifyToken, wrap(async (req, res) => {
 router.put('/:id', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
   const { id } = req.params
-  const { type, amount, category_code, category_name, account_code, remark, record_date, update_time } = req.body
+  const { type, amount, category_code, category_name, account_code, remark, record_date, icon, color, update_time } = req.body
 
   if (type !== undefined && type !== 1 && type !== 2) {
     return res.status(400).json({ error: 'type must be 1 or 2' })
@@ -81,12 +82,14 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
     || category_code !== undefined || category_name !== undefined
     || account_code !== undefined || remark !== undefined
     || record_date !== undefined
+    || icon !== undefined || color !== undefined
   if (!hasAnyField && update_time === undefined) {
     return res.json({ success: true, noop: true })
   }
 
   // 部分更新：只覆盖 req.body 里实际存在的字段，未提供的字段保持原值
   // 否则 mysql2 把 undefined 绑成 NULL，会把 NOT NULL 列清空
+  // icon/color 允许 NULL：客户端显式传 null 可清空覆盖；undefined 走 COALESCE 保留原值
   const [result] = await pool.execute(
     `UPDATE records SET
        type          = COALESCE(?, type),
@@ -96,10 +99,12 @@ router.put('/:id', verifyToken, wrap(async (req, res) => {
        account_code  = COALESCE(?, account_code),
        remark        = COALESCE(?, remark),
        record_date   = COALESCE(?, record_date),
+       icon          = COALESCE(?, icon),
+       color         = COALESCE(?, color),
        update_time   = ?,
        sync_status   = 1
      WHERE id=? AND openid=?`,
-    [type, amount, category_code, category_name, account_code, remark, record_date, update_time || Date.now(), id, openid]
+    [type, amount, category_code, category_name, account_code, remark, record_date, icon, color, update_time || Date.now(), id, openid]
   )
   if (result.affectedRows === 0) {
     return res.status(404).json({ error: 'record not found' })

@@ -115,15 +115,16 @@ router.post('/', verifyToken, wrap(async (req, res) => {
       if (toUpsert.length > 0) {
         const rows = toUpsert.map(r => [
           r.id, openid, r.type, r.amount, r.category_code, r.category_name, r.account_code,
-          r.remark, r.record_date, r.create_time, r.update_time, 1
+          r.remark, r.record_date, r.icon || null, r.color || null, r.create_time, r.update_time, 1
         ])
         await conn.query(
-          `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, create_time, update_time, sync_status)
+          `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, icon, color, create_time, update_time, sync_status)
            VALUES ?
            ON DUPLICATE KEY UPDATE
              type=VALUES(type), amount=VALUES(amount), category_code=VALUES(category_code),
              category_name=VALUES(category_name), account_code=VALUES(account_code),
              remark=VALUES(remark), record_date=VALUES(record_date),
+             icon=VALUES(icon), color=VALUES(color),
              update_time=VALUES(update_time), sync_status=1`,
           [rows]
         )
