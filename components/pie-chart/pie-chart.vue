@@ -197,7 +197,7 @@ export default {
 			const x = cx + LABEL_R * Math.sin(rad)
 			const y = cy - LABEL_R * Math.cos(rad)
 			// 反向旋转抵消父 rotator 旋转，让文字在 pie 转动时保持正立
-			const counter = -this.rotator
+			const counter = -this.rotation
 			return {
 				left: `${x}rpx`,
 				top: `${y}rpx`,
@@ -296,16 +296,16 @@ export default {
 				this.rotation += this.angularVelocity
 				this.angularVelocity *= MOMENTUM_DECAY
 				if (Math.abs(this.angularVelocity) >= MOMENTUM_MIN) {
-					this.momentumRaf = requestAnimationFrame(tick)
+					this.momentumRaf = setTimeout(tick, 16)
 				} else {
 					this.momentumRaf = null
 				}
 			}
-			this.momentumRaf = requestAnimationFrame(tick)
+			this.momentumRaf = setTimeout(tick, 16)
 		},
 		cancelMomentum() {
 			if (this.momentumRaf) {
-				cancelAnimationFrame(this.momentumRaf)
+				clearTimeout(this.momentumRaf)
 				this.momentumRaf = null
 			}
 		},
