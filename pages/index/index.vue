@@ -24,7 +24,7 @@
 		</view>
 
 		<!-- 预算进度 -->
-		<view class="budget-section animate-slide-up delay-1" v-if="budgetStore.currentBudget">
+		<view class="budget-section animate-slide-up delay-1" v-if="budgetStore.currentBudget" @click="goToBudget">
 			<ring-chart
 				:used="monthUsed"
 				:total="budgetStore.currentBudget"
@@ -41,6 +41,7 @@
 						¥{{ remaining.toFixed(2) }}
 					</text>
 				</view>
+				<text class="budget-edit-hint">设置 ›</text>
 			</view>
 		</view>
 
@@ -277,6 +278,10 @@ export default {
 			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
+		const goToBudget = () => {
+			uni.navigateTo({ url: '/pages/budget/budget' })
+		}
+
 		const getIconPath = (iconName) => {
 			return `/static/icon/icon-${iconName}.svg`
 		}
@@ -310,6 +315,7 @@ export default {
 			goToRecords,
 			goToStats,
 			goToMy,
+			goToBudget,
 			getIconPath,
 			editRecord
 		}
@@ -400,6 +406,18 @@ export default {
 	font-size: 28rpx;
 	color: #333333;
 	font-weight: 500;
+}
+
+.budget-edit-hint {
+	position: absolute;
+	right: 24rpx;
+	top: 24rpx;
+	font-size: 22rpx;
+	color: #999;
+}
+
+.budget-section {
+	position: relative;
 }
 
 .text-danger {

@@ -7,13 +7,13 @@
 		<!-- 月份选择器 -->
 		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
-				<text class="nav-btn">&lt;</text>
+				<text class="nav-btn">‹</text>
 			</view>
 			<view class="month-display">
 				<text class="month-text">{{ displayMonth }}</text>
 			</view>
 			<view class="month-nav" @click="nextMonth">
-				<text class="nav-btn">&gt;</text>
+				<text class="nav-btn">›</text>
 			</view>
 		</view>
 
