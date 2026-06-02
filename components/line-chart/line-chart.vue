@@ -12,15 +12,13 @@
 			<text class="title">{{ title }}</text>
 		</view>
 		<view class="chart-container">
-			<view class="line-canvas" :style="canvasWrapStyle">
+			<view class="line-canvas-wrap" :style="canvasWrapStyle">
 				<canvas class="real-canvas" :canvas-id="canvasId" :id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
-				<!-- 数据点 -->
-				<view v-for="(p, i) in points" :key="i" class="point" :style="getPointStyle(p)" />
-				<!-- 触摸提示 -->
-				<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
-					<text class="tooltip-day">{{ hoverInfo.day }}</text>
-					<text class="tooltip-val">¥{{ hoverInfo.value }}</text>
-				</view>
+				<view v-for="(p, i) in points" :key="i" class="point" :style="getPointStyle(p)"></view>
+			</view>
+			<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
+				<text class="tooltip-day">{{ hoverInfo.day }}</text>
+				<text class="tooltip-val">¥{{ hoverInfo.value }}</text>
 			</view>
 			<view class="x-axis">
 				<text v-for="label in xLabels" :key="label" class="x-label">{{ label }}</text>
