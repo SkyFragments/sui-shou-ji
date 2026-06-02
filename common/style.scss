@@ -304,3 +304,12 @@ page {
   --color-success: #2dd58a;
   --color-active-bg: #2A2520;
 }
+
+/* ============================================
+ * 全局背景：暖米色 → 蜜色 135° 软渐变
+ * 作用：所有页面 body 背景；卡片白底不受影响
+ * ============================================ */
+page {
+	background: linear-gradient(135deg, #FDF4E9 0%, #F5E6D0 100%);
+	background-attachment: fixed;
+}
