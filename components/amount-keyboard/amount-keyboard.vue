@@ -132,6 +132,6 @@ export default {
 }
 
 .icon {
-	font-size: 52rpx;
+	font-size: 44rpx;
 }
 </style>

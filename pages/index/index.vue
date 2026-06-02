@@ -656,7 +656,7 @@ export default {
 }
 
 .add-text {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #ffffff;
 	margin-top: 4rpx;
 }

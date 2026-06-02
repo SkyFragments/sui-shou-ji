@@ -168,7 +168,7 @@ export default {
 }
 
 .category-name {
-	font-size: 28rpx;
+	font-size: 32rpx;
 	color: #666666;
 	margin-top: 8rpx;
 	text-align: center;

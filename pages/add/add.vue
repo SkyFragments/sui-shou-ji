@@ -528,7 +528,7 @@ function getToday() {
 
 .section-title {
 	padding: 20rpx 24rpx;
-	font-size: 34rpx;
+	font-size: 36rpx;
 	color: #333333;
 	border-bottom: 1rpx solid #f0f0f0;
 }

@@ -7,9 +7,7 @@
 		<view class="chart-container">
 			<!-- 简单饼图实现 -->
 			<view class="pie" :style="pieStyle">
-				<view class="pie-inner">
-					<text class="total">{{ totalAmount.toFixed(2) }}</text>
-				</view>
+				<view class="pie-inner"></view>
 			</view>
 		</view>
 		<view class="legend">
@@ -105,15 +103,6 @@ export default {
 	height: 70%;
 	border-radius: 50%;
 	background-color: var(--color-surface);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.total {
-	font-size: 38rpx;
-	font-weight: bold;
-	color: var(--color-text-primary);
 }
 
 .legend {
@@ -143,7 +132,7 @@ export default {
 }
 
 .legend-value {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: var(--color-text-secondary);
 }
 </style>

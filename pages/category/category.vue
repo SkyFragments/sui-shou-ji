@@ -370,7 +370,7 @@ export default {
 }
 
 .category-name {
-	font-size: 34rpx;
+	font-size: 32rpx;
 	color: #333333;
 	display: block;
 }
@@ -464,7 +464,7 @@ export default {
 }
 
 .form-label {
-	font-size: 34rpx;
+	font-size: 32rpx;
 	color: #666666;
 	display: block;
 	margin-bottom: 16rpx;
@@ -611,7 +611,7 @@ export default {
 }
 
 .add-tab-icon {
-	font-size: 68rpx;
+	font-size: 48rpx;
 	color: #07c160;
 }
 

@@ -42,6 +42,11 @@
 		<!-- 分类占比饼图 -->
 		<view class="chart-section animate-slide-up delay-2">
 			<view class="section-title">支出分类</view>
+			<view class="chart-kpi" v-if="categoryStats.length > 0">
+				<text class="kpi-label">支出</text>
+				<text class="kpi-value">¥{{ totalExpense.toFixed(2) }}</text>
+				<text class="kpi-meta">共 {{ categoryStats.length }} 个分类</text>
+			</view>
 			<pie-chart
 				v-if="categoryStats.length > 0"
 				:data="categoryStats"
@@ -154,6 +159,10 @@ export default {
 			return billStore.getMonthStats(currentYearMonth.value)
 		})
 
+		const totalExpense = computed(() => {
+			return categoryStats.value.reduce((sum, c) => sum + c.value, 0)
+		})
+
 		const categoryStats = computed(() => {
 			const stats = billStore.getCategoryStats(currentYearMonth.value, 1)
 			return stats.map(s => {
@@ -261,6 +270,7 @@ export default {
 			displayMonth,
 			monthStats,
 			categoryStats,
+			totalExpense,
 			dailyExpense,
 			xLabels,
 			showCategoryModal,
@@ -371,6 +381,31 @@ function getCurrentYearMonth() {
 	font-weight: bold;
 	color: #333333;
 	margin-bottom: 20rpx;
+}
+
+.chart-kpi {
+	display: flex;
+	align-items: baseline;
+	justify-content: center;
+	gap: 12rpx;
+	margin-bottom: 16rpx;
+}
+
+.kpi-label {
+	font-size: 28rpx;
+	color: #666666;
+}
+
+.kpi-value {
+	font-size: 48rpx;
+	font-weight: bold;
+	color: #dd524d;
+	font-variant-numeric: tabular-nums;
+}
+
+.kpi-meta {
+	font-size: 24rpx;
+	color: #999999;
 }
 
 .empty-chart {
@@ -521,7 +556,7 @@ function getCurrentYearMonth() {
 }
 
 .add-tab-icon {
-	font-size: 68rpx;
+	font-size: 48rpx;
 	color: #07c160;
 }
 

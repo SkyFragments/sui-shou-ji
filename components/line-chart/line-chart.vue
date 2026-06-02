@@ -1,6 +1,9 @@
 /**
  * 折线图组件
  * 显示日支出趋势
+ *
+ * 实现：纯 CSS 折线。每段 = 绝对定位 div + transform: rotate()；
+ * 不用 SVG，因为微信小程序不渲染内联 svg 标签。
  */
 <template>
 	<view class="line-chart">
@@ -8,13 +11,18 @@
 			<text class="title">{{ title }}</text>
 		</view>
 		<view class="chart-container">
-			<!-- 简化折线图实现 -->
 			<view class="line-canvas">
 				<view
-					v-for="(point, index) in points"
-					:key="index"
+					v-for="(seg, i) in segments"
+					:key="'seg-' + i"
+					class="line-seg"
+					:style="seg.style"
+				></view>
+				<view
+					v-for="(p, i) in points"
+					:key="'p-' + i"
 					class="point"
-					:style="getPointStyle(point, index)"
+					:style="getPointStyle(p)"
 				>
 					<view class="dot"></view>
 				</view>
@@ -52,13 +60,37 @@ export default {
 				x: (index / Math.max(this.data.length - 1, 1)) * 100,
 				y: 100 - (value / max) * 80
 			}))
+		},
+		segments() {
+			const pts = this.points
+			const segs = []
+			for (let i = 0; i < pts.length - 1; i++) {
+				const a = pts[i]
+				const b = pts[i + 1]
+				const dx = b.x - a.x
+				const dy = b.y - a.y
+				// 长度按 x 方向百分比近似（容器宽高比在小屏接近 16:9~3:1，
+				// 主要段几乎水平；倾斜段视觉差可接受）。
+				const length = Math.abs(dx)
+				const angle = Math.atan2(dy, dx) * 180 / Math.PI
+				segs.push({
+					style: {
+						left: a.x + '%',
+						top: a.y + '%',
+						width: length + '%',
+						transform: `rotate(${angle}deg)`,
+						transformOrigin: '0 50%'
+					}
+				})
+			}
+			return segs
 		}
 	},
 	methods: {
-		getPointStyle(point, index) {
+		getPointStyle(p) {
 			return {
-				left: `${point.x}%`,
-				top: `${point.y}%`
+				left: p.x + '%',
+				top: p.y + '%'
 			}
 		}
 	}
@@ -95,9 +127,20 @@ export default {
 	margin: 0 20rpx;
 }
 
+.line-seg {
+	position: absolute;
+	height: 4rpx;
+	background-color: #07c160;
+	border-radius: 2rpx;
+	transform-origin: 0 50%;
+	pointer-events: none;
+}
+
 .point {
 	position: absolute;
 	transform: translate(-50%, -50%);
+	width: 16rpx;
+	height: 16rpx;
 }
 
 .dot {
@@ -105,6 +148,8 @@ export default {
 	height: 16rpx;
 	border-radius: 50%;
 	background-color: #07c160;
+	border: 2rpx solid #ffffff;
+	box-sizing: border-box;
 }
 
 .x-axis {
@@ -114,7 +159,7 @@ export default {
 }
 
 .x-label {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 }
 </style>

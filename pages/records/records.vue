@@ -351,13 +351,13 @@ function getCurrentYearMonth() {
 }
 
 .stat-label {
-	font-size: 28rpx;
+	font-size: 32rpx;
 	color: #666666;
 	display: block;
 }
 
 .stat-value {
-	font-size: 38rpx;
+	font-size: 48rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
