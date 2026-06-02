@@ -7,9 +7,16 @@
 //  1) import.meta.env.VITE_API_BASE  (H5 Vite 构建注入，Vite 标准)
 //  2) process.env.VUE_APP_API_BASE  (老 Vue CLI / Webpack 兼容)
 //  3) uni.getStorageSync('ssj_api_base')  (运行时手动覆盖，便于小程序多环境)
-//  4) 默认线上地址 — 服务器在 1.12.234.7 上是 HTTP-only（无 TLS 证书），
-//  改用 http:// 走明文，小程序开发态需勾「不校验合法域名」，生产环境需反向代理加 HTTPS
-const DEFAULT_API_BASE = 'http://1.12.234.7/api'
+//  4) __DEV__ ? HTTP 测试地址 : HTTPS 线上地址
+//
+// 安全策略：
+// - 生产态（__DEV__ 为 false）默认走 HTTPS，避免 JWT 在公网明文传输
+// - 开发态（__DEV__ 为 true，默认在 uni-app 编译时确定）允许 HTTP 走测试服务器
+// - 用户通过 ssj_api_base storage 手动指定 http:// 时，console.error 告警一次防漏到生产
+// - 生产环境若真要走 http://，必须显式通过 build-time env 注入（VITE_API_BASE=...），
+//   而非依赖 fallback；这样 release 构建审计 build artifact 即可拦截
+const DEFAULT_API_BASE_DEV = 'http://1.12.234.7/api'
+const DEFAULT_API_BASE_PROD = 'https://1.12.234.7/api'
 function getApiBase() {
   try {
     // Vite 在 ESM 下注入 import.meta.env；process.env 在 Vite 客户端构建中是空的
@@ -23,10 +30,23 @@ function getApiBase() {
   if (typeof uni !== 'undefined' && uni.getStorageSync) {
     try {
       const stored = uni.getStorageSync('ssj_api_base')
-      if (stored) return stored
+      if (stored) {
+        // 显式覆盖时若仍是 http://，高优告警一次（防止 prod 漏审）
+        if (typeof stored === 'string' && stored.startsWith('http://')) {
+          console.error('[api] ssj_api_base 走明文 HTTP，JWT 等鉴权信息将被截获；' +
+            '生产前请改用 https:// 或经 TLS 终结的反代')
+        }
+        return stored
+      }
     } catch (e) { /* 忽略 */ }
   }
-  return DEFAULT_API_BASE
+  // __DEV__ 是 uni-app 提供的全局变量，编译期确定 dev/prod
+  const fallback = typeof __DEV__ !== 'undefined' && __DEV__ ? DEFAULT_API_BASE_DEV : DEFAULT_API_BASE_PROD
+  if (fallback.startsWith('http://')) {
+    // prod fallback 不应走 http；若走到了说明配置错误，强告警
+    console.error('[api] 生产态默认 base 走明文 HTTP，请检查构建配置')
+  }
+  return fallback
 }
 
 // 请求超时（毫秒）；H5 路径无内置超时，必须显式传 timeout 才生效
