@@ -37,7 +37,7 @@
 					<text class="category-name">{{ category.name }}</text>
 					<text class="category-code">{{ category.code }}</text>
 				</view>
-					<text class="category-arrow">></text>
+					<image src="/static/icon/icon-arrow-right.svg" class="category-arrow" />
 			</view>
 
 			<view class="empty-state" v-if="filteredCategories.length === 0">
@@ -383,8 +383,9 @@ export default {
 }
 
 .category-arrow {
-	font-size: 28rpx;
-	color: #666666;
+	width: 32rpx;
+	height: 32rpx;
+	opacity: 0.55;
 }
 
 .empty-state {
