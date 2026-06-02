@@ -4,22 +4,24 @@
  */
 <template>
 	<view class="index-page">
-		<!-- 头部概况 -->
+		<!-- 头部概况：绿底仅承载问候/日期，金额移入白卡片 -->
 		<view class="overview-section animate-slide-up">
 			<view class="overview-header">
 				<text class="date">{{ todayDate }}</text>
 				<text class="greeting">今天</text>
 			</view>
+		</view>
 
-			<view class="stats-row">
-				<view class="stat-item expense">
-					<text class="stat-label">支出</text>
-					<text class="stat-amount">-{{ todayExpense.toFixed(2) }}</text>
-				</view>
-				<view class="stat-item income">
-					<text class="stat-label">收入</text>
-					<text class="stat-amount">+{{ todayIncome.toFixed(2) }}</text>
-				</view>
+		<!-- 今日收支白卡片（与绿色背景有视觉分层） -->
+		<view class="stats-card animate-slide-up delay-1">
+			<view class="stat-item expense">
+				<text class="stat-label">支出</text>
+				<text class="stat-amount">-{{ todayExpense.toFixed(2) }}</text>
+			</view>
+			<view class="stat-divider"></view>
+			<view class="stat-item income">
+				<text class="stat-label">收入</text>
+				<text class="stat-amount">+{{ todayIncome.toFixed(2) }}</text>
 			</view>
 		</view>
 
@@ -41,7 +43,10 @@
 						¥{{ remaining.toFixed(2) }}
 					</text>
 				</view>
-				<text class="budget-edit-hint">设置 ›</text>
+				<view class="budget-edit-hint">
+					<text>设置</text>
+					<image src="/static/icon/icon-arrow-right.svg" class="budget-edit-icon" />
+				</view>
 			</view>
 		</view>
 
@@ -102,10 +107,9 @@
 			</view>
 		</view>
 
-		<!-- 记一笔按钮 -->
+		<!-- 记一笔按钮（仅 + 图标） -->
 		<view class="add-btn" @click="goToAdd">
 			<text class="add-icon">+</text>
-			<text class="add-text">记一笔</text>
 		</view>
 
 		<!-- 底部导航 -->
@@ -138,6 +142,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useBillStore } from '@/store/bill'
 import { useBudgetStore } from '@/store/budget'
 import { useCategoryStore } from '@/store/category'
+import { useTemplateStore } from '@/store/template'
 import RingChart from '@/components/ring-chart/ring-chart.vue'
 
 export default {
@@ -148,22 +153,17 @@ export default {
 		const billStore = useBillStore()
 		const budgetStore = useBudgetStore()
 		const categoryStore = useCategoryStore()
+		const templateStore = useTemplateStore()
 
-		// 快捷模板 - 使用SVG图标
-		const templates = [
-			{ id: 1, name: '早餐', amount: 10, category_code: 'FOOD', icon: 'meal', color: '#FF6B6B' },
-			{ id: 2, name: '午餐', amount: 30, category_code: 'FOOD', icon: 'food', color: '#FF6B6B' },
-			{ id: 3, name: '打车', amount: 25, category_code: 'TRANSPORT', icon: 'car', color: '#4ECDC4' },
-			{ id: 4, name: '地铁', amount: 5, category_code: 'TRANSPORT', icon: 'bus', color: '#4ECDC4' },
-			{ id: 5, name: '咖啡', amount: 20, category_code: 'FOOD', icon: 'drink', color: '#FF6B6B' },
-			{ id: 6, name: '电影', amount: 50, category_code: 'ENTERTAINMENT', icon: 'movie', color: '#96CEB4' }
-		]
+		// 快捷模板：从 store 读取（首页只显示前 N 个，store getter 已 slice）
+		const templates = computed(() => templateStore.visibleTemplates)
 
 		// 初始化数据
 		onMounted(() => {
 			billStore.loadRecords()
 			budgetStore.loadBudgets()
 			categoryStore.loadCategories()
+			templateStore.loadTemplates()
 		})
 
 		// 计算属性
@@ -246,7 +246,7 @@ export default {
 			const now = new Date()
 			const recordDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 			const record = {
-				type: 1, // 支出
+				type: template.type || 1, // 跟随模板 type；旧硬编码默认支出
 				amount: template.amount,
 				category_code: template.category_code,
 				category_name: category?.name || template.name,
@@ -326,7 +326,7 @@ export default {
 <style scoped>
 .index-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	/* 留出悬浮「记一笔」按钮（100rpx 高，bottom:180rpx）+ tabbar(100rpx) + 余量，
 	   否则最后一条账单记录会被按钮盖住右侧金额 */
 	padding-bottom: 320rpx;
@@ -334,47 +334,70 @@ export default {
 
 .overview-section {
 	background-color: #07c160;
-	padding: 30rpx 30rpx 40rpx;
+	padding: 30rpx 30rpx 50rpx;
 	padding-top: calc(30rpx + env(safe-area-inset-top));
 	color: #ffffff;
 }
 
 .overview-header {
-	margin-bottom: 20rpx;
+	margin-bottom: 4rpx;
 }
 
 .date {
-	font-size: 34rpx;
-	opacity: 0.9;
+	font-size: 28rpx;
+	opacity: 0.85;
+	letter-spacing: 1rpx;
 }
 
 .greeting {
-	font-size: 48rpx;
+	font-size: 44rpx;
 	font-weight: bold;
 	display: block;
-	margin-top: 8rpx;
+	margin-top: 6rpx;
 }
 
-.stats-row {
+/* 今日收支白卡片：与绿底有 16rpx 间隔，不重叠 */
+.stats-card {
 	display: flex;
+	align-items: center;
 	justify-content: space-around;
-	margin-top: 20rpx;
+	margin: 16rpx 20rpx 0;
+	padding: 28rpx 24rpx;
+	background-color: #ffffff;
+	border-radius: 20rpx;
+	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 .stat-item {
+	flex: 1;
 	text-align: center;
 }
 
 .stat-label {
-	font-size: 32rpx;
-	opacity: 0.85;
+	font-size: 26rpx;
+	color: #999999;
 }
 
 .stat-amount {
-	font-size: 52rpx;
+	font-size: 44rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
+	font-variant-numeric: tabular-nums;
+}
+
+.stat-item.expense .stat-amount {
+	color: #C85A53;
+}
+
+.stat-item.income .stat-amount {
+	color: #3A7D5C;
+}
+
+.stat-divider {
+	width: 1rpx;
+	height: 56rpx;
+	background-color: #f0f0f0;
 }
 
 .budget-section {
@@ -415,6 +438,15 @@ export default {
 	top: 24rpx;
 	font-size: 26rpx;
 	color: #999;
+	display: flex;
+	align-items: center;
+	gap: 4rpx;
+}
+
+.budget-edit-icon {
+	width: 24rpx;
+	height: 24rpx;
+	opacity: 0.7;
 }
 
 .budget-section {
@@ -651,15 +683,9 @@ export default {
 }
 
 .add-icon {
-	font-size: 58rpx;
+	font-size: 60rpx;
 	color: #ffffff;
 	line-height: 1;
-}
-
-.add-text {
-	font-size: 32rpx;
-	color: #ffffff;
-	margin-top: 4rpx;
 }
 
 .tabbar {

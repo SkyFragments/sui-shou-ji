@@ -12,18 +12,22 @@ import {
   deleteRecord,
   deleteAccount,
   deleteCategory,
+  deleteTemplate,
   postBudget,
   putBudget,
   putAccount,
   postAccount,
   putCategory,
   postCategory,
+  putTemplate,
+  postTemplate,
   upsertByPutPost
 } from '@/utils/api'
 import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
 import { useBudgetStore } from '@/store/budget'
+import { useTemplateStore } from '@/store/template'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_sync_status'
@@ -136,17 +140,19 @@ export const useSyncStore = defineStore('sync', {
         const categoryStore = useCategoryStore()
         const accountStore = useAccountStore()
         const budgetStore = useBudgetStore()
+        const templateStore = useTemplateStore()
 
-        // 仅同步配置类数据（category/account/budget），记录由 addRecord 单独走 REST
+        // 仅同步配置类数据（category/account/budget/template），记录由 addRecord 单独走 REST
         // 各 store 的 syncToCloud 内部 try/catch 返回 {success:false, error}，不会 throw
         // 这里再加一层 catch 兜底网络异常，标 offline 让上层分支正确走 IDLE 而非 SUCCESS
-        const [catResult, accResult, budgetResult] = await Promise.all([
+        const [catResult, accResult, budgetResult, tplResult] = await Promise.all([
           categoryStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e })),
           accountStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e })),
-          budgetStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e }))
+          budgetStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e })),
+          templateStore.syncToCloud().catch((e) => ({ success: false, offline: true, error: e }))
         ])
 
-        const allOffline = catResult.offline && accResult.offline && budgetResult.offline
+        const allOffline = catResult.offline && accResult.offline && budgetResult.offline && tplResult.offline
         if (allOffline) {
           // 所有云端都不可用，标记待同步；状态置 IDLE 而非 SUCCESS，避免 UI 绿勾误导
           this.addPendingSync('full_sync', { timestamp: Date.now() })
@@ -155,11 +161,11 @@ export const useSyncStore = defineStore('sync', {
           return { success: true, offline: true }
         }
 
-        const anyFailed = !catResult.success || !accResult.success || !budgetResult.success
+        const anyFailed = !catResult.success || !accResult.success || !budgetResult.success || !tplResult.success
         if (anyFailed) {
           // 部分失败：状态置 IDLE 让 UI 不显示成功勾；具体失败项已被各 store 内部吞掉
           // 入队 full_sync 让下次有机会整体重试
-          console.warn('[sync] 部分配置同步失败：', { catResult, accResult, budgetResult })
+          console.warn('[sync] 部分配置同步失败：', { catResult, accResult, budgetResult, tplResult })
           this.addPendingSync('full_sync', { timestamp: Date.now(), reason: 'partial_failure' })
           this.setSyncStatus(SYNC_STATUS.IDLE)
           return { success: false, partial: true }
@@ -193,7 +199,7 @@ export const useSyncStore = defineStore('sync', {
           // 调用云函数获取增量数据
           // 服务端可能分页（has_more），循环拉直到 has_more=false，避免大账号漏数据
           // 使用服务端返回的 next_cursor（复合游标 update_time + id）以正确处理同毫秒写多条的边界
-          const allCloudData = { records: [], categories: [], accounts: [], budgets: [] }
+          const allCloudData = { records: [], categories: [], accounts: [], budgets: [], templates: [] }
           let cursor = { last_sync_time: this.lastSyncTime || 0, last_id: '' }
           let serverTime = Date.now()
           // 防呆：单次 pull 最多 100 页 = 10 万条，防止服务端死循环/客户端卡死
@@ -207,6 +213,7 @@ export const useSyncStore = defineStore('sync', {
             if (pageData.categories) allCloudData.categories = pageData.categories
             if (pageData.accounts) allCloudData.accounts = pageData.accounts
             if (pageData.budgets) allCloudData.budgets = pageData.budgets
+            if (pageData.templates) allCloudData.templates = pageData.templates
             if (pageData.server_time) serverTime = pageData.server_time
             if (!pageData.has_more) break
             // 用服务端 next_cursor 续拉，复合游标能精准定位到同 update_time 内的下一条
@@ -260,7 +267,8 @@ export const useSyncStore = defineStore('sync', {
         records: stripOpenid(cloudData.records),
         categories: stripOpenid(cloudData.categories),
         accounts: stripOpenid(cloudData.accounts),
-        budgets: stripOpenid(cloudData.budgets)
+        budgets: stripOpenid(cloudData.budgets),
+        templates: stripOpenid(cloudData.templates)
       }
 
       // Helper to merge arrays with timestamp-based conflict resolution
@@ -304,6 +312,12 @@ export const useSyncStore = defineStore('sync', {
         const merged = mergeWithTimestamp(localBudgets, cleanCloudData.budgets)
         setStorage('ssj_budgets', merged)
         useBudgetStore().loadBudgets()
+      }
+      if (cleanCloudData.templates) {
+        const localTemplates = getStorage('ssj_templates') || []
+        const merged = mergeWithTimestamp(localTemplates, cleanCloudData.templates)
+        setStorage('ssj_templates', merged)
+        useTemplateStore().loadTemplates()
       }
     },
 
@@ -381,6 +395,10 @@ export const useSyncStore = defineStore('sync', {
               await upsertByPutPost(putAccount, postAccount, item.data)
             } else if (item.type === 'budget_upsert') {
               await upsertByPutPost(putBudget, postBudget, item.data)
+            } else if (item.type === 'template_upsert') {
+              await upsertByPutPost(putTemplate, postTemplate, item.data)
+            } else if (item.type === 'template_delete') {
+              await deleteTemplate(item.data.id)
             } else if (item.type === 'full_sync') {
               const r = await this.syncToCloud()
               // 仅在非离线状态下视为成功；离线保留以便重试

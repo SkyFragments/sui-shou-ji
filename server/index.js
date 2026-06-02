@@ -6,6 +6,7 @@ import recordsRoutes from './routes/records.js'
 import categoriesRoutes from './routes/categories.js'
 import accountsRoutes from './routes/accounts.js'
 import budgetsRoutes from './routes/budgets.js'
+import templatesRoutes from './routes/templates.js'
 
 dotenv.config()
 
@@ -44,6 +45,7 @@ app.use('/api/records', recordsRoutes)
 app.use('/api/categories', categoriesRoutes)
 app.use('/api/accounts', accountsRoutes)
 app.use('/api/budgets', budgetsRoutes)
+app.use('/api/templates', templatesRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: Date.now() })

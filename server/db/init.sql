@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS categories (
   openid VARCHAR(64) NOT NULL,
   code VARCHAR(16) NOT NULL,
   name VARCHAR(32) NOT NULL,
-  icon VARCHAR(8),
+  icon VARCHAR(16),
   color VARCHAR(16),
   type INT NOT NULL COMMENT '1=支出 2=收入',
   sort INT DEFAULT 0,
@@ -73,4 +73,24 @@ CREATE TABLE IF NOT EXISTS budgets (
   update_time BIGINT,
   PRIMARY KEY (openid, id),
   UNIQUE INDEX idx_openid_month (openid, `year_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- templates 表 — 首页快捷记账模板
+-- icon 取 VARCHAR(16) 容纳 'briefcase' / 'shopping' 等较长 SVG 名
+CREATE TABLE IF NOT EXISTS templates (
+  id VARCHAR(32) NOT NULL,
+  openid VARCHAR(64) NOT NULL,
+  name VARCHAR(32) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  type INT NOT NULL COMMENT '1=支出 2=收入',
+  category_code VARCHAR(16) NOT NULL,
+  icon VARCHAR(16),
+  color VARCHAR(16),
+  sort INT DEFAULT 0,
+  is_default INT DEFAULT 0,
+  create_time BIGINT NOT NULL DEFAULT 0,
+  update_time BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (openid, id),
+  INDEX idx_openid_sort (openid, sort),
+  INDEX idx_update_time (update_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

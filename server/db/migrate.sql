@@ -129,3 +129,32 @@ DELIMITER ;
 
 CALL migrate_rebuild();
 DROP PROCEDURE migrate_rebuild;
+
+-- ============================================================
+-- templates 表新增（v1.1）— 已部署实例补建表
+-- CREATE TABLE IF NOT EXISTS 自身幂等，可重复执行
+-- ============================================================
+CREATE TABLE IF NOT EXISTS templates (
+  id VARCHAR(32) NOT NULL,
+  openid VARCHAR(64) NOT NULL,
+  name VARCHAR(32) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  type INT NOT NULL COMMENT '1=支出 2=收入',
+  category_code VARCHAR(16) NOT NULL,
+  icon VARCHAR(16),
+  color VARCHAR(16),
+  sort INT DEFAULT 0,
+  is_default INT DEFAULT 0,
+  create_time BIGINT NOT NULL DEFAULT 0,
+  update_time BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (openid, id),
+  INDEX idx_openid_sort (openid, sort),
+  INDEX idx_update_time (update_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- categories.icon 列宽：VARCHAR(8) → VARCHAR(16)（v1.1）
+-- 与 templates.icon 对齐，容纳 'briefcase'/'shopping' 等较长 SVG 名
+-- MODIFY COLUMN 幂等：已是 VARCHAR(16) 重跑无害
+-- ============================================================
+ALTER TABLE categories MODIFY COLUMN icon VARCHAR(16);

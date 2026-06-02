@@ -219,3 +219,20 @@ export async function putBudget(id, data) {
 export async function deleteBudget(id) {
   return request(`/budgets/${id}`, 'DELETE')
 }
+
+// Templates — 首页快捷记账模板
+export async function getTemplates() {
+  return request('/templates')
+}
+
+export async function postTemplate(template) {
+  return request('/templates', 'POST', template)
+}
+
+export async function putTemplate(id, data) {
+  return request(`/templates/${id}`, 'PUT', data)
+}
+
+export async function deleteTemplate(id) {
+  return request(`/templates/${id}`, 'DELETE')
+}

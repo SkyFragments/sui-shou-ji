@@ -51,6 +51,19 @@
  *    - default_budget: 默认预算
  *    - last_sync_time: 最后同步时间
  *    - create_time: 创建时间
+ *
+ * 6. template 表 - 首页快捷记账模板
+ *    - id: 主键
+ *    - name: 模板名（如「早餐」「打车」）
+ *    - amount: 默认金额
+ *    - type: 记账类型 (1=支出, 2=收入)
+ *    - category_code: 关联分类编码
+ *    - icon: 图标名（可与 category icon 不同，例如 FOOD 类下「咖啡」用 drink）
+ *    - color: 图标背景色
+ *    - sort: 首页显示排序（首页 slice 前 8 个展示）
+ *    - is_default: 是否默认 (0=否, 1=是)
+ *    - create_time: 创建时间
+ *    - update_time: 更新时间
  */
 
 // 数据库表名常量
@@ -59,7 +72,8 @@ export const TABLE_NAMES = {
   CATEGORY: 'ssj_categories',
   ACCOUNT: 'ssj_accounts',
   BUDGET: 'ssj_budgets',
-  USER: 'ssj_users'
+  USER: 'ssj_users',
+  TEMPLATE: 'ssj_templates'
 }
 
 // record 表字段
@@ -119,6 +133,24 @@ export const USER_COLUMNS = {
   LAST_SYNC_TIME: 'last_sync_time',
   CREATE_TIME: 'create_time'
 }
+
+// template 表字段
+export const TEMPLATE_COLUMNS = {
+  ID: 'id',
+  NAME: 'name',
+  AMOUNT: 'amount',
+  TYPE: 'type',
+  CATEGORY_CODE: 'category_code',
+  ICON: 'icon',
+  COLOR: 'color',
+  SORT: 'sort',
+  IS_DEFAULT: 'is_default',
+  CREATE_TIME: 'create_time',
+  UPDATE_TIME: 'update_time'
+}
+
+// 首页快捷记账显示上限
+export const HOME_TEMPLATE_VISIBLE_LIMIT = 8
 
 // 支出分类编码
 export const EXPENSE_CATEGORY_CODES = {

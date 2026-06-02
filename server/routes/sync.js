@@ -46,6 +46,11 @@ router.get('/', verifyToken, wrap(async (req, res) => {
     'SELECT * FROM budgets WHERE openid = ? ORDER BY year_month ASC',
     [openid]
   )
+  // templates 整表返回；量小（默认 8，用户自定义上限通常 < 50）
+  const [templates] = await pool.execute(
+    'SELECT * FROM templates WHERE openid = ? ORDER BY sort ASC',
+    [openid]
+  )
 
   // 告诉客户端下一轮的游标；满页说明还有更多
   const lastRecord = records[records.length - 1]
@@ -56,6 +61,7 @@ router.get('/', verifyToken, wrap(async (req, res) => {
       categories,
       accounts,
       budgets,
+      templates,
       server_time: Date.now(),
       // 告知客户端是否还有更多增量记录待拉（records 达到上限就分页）
       has_more: records.length >= SYNC_PAGE_SIZE,
@@ -67,7 +73,7 @@ router.get('/', verifyToken, wrap(async (req, res) => {
 // 上传数据合并
 router.post('/', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
-  const { records = [], categories = [], accounts = [], budgets = [] } = req.body
+  const { records = [], categories = [], accounts = [], budgets = [], templates = [] } = req.body
   const now = Date.now()
 
   // 收集冲突而不是抛出：部分成功 + 冲突清单让客户端能局部重试/合并
@@ -164,6 +170,51 @@ router.post('/', verifyToken, wrap(async (req, res) => {
          ON DUPLICATE KEY UPDATE total_budget=VALUES(total_budget), update_time=VALUES(update_time)`,
         [budRows]
       )
+    }
+
+    // 合并 templates — executemany + 冲突检测
+    // 与 records 同套路：先 FOR UPDATE 锁 + 时间戳预筛，比服务端旧的入 conflicts 不阻断本批
+    if (templates.length > 0) {
+      const tplIds = templates.map(t => t.id)
+      const tplPlaceholders = tplIds.map(() => '?').join(',')
+      const [existingTplRows] = await conn.query(
+        `SELECT id, update_time FROM templates WHERE openid = ? AND id IN (${tplPlaceholders}) FOR UPDATE`,
+        [openid, ...tplIds]
+      )
+      const existingTplMap = new Map(existingTplRows.map(r => [r.id, r.update_time]))
+
+      const toUpsertTpl = []
+      for (const tpl of templates) {
+        const serverTime = existingTplMap.get(tpl.id)
+        // 严格 >：客户端 update_time 比服务端老才视为冲突，等于 ms 走幂等 upsert
+        if (serverTime !== undefined && serverTime > (tpl.update_time || 0)) {
+          conflicts.push({
+            kind: 'template',
+            id: tpl.id,
+            serverUpdateTime: serverTime,
+            clientUpdateTime: tpl.update_time
+          })
+          continue
+        }
+        toUpsertTpl.push(tpl)
+      }
+
+      if (toUpsertTpl.length > 0) {
+        const tplRows = toUpsertTpl.map(tpl => [
+          tpl.id, openid, tpl.name, Number(tpl.amount) || 0, tpl.type, tpl.category_code,
+          tpl.icon || null, tpl.color || null, tpl.sort || 0, tpl.is_default || 0,
+          tpl.create_time || now, tpl.update_time || now
+        ])
+        await conn.query(
+          `INSERT INTO templates (id, openid, name, amount, type, category_code, icon, color, sort, is_default, create_time, update_time)
+           VALUES ?
+           ON DUPLICATE KEY UPDATE
+             name=VALUES(name), amount=VALUES(amount), type=VALUES(type),
+             category_code=VALUES(category_code), icon=VALUES(icon), color=VALUES(color),
+             sort=VALUES(sort), is_default=VALUES(is_default), update_time=VALUES(update_time)`,
+          [tplRows]
+        )
+      }
     }
 
     await conn.commit()

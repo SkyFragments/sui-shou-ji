@@ -48,6 +48,15 @@
 				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
 			</view>
 
+			<!-- 快捷记账设置 -->
+			<view class="menu-item" @click="goToTemplateSetting">
+				<view class="menu-left">
+					<image src="/static/icon/icon-trend.svg" class="menu-icon-svg" />
+					<text class="menu-text">快捷记账设置</text>
+				</view>
+				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
+			</view>
+
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
@@ -81,12 +90,46 @@
 
 		<!-- 关于 -->
 		<view class="menu-section animate-slide-up delay-1">
-			<view class="menu-item">
+			<view class="menu-item" @click="showAbout = true">
 				<view class="menu-left">
 					<image src="/static/icon/icon-info.svg" class="menu-icon-svg" />
 					<text class="menu-text">关于</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
+			</view>
+		</view>
+
+		<!-- 关于弹窗 -->
+		<view class="modal" v-if="showAbout">
+			<view class="modal-mask" @click="showAbout = false"></view>
+			<view class="modal-content about-modal">
+				<view class="about-header">
+					<text class="about-title">随手记</text>
+					<text class="about-version">v1.0.0</text>
+				</view>
+				<view class="about-body">
+					<view class="about-row">
+						<text class="about-label">简介</text>
+						<text class="about-text">个人记账小程序，记录每一笔收支</text>
+					</view>
+					<view class="about-row">
+						<text class="about-label">技术栈</text>
+						<text class="about-text">UniApp + Vue 3 + Pinia</text>
+					</view>
+					<view class="about-row">
+						<text class="about-label">开发者</text>
+						<text class="about-text">231603010217 罗诗伟</text>
+					</view>
+					<view class="about-row">
+						<text class="about-label">学号</text>
+						<text class="about-text">231603010217</text>
+					</view>
+				</view>
+				<view class="modal-footer">
+					<view class="btn confirm-btn" @click="showAbout = false">
+						<text>确定</text>
+					</view>
+				</view>
 			</view>
 		</view>
 
@@ -122,6 +165,8 @@ import { useBillStore } from '@/store/bill'
 import { useCategoryStore } from '@/store/category'
 import { useAccountStore } from '@/store/account'
 import { login, getStoredUser, isLoggedIn as checkIsLoggedIn } from '@/utils/auth'
+import { exportToCSV, generateExportFileName, exportToExcelWithStyle, generateExcelFileName, downloadCSVFile, downloadExcelFile } from '@/utils/export.js'
+
 
 export default {
 	setup() {
@@ -134,6 +179,7 @@ export default {
 		const nickName = ref('')
 		const isLoggedIn = ref(false)
 		const shortOpenid = ref('')
+		const showAbout = ref(false)
 
 		// 初始化用户状态
 		const initUserState = () => {
@@ -171,7 +217,16 @@ export default {
 				await syncStore.triggerFirstSync()
 			} catch (e) {
 				uni.hideLoading()
-				uni.showToast({ title: '登录失败', icon: 'none' })
+				const msg = (e && e.message) || String(e) || ''
+				let hint = '登录失败'
+				if (msg.includes('无 code') || msg.includes('uni.login 调用失败')) {
+					hint = '请在微信小程序中打开'
+				} else if (msg.includes('Network') || msg.includes('timeout') || msg.includes('fail')) {
+					hint = '服务器不可达，请稍后重试'
+				} else if (msg) {
+					hint = `登录失败：${msg.slice(0, 20)}`
+				}
+				uni.showToast({ title: hint, icon: 'none' })
 				console.error('Login error:', e)
 			}
 		}
@@ -213,6 +268,10 @@ export default {
 			uni.navigateTo({ url: '/pages/category/category' })
 		}
 
+		const goToTemplateSetting = () => {
+			uni.navigateTo({ url: '/pages/template-setting/template-setting' })
+		}
+
 		const goToBudget = () => {
 			uni.navigateTo({ url: '/pages/budget/budget' })
 		}
@@ -227,18 +286,18 @@ export default {
 
 			uni.showModal({
 				title: '数据导出',
-				content: `确定导出 ${startMonth} 至 ${endMonth} 的账单数据吗？`,
+				content: '确定导出全部账单数据吗？',
 				success: async (res) => {
 					if (res.confirm) {
 						const billStore = useBillStore()
-						const records = billStore.getRecordsByDateRange(startMonth, endMonth)
+						const records = billStore.records
 
 						if (records.length === 0) {
-							uni.showToast({ title: '该月无账单数据', icon: 'none' })
+							uni.showToast({ title: '暂无账单数据', icon: 'none' })
 							return
 						}
 
-						const { exportToCSV, generateExportFileName } = require('@/utils/export.js')
+						// 已在 setup 顶部 import，不再 require
 						const categoryStore = useCategoryStore()
 						const accountStore = useAccountStore()
 
@@ -255,13 +314,34 @@ export default {
 						const csvContent = exportToCSV(records, { categoryMap, accountMap })
 						const fileName = generateExportFileName(startMonth, endMonth)
 
-						// 导出结果预览（演示模式）
+						// 实际触发下载/保存
+						downloadCSVFile(csvContent, fileName)
+
+						// 按平台给出保存位置说明
+						// #ifdef MP-WEIXIN
+						const saveTip = '小程序本地目录：\nwxfile://usr/' + fileName + '\n\n点击右上角"…"可转发或保存到手机'
+						// #endif
+						// #ifdef H5
+						const saveTip = '浏览器默认下载目录：\n' + fileName + '\n\n可在浏览器下载列表中查看'
+						// #endif
+						// #ifdef APP-PLUS
+						const saveTip = '应用沙盒目录：\n' + fileName + '\n\n可通过文件管理 App 在应用目录下找到'
+						// #endif
+						// #ifndef MP-WEIXIN
+						// #ifndef H5
+						// #ifndef APP-PLUS
+						const saveTip = '已生成文件：' + fileName
+						// #endif
+						// #endif
+						// #endif
+
+						// 导出结果预览
 						const totalExpense = records.filter(r => r.type === 1).reduce((sum, r) => sum + r.amount, 0)
 						const totalIncome = records.filter(r => r.type === 2).reduce((sum, r) => sum + r.amount, 0)
 
 						uni.showModal({
-							title: `导出成功 - ${fileName}`,
-							content: `数据统计\n• 支出记录：${records.filter(r => r.type === 1).length} 条\n• 收入记录：${records.filter(r => r.type === 2).length} 条\n• 支出总额：¥${totalExpense.toFixed(2)}\n• 收入总额：¥${totalIncome.toFixed(2)}\n\nCSV 预览（前 500 字符）：\n${csvContent.substring(0, 500)}${csvContent.length > 500 ? '\n...' : ''}`,
+							title: '导出成功 - ' + fileName,
+							content: '数据统计\n• 支出记录：' + records.filter(r => r.type === 1).length + ' 条\n• 收入记录：' + records.filter(r => r.type === 2).length + ' 条\n• 支出总额：¥' + totalExpense.toFixed(2) + '\n• 收入总额：¥' + totalIncome.toFixed(2) + '\n\n保存位置\n' + saveTip + '\n\nCSV 预览（前 500 字符）：\n' + csvContent.substring(0, 500) + (csvContent.length > 500 ? '\n...' : ''),
 							showCancel: false,
 							confirmText: '确定'
 						})
@@ -303,6 +383,7 @@ export default {
 			isLoggedIn,
 			nickName,
 			shortOpenid,
+			showAbout,
 			syncStatusText,
 			goToIndex,
 			goToRecords,
@@ -310,6 +391,7 @@ export default {
 			goToStats,
 			goToAccountManage,
 			goToCategoryManage,
+			goToTemplateSetting,
 			goToBudget,
 			onExport,
 			onSync,
@@ -322,7 +404,7 @@ export default {
 <style scoped>
 .my-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 120rpx;
 }
 
@@ -449,6 +531,83 @@ export default {
 	align-items: center;
 }
 
+/* About Modal */
+.modal {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	z-index: 999;
+}
+.modal-mask {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+.modal-content {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 600rpx;
+	background-color: #ffffff;
+	border-radius: 16rpx;
+	overflow: hidden;
+}
+.modal-footer {
+	border-top: 1rpx solid #f0f0f0;
+}
+.btn {
+	text-align: center;
+	padding: 28rpx;
+	font-size: 32rpx;
+}
+.confirm-btn {
+	color: #07c160;
+}
+
+.about-modal {
+	padding: 0;
+}
+.about-header {
+	padding: 40rpx 30rpx 24rpx;
+	text-align: center;
+	border-bottom: 1rpx solid #f0f0f0;
+}
+.about-title {
+	display: block;
+	font-size: 44rpx;
+	font-weight: bold;
+	color: #333333;
+}
+.about-version {
+	display: block;
+	font-size: 24rpx;
+	color: #999999;
+	margin-top: 8rpx;
+}
+.about-body {
+	padding: 20rpx 30rpx;
+}
+.about-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18rpx 0;
+	border-bottom: 1rpx solid #f5f5f5;
+}
+.about-row:last-child {
+	border-bottom: none;
+}
+.about-label {
+	font-size: 28rpx;
+	color: #999999;
+}
+.about-text {
+	font-size: 28rpx;
+	color: #333333;
+	font-weight: 500;
+}
+
 .sync-text {
 	font-size: 28rpx;
 	color: #666666;
@@ -566,7 +725,7 @@ export default {
 							accountMap[a.code] = a.name
 						})
 
-						const { exportToExcelWithStyle, generateExcelFileName, downloadExcelFile } = require('@/utils/export.js')
+						// 已在 setup 顶部 import
 
 						try {
 							const excelData = exportToExcelWithStyle(records, { categoryMap, accountMap })

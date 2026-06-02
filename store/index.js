@@ -11,6 +11,7 @@ import { useCategoryStore } from './category'
 import { useAccountStore } from './account'
 import { useBudgetStore } from './budget'
 import { useSyncStore } from './sync'
+import { useTemplateStore } from './template'
 
 const pinia = createPinia()
 
@@ -28,5 +29,6 @@ export {
   useCategoryStore,
   useAccountStore,
   useBudgetStore,
-  useSyncStore
+  useSyncStore,
+  useTemplateStore
 }

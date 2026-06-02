@@ -3,7 +3,7 @@
  * 随手记 - 个人记账小程序
  */
 
-import { EXPENSE_CATEGORY_CODES, INCOME_CATEGORY_CODES, ACCOUNT_CODES } from './schema'
+import { EXPENSE_CATEGORY_CODES, INCOME_CATEGORY_CODES, ACCOUNT_CODES, TABLE_NAMES } from './schema'
 import { getStorage, setStorage } from './storage'
 
 /**
@@ -62,6 +62,34 @@ export function initAccounts() {
 }
 
 /**
+ * 初始化默认快捷记账模板（首页快捷记账区域）
+ * 全为支出（type=1）；用户可在「快捷记账设置」页增加收入模板
+ *
+ * 关键：create_time/update_time = 0
+ *   - 让 mergeWithTimestamp(cloud, local) 在云端版本存在时永远胜出
+ *   - 避免「缓存清空 → 重新初始化默认 → Date.now() > 云端 update_time → 默认覆盖云端修改」的丢失
+ */
+export function initTemplates() {
+  const templates = [
+    { name: '早餐', amount: 10, type: 1, category_code: EXPENSE_CATEGORY_CODES.FOOD, icon: 'meal', color: '#FF6B6B', sort: 1 },
+    { name: '午餐', amount: 30, type: 1, category_code: EXPENSE_CATEGORY_CODES.FOOD, icon: 'food', color: '#FF6B6B', sort: 2 },
+    { name: '晚餐', amount: 40, type: 1, category_code: EXPENSE_CATEGORY_CODES.FOOD, icon: 'food', color: '#FF6B6B', sort: 3 },
+    { name: '咖啡', amount: 20, type: 1, category_code: EXPENSE_CATEGORY_CODES.FOOD, icon: 'drink', color: '#FF6B6B', sort: 4 },
+    { name: '打车', amount: 25, type: 1, category_code: EXPENSE_CATEGORY_CODES.TRANSPORT, icon: 'car', color: '#4ECDC4', sort: 5 },
+    { name: '地铁', amount: 5, type: 1, category_code: EXPENSE_CATEGORY_CODES.TRANSPORT, icon: 'bus', color: '#4ECDC4', sort: 6 },
+    { name: '电影', amount: 50, type: 1, category_code: EXPENSE_CATEGORY_CODES.ENTERTAINMENT, icon: 'movie', color: '#96CEB4', sort: 7 },
+    { name: '超市', amount: 80, type: 1, category_code: EXPENSE_CATEGORY_CODES.SHOPPING, icon: 'shopping', color: '#45B7D1', sort: 8 }
+  ]
+  return templates.map((tpl, index) => ({
+    ...tpl,
+    id: 'template_' + index,
+    is_default: 1,
+    create_time: 0,
+    update_time: 0
+  }))
+}
+
+/**
  * 初始化所有默认数据
  */
 export function initAllData() {
@@ -75,11 +103,17 @@ export function initAllData() {
   if (!existingAccounts || existingAccounts.length === 0) {
     setStorage('ssj_accounts', initAccounts())
   }
+
+  const existingTemplates = getStorage(TABLE_NAMES.TEMPLATE)
+  if (!existingTemplates || existingTemplates.length === 0) {
+    setStorage(TABLE_NAMES.TEMPLATE, initTemplates())
+  }
 }
 
 export default {
   initExpenseCategories,
   initIncomeCategories,
   initAccounts,
+  initTemplates,
   initAllData
 }

@@ -51,6 +51,13 @@
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
+		},
+		{
+			"path": "pages/template-setting/template-setting",
+			"style": {
+				"navigationBarTitleText": "快捷记账设置",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {

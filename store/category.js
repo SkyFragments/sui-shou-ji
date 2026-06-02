@@ -73,12 +73,15 @@ export const useCategoryStore = defineStore('category', {
   },
 
   actions: {
-    // 加载分类
+    // 加载分类：仅 storage 键缺失时注入默认；空数组视为用户主动清空，不再回填
+    // 注：默认分类无 create_time/update_time，mergeWithTimestamp 比较 undefined 永远不覆盖本地，
+    //   反向亦然——云端版本（带真实 update_time）总能覆盖本地无戳的默认值
     loadCategories() {
       const data = getStorage(STORAGE_KEY)
-      if (!data || data.length === 0) {
+      if (data === null || data === undefined) {
         // 初始化默认分类，必须带 id 才能上行到 (openid,id) 复合主键的表
         this.categories = initCategories().map(cat => ({ ...cat, id: cat.id || generateId() }))
+        this.saveCategories()
       } else {
         // 迁移旧数据：把 emoji 图标替换为 SVG 名称，并补 id
         const emojiToIcon = {
@@ -95,8 +98,8 @@ export const useCategoryStore = defineStore('category', {
           }
           return newCat
         })
+        this.saveCategories()
       }
-      this.saveCategories()
       return this.categories
     },
 
@@ -167,14 +170,10 @@ export const useCategoryStore = defineStore('category', {
     },
 
     // 从云端删除分类
+    // 关键：不 try/catch 吞异常，让 Promise reject 真正传播到调用方的 .catch
     async syncDeleteFromCloud(id) {
-      try {
-        await deleteCategory(id)
-        return { success: true }
-      } catch (e) {
-        console.error('Sync delete category failed:', e)
-        return { success: false, error: e }
-      }
+      await deleteCategory(id)
+      return { success: true }
     },
 
     // 保存到本地存储
@@ -189,26 +188,26 @@ export const useCategoryStore = defineStore('category', {
     },
 
     // 同步单个分类到云端
+    // 关键：不 try/catch 吞异常，让 .catch 真正触发 addPendingSync
     async syncCategory(category) {
-      try {
-        await upsertByPutPost(putCategory, postCategory, category)
-        return { success: true }
-      } catch (e) {
-        return { success: false, error: e }
-      }
+      await upsertByPutPost(putCategory, postCategory, category)
+      return { success: true }
     },
 
     // 同步所有分类到云端
+    // 单点失败入队，不让整体失败拖累其他配置类
     async syncToCloud() {
-      try {
-        for (const cat of this.categories) {
+      let allOk = true
+      const sync = useSyncStore()
+      for (const cat of this.categories) {
+        try {
           await this.syncCategory(cat)
+        } catch (e) {
+          allOk = false
+          sync.addPendingSync('category_upsert', cat)
         }
-        return { success: true }
-      } catch (e) {
-        console.error('Sync categories failed:', e)
-        return { success: false, error: e }
       }
+      return { success: allOk }
     }
   }
 })
