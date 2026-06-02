@@ -317,7 +317,7 @@ function getCurrentYearMonth() {
 }
 
 .nav-btn {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
@@ -332,7 +332,7 @@ function getCurrentYearMonth() {
 }
 
 .month-text {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -351,13 +351,13 @@ function getCurrentYearMonth() {
 }
 
 .stat-label {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	display: block;
 }
 
 .stat-value {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
@@ -388,12 +388,12 @@ function getCurrentYearMonth() {
 }
 
 .date-text {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 }
 
 .date-total {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	font-weight: 500;
 }
 
@@ -430,7 +430,7 @@ function getCurrentYearMonth() {
 
 .delete-btn {
 	color: #ffffff;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .record-content {
@@ -461,20 +461,20 @@ function getCurrentYearMonth() {
 }
 
 .record-category {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	display: block;
 }
 
 .record-remark {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-top: 4rpx;
 	display: block;
 }
 
 .record-amount {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: 500;
 }
 
@@ -482,7 +482,7 @@ function getCurrentYearMonth() {
 	text-align: center;
 	padding: 100rpx 0;
 	color: #666666;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .tabbar {
@@ -502,7 +502,7 @@ function getCurrentYearMonth() {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 	display: flex;
 	flex-direction: column;

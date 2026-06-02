@@ -430,7 +430,7 @@ function getToday() {
 }
 
 .navbar-back {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	line-height: 1;
 	color: #333333;
 	font-weight: 300;
@@ -438,7 +438,7 @@ function getToday() {
 }
 
 .navbar-title {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: 600;
 	color: #333333;
 	flex: 1;
@@ -446,7 +446,7 @@ function getToday() {
 }
 
 .navbar-action {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	padding: 8rpx 16rpx;
 }
@@ -462,7 +462,7 @@ function getToday() {
 }
 
 .amount-label {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 	margin-bottom: 16rpx;
 }
@@ -474,13 +474,13 @@ function getToday() {
 }
 
 .currency {
-	font-size: 40rpx;
+	font-size: 48rpx;
 	color: #333333;
 	margin-right: 8rpx;
 }
 
 .amount {
-	font-size: 72rpx;
+	font-size: 86rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -501,7 +501,7 @@ function getToday() {
 	align-items: center;
 	justify-content: center;
 	border-radius: 999rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 	transition: all 0.2s;
 }
@@ -528,7 +528,7 @@ function getToday() {
 
 .section-title {
 	padding: 20rpx 24rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	border-bottom: 1rpx solid #f0f0f0;
 }
@@ -545,13 +545,13 @@ function getToday() {
 }
 
 .form-label {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 	margin-bottom: 12rpx;
 }
 
 .picker-value {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	padding: 16rpx 0;
 	border-bottom: 1rpx solid #f0f0f0;
@@ -562,7 +562,7 @@ function getToday() {
 .remark-input {
 	width: 100%;
 	padding: 20rpx 24rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	box-sizing: border-box;
 	min-height: 88rpx;
 }
@@ -589,7 +589,7 @@ function getToday() {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 }
 

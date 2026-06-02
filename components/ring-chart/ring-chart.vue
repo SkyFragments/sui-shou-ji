@@ -93,13 +93,13 @@ export default {
 }
 
 .amount {
-	font-size: 36rpx;
+	font-size: 44rpx;
 	font-weight: bold;
 	color: #333333;
 }
 
 .label {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-top: 5rpx;
 }

@@ -121,7 +121,7 @@ export default {
 .tab {
 	padding: 12rpx 48rpx;
 	border-radius: 40rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 	background-color: #f0f0f0;
 	transition: all 0.2s;
@@ -168,7 +168,7 @@ export default {
 }
 
 .category-name {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-top: 8rpx;
 	text-align: center;

@@ -303,7 +303,7 @@ function getCurrentYearMonth() {
 }
 
 .nav-btn {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
@@ -312,7 +312,7 @@ function getCurrentYearMonth() {
 }
 
 .month-text {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -325,7 +325,7 @@ function getCurrentYearMonth() {
 }
 
 .section-title {
-	font-size: 30rpx;
+	font-size: 36rpx;
 	font-weight: bold;
 	color: #333333;
 	margin-bottom: 20rpx;
@@ -339,13 +339,13 @@ function getCurrentYearMonth() {
 }
 
 .budget-currency {
-	font-size: 48rpx;
+	font-size: 58rpx;
 	color: #333333;
 	margin-right: 8rpx;
 }
 
 .budget-input {
-	font-size: 64rpx;
+	font-size: 76rpx;
 	font-weight: bold;
 	text-align: center;
 	width: 300rpx;
@@ -369,7 +369,7 @@ function getCurrentYearMonth() {
 	padding: 12rpx 32rpx;
 	border-radius: 40rpx;
 	background-color: #f0f0f0;
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 	transition: transform 0.15s ease-out, opacity 0.15s ease-out;
 }
@@ -397,13 +397,13 @@ function getCurrentYearMonth() {
 }
 
 .progress-label {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 	display: block;
 }
 
 .progress-value {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
@@ -448,7 +448,7 @@ function getCurrentYearMonth() {
 
 .progress-percentage {
 	text-align: center;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-top: 12rpx;
 }
@@ -457,7 +457,7 @@ function getCurrentYearMonth() {
 	margin: 0 20rpx 20rpx;
 	padding: 20rpx 24rpx;
 	border-radius: 12rpx;
-	font-size: 26rpx;
+	font-size: 32rpx;
 	text-align: center;
 }
 
@@ -485,12 +485,12 @@ function getCurrentYearMonth() {
 }
 
 .suggestion-title {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 }
 
 .suggestion-value {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	font-weight: bold;
 	color: #07c160;
 	display: block;
@@ -498,7 +498,7 @@ function getCurrentYearMonth() {
 }
 
 .suggestion-hint {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 }
 
@@ -519,7 +519,7 @@ function getCurrentYearMonth() {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 }
 

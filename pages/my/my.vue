@@ -367,7 +367,7 @@ export default {
 }
 
 .profile-name {
-	font-size: 36rpx;
+	font-size: 44rpx;
 	font-weight: bold;
 	color: #ffffff;
 	display: block;
@@ -378,7 +378,7 @@ export default {
 }
 
 .profile-id {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: rgba(255, 255, 255, 0.8);
 	margin-top: 8rpx;
 	display: block;
@@ -414,7 +414,7 @@ export default {
 }
 
 .menu-icon {
-	font-size: 36rpx;
+	font-size: 44rpx;
 	margin-right: 16rpx;
 }
 
@@ -425,7 +425,7 @@ export default {
 }
 
 .menu-text {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 }
 
@@ -436,7 +436,7 @@ export default {
 }
 
 .menu-value {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 }
 
@@ -450,7 +450,7 @@ export default {
 }
 
 .sync-text {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-right: 12rpx;
 }
@@ -472,7 +472,7 @@ export default {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 	display: flex;
 	flex-direction: column;

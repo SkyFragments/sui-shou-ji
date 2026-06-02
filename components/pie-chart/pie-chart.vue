@@ -111,7 +111,7 @@ export default {
 }
 
 .total {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: var(--color-text-primary);
 }
@@ -138,12 +138,12 @@ export default {
 }
 
 .legend-name {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: var(--color-text-secondary);
 }
 
 .legend-value {
-	font-size: 20rpx;
+	font-size: 24rpx;
 	color: var(--color-text-secondary);
 }
 </style>

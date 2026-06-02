@@ -328,7 +328,7 @@ export default {
 	padding: 20rpx 0;
 	border-radius: 12rpx;
 	background-color: #FDF4E9;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
@@ -370,20 +370,20 @@ export default {
 }
 
 .category-name {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	display: block;
 }
 
 .category-code {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 	margin-top: 4rpx;
 	display: block;
 }
 
 .category-arrow {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 }
 
@@ -391,7 +391,7 @@ export default {
 	text-align: center;
 	padding: 100rpx 0;
 	color: #666666;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .add-btn {
@@ -409,7 +409,7 @@ export default {
 }
 
 .add-icon {
-	font-size: 48rpx;
+	font-size: 58rpx;
 	color: #ffffff;
 }
 
@@ -448,7 +448,7 @@ export default {
 }
 
 .modal-title {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -464,7 +464,7 @@ export default {
 }
 
 .form-label {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 	display: block;
 	margin-bottom: 16rpx;
@@ -474,7 +474,7 @@ export default {
 	border: 1rpx solid #f0f0f0;
 	border-radius: 8rpx;
 	padding: 20rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .icon-grid {
@@ -524,7 +524,7 @@ export default {
 
 .color-check {
 	color: #ffffff;
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 }
 
@@ -537,7 +537,7 @@ export default {
 	flex: 1;
 	text-align: center;
 	padding: 30rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .cancel-btn {
@@ -570,7 +570,7 @@ export default {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 }
 
@@ -585,7 +585,7 @@ export default {
 }
 
 .add-tab-icon {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	color: #07c160;
 }
 

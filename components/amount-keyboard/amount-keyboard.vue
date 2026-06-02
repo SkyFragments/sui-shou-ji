@@ -92,7 +92,7 @@ export default {
 	text-align: center;
 	background-color: #ffffff;
 	border-radius: 12rpx;
-	font-size: 40rpx;
+	font-size: 48rpx;
 	color: #333333;
 	margin: 0 4rpx;
 	box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
@@ -128,10 +128,10 @@ export default {
 }
 
 .key-double {
-	font-size: 36rpx;
+	font-size: 44rpx;
 }
 
 .icon {
-	font-size: 44rpx;
+	font-size: 52rpx;
 }
 </style>

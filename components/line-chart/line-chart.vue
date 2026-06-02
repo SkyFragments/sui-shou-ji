@@ -77,7 +77,7 @@ export default {
 }
 
 .title {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	font-weight: bold;
 }
@@ -114,7 +114,7 @@ export default {
 }
 
 .x-label {
-	font-size: 20rpx;
+	font-size: 24rpx;
 	color: #666666;
 }
 </style>

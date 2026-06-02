@@ -92,7 +92,7 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 36rpx;
+	font-size: 44rpx;
 }
 
 .info {
@@ -100,13 +100,13 @@ export default {
 }
 
 .category {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	display: block;
 }
 
 .remark {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	display: block;
 	margin-top: 5rpx;
@@ -117,7 +117,7 @@ export default {
 }
 
 .amount {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	display: block;
 }
@@ -131,7 +131,7 @@ export default {
 }
 
 .time {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	display: block;
 	margin-top: 5rpx;

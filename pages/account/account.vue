@@ -349,13 +349,13 @@ export default {
 }
 
 .account-name {
-	font-size: 30rpx;
+	font-size: 36rpx;
 	color: #333333;
 	font-weight: 500;
 }
 
 .account-type {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	margin-top: 8rpx;
 }
@@ -366,7 +366,7 @@ export default {
 }
 
 .default-badge {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #07c160;
 	padding: 4rpx 12rpx;
 	border: 1rpx solid #07c160;
@@ -375,7 +375,7 @@ export default {
 }
 
 .action-btn {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 	padding: 8rpx 16rpx;
 }
@@ -396,13 +396,13 @@ export default {
 }
 
 .add-icon {
-	font-size: 48rpx;
+	font-size: 58rpx;
 	color: #07c160;
 	margin-right: 12rpx;
 }
 
 .add-text {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #07c160;
 }
 
@@ -440,7 +440,7 @@ export default {
 }
 
 .modal-title {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -462,19 +462,19 @@ export default {
 }
 
 .form-label {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 }
 
 .form-input {
 	flex: 1;
 	text-align: right;
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
 .picker-value {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
@@ -487,7 +487,7 @@ export default {
 	flex: 1;
 	text-align: center;
 	padding: 30rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .cancel-btn {
@@ -517,7 +517,7 @@ export default {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 }
 
@@ -532,7 +532,7 @@ export default {
 }
 
 .add-tab-icon {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	color: #07c160;
 }
 .tab-item .tab-icon {

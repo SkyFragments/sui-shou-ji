@@ -305,7 +305,7 @@ function getCurrentYearMonth() {
 }
 
 .nav-btn {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
@@ -314,7 +314,7 @@ function getCurrentYearMonth() {
 }
 
 .month-text {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -339,13 +339,13 @@ function getCurrentYearMonth() {
 }
 
 .stat-label {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 	display: block;
 }
 
 .stat-value {
-	font-size: 40rpx;
+	font-size: 48rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
@@ -367,7 +367,7 @@ function getCurrentYearMonth() {
 }
 
 .section-title {
-	font-size: 30rpx;
+	font-size: 36rpx;
 	font-weight: bold;
 	color: #333333;
 	margin-bottom: 20rpx;
@@ -377,7 +377,7 @@ function getCurrentYearMonth() {
 	text-align: center;
 	padding: 60rpx 0;
 	color: #666666;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 /* Modal */
@@ -414,7 +414,7 @@ function getCurrentYearMonth() {
 }
 
 .modal-title {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
 }
@@ -435,12 +435,12 @@ function getCurrentYearMonth() {
 }
 
 .detail-label {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
 .detail-value {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	font-weight: 500;
 }
@@ -452,7 +452,7 @@ function getCurrentYearMonth() {
 .btn {
 	text-align: center;
 	padding: 30rpx;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .confirm-btn {
@@ -476,7 +476,7 @@ function getCurrentYearMonth() {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 	display: flex;
 	flex-direction: column;
@@ -495,7 +495,7 @@ function getCurrentYearMonth() {
 }
 
 .add-tab-icon {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	color: #07c160;
 }
 

@@ -343,12 +343,12 @@ export default {
 }
 
 .date {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	opacity: 0.9;
 }
 
 .greeting {
-	font-size: 40rpx;
+	font-size: 48rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
@@ -365,12 +365,12 @@ export default {
 }
 
 .stat-label {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	opacity: 0.85;
 }
 
 .stat-amount {
-	font-size: 44rpx;
+	font-size: 52rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 8rpx;
@@ -398,12 +398,12 @@ export default {
 }
 
 .budget-label {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #666666;
 }
 
 .budget-value {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	font-weight: 500;
 }
@@ -412,7 +412,7 @@ export default {
 	position: absolute;
 	right: 24rpx;
 	top: 24rpx;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #999;
 }
 
@@ -433,7 +433,7 @@ export default {
 	margin: 0 20rpx 20rpx;
 	padding: 20rpx 24rpx;
 	border-radius: 12rpx;
-	font-size: 26rpx;
+	font-size: 32rpx;
 	display: flex;
 	align-items: center;
 	gap: 16rpx;
@@ -451,7 +451,7 @@ export default {
 }
 
 .alert-icon {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	font-weight: bold;
 	color: inherit;
 }
@@ -483,7 +483,7 @@ export default {
 }
 
 .section-title {
-	font-size: 30rpx;
+	font-size: 36rpx;
 	font-weight: bold;
 	color: #333333;
 	margin-bottom: 20rpx;
@@ -517,19 +517,19 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 36rpx;
+	font-size: 44rpx;
 	color: #ffffff;
 	font-weight: 500;
 }
 
 .template-name {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #333333;
 	margin-top: 10rpx;
 }
 
 .template-amount {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #666666;
 	margin-top: 4rpx;
 }
@@ -549,7 +549,7 @@ export default {
 }
 
 .more {
-	font-size: 26rpx;
+	font-size: 32rpx;
 	color: #999;
 }
 
@@ -596,19 +596,19 @@ export default {
 }
 
 .record-category {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #333333;
 	display: block;
 }
 
 .record-time {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #999;
 	margin-top: 4rpx;
 }
 
 .record-amount {
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: 500;
 }
 
@@ -624,7 +624,7 @@ export default {
 	text-align: center;
 	padding: 60rpx 0;
 	color: #999;
-	font-size: 28rpx;
+	font-size: 34rpx;
 }
 
 .add-btn {
@@ -650,13 +650,13 @@ export default {
 }
 
 .add-icon {
-	font-size: 48rpx;
+	font-size: 58rpx;
 	color: #ffffff;
 	line-height: 1;
 }
 
 .add-text {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #ffffff;
 	margin-top: 4rpx;
 }
@@ -678,7 +678,7 @@ export default {
 .tab-item {
 	flex: 1;
 	text-align: center;
-	font-size: 22rpx;
+	font-size: 26rpx;
 	color: #999;
 	transition: color 0.15s ease-out;
 	display: flex;
@@ -692,7 +692,7 @@ export default {
 }
 
 .add-tab-icon {
-	font-size: 56rpx;
+	font-size: 68rpx;
 	color: #07c160;
 	margin-bottom: 0;
 }

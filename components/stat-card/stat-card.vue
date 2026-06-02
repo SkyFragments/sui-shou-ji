@@ -51,19 +51,19 @@ export default {
 }
 
 .title {
-	font-size: 28rpx;
+	font-size: 34rpx;
 	color: #666666;
 }
 
 .amount {
-	font-size: 40rpx;
+	font-size: 48rpx;
 	font-weight: bold;
 	display: block;
 	margin-top: 10rpx;
 }
 
 .compare {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666666;
 	display: block;
 	margin-top: 5rpx;
