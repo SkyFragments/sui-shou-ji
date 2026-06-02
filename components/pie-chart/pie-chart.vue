@@ -196,10 +196,12 @@ export default {
 			const cy = ROTATOR_SIZE / 2
 			const x = cx + LABEL_R * Math.sin(rad)
 			const y = cy - LABEL_R * Math.cos(rad)
+			// 反向旋转抵消父 rotator 旋转，让文字在 pie 转动时保持正立
+			const counter = -this.rotator
 			return {
 				left: `${x}rpx`,
 				top: `${y}rpx`,
-				transform: 'translate(-50%, -50%)'
+				transform: `translate(-50%, -50%) rotate(${counter}deg)`
 			}
 		},
 		// leader 从 pie 边缘向外延伸到 label 前
