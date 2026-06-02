@@ -116,6 +116,20 @@ export const useSyncStore = defineStore('sync', {
 
     // 同步到云端（使用各store的syncToCloud方法）
     async syncToCloud() {
+      // 登录态守卫：未登录不发起任何 HTTP 请求
+      // 之前缺这层，导致 triggerFirstSync 在 no_user 情况下仍触发 3 次 401 + 入队 full_sync
+      try {
+        const { getStoredUser } = await import('@/utils/auth')
+        const user = getStoredUser()
+        if (!user?.openid) {
+          this.setSyncStatus(SYNC_STATUS.IDLE)
+          return { success: false, reason: 'no_user' }
+        }
+      } catch (_) {
+        this.setSyncStatus(SYNC_STATUS.IDLE)
+        return { success: false, reason: 'no_user' }
+      }
+
       try {
         this.setSyncStatus(SYNC_STATUS.SYNCING)
 
@@ -528,7 +542,13 @@ export const useSyncStore = defineStore('sync', {
 
         if (pullResult.success) {
           if (!pullResult.data) {
-            await this.syncToCloud()
+            // syncToCloud 内部已有登录守卫；这里只判断要不要触发
+            const r = await this.syncToCloud()
+            if (r && r.reason === 'no_user') {
+              uni.hideLoading()
+              uni.showToast({ title: '请先登录', icon: 'none' })
+              return { success: false, needLogin: true }
+            }
           }
           // 手动同步入口也要 flush pending 队列（不依赖网络变化事件）
           const pendingResult = await this.syncPendingData()
