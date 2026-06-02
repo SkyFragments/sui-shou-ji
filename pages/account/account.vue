@@ -548,7 +548,6 @@ export default {
 .add-tab-icon-svg {
 	width: 48rpx;
 	height: 48rpx;
-	filter: brightness(0) invert(1);
 }
 
 .add-tab-icon {

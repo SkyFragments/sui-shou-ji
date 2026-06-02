@@ -102,7 +102,7 @@
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
+				<image src="/static/icon/icon-wallet-white.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
 				<image src="/static/icon/icon-info.svg" class="tab-icon" />
@@ -550,7 +550,6 @@ function getCurrentYearMonth() {
 .add-tab-icon-svg {
 	width: 48rpx;
 	height: 48rpx;
-	filter: brightness(0) invert(1);
 }
 
 .add-tab-icon {
@@ -560,7 +559,7 @@ function getCurrentYearMonth() {
 	line-height: 1;
 }
 
-.tab-icon { width: 44rpx; height: 44rpx; margin-bottom: 4rpx; } .add-tab-icon-svg { width: 56rpx; height: 56rpx; }
+.tab-icon { width: 44rpx; height: 44rpx; margin-bottom: 4rpx; } 
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

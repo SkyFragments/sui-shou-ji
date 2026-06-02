@@ -126,7 +126,7 @@
 				<text>账单</text>
 			</view>
 			<view class="tab-item add-tab" @click="goToAdd">
-				<image src="/static/icon/icon-wallet.svg" class="add-tab-icon-svg" />
+				<image src="/static/icon/icon-wallet-white.svg" class="add-tab-icon-svg" />
 			</view>
 			<view class="tab-item" @click="goToStats">
 				<image src="/static/icon/icon-info.svg" class="tab-icon" />
@@ -601,7 +601,6 @@ export default {
 .add-tab-icon-svg {
 	width: 48rpx;
 	height: 48rpx;
-	filter: brightness(0) invert(1);
 }
 
 .add-tab-icon {
@@ -622,10 +621,7 @@ export default {
 	margin-bottom: 4rpx;
 }
 
-.add-tab-icon-svg {
-	width: 56rpx;
-	height: 56rpx;
-}
+
 
 .icon-svg {
 	width: 48rpx;
