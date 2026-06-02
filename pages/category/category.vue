@@ -582,6 +582,33 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 96rpx;
+	height: 96rpx;
+	margin: 0 auto;
+	margin-top: -18rpx;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #07c160 0%, #06ae56 100%);
+	box-shadow: 0 6rpx 20rpx rgba(7, 193, 96, 0.35);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	position: relative;
+}
+
+.add-tab:active {
+	transform: scale(0.94);
+	box-shadow: 0 3rpx 10rpx rgba(7, 193, 96, 0.25);
+}
+
+.add-tab-icon-svg {
+	width: 48rpx;
+	height: 48rpx;
+	filter: brightness(0) invert(1);
+}
+
+.add-tab-icon {
+	font-size: 48rpx;
+	color: #ffffff;
+	font-weight: 300;
+	line-height: 1;
 }
 
 .add-tab-icon {
