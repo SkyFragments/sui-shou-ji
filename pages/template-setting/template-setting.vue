@@ -193,7 +193,7 @@
 					</view>
 				</scroll-view>
 
-				<view class="modal-footer">
+				<view class="modal-footer" :style="{ paddingBottom: (safeBottom + 12) + 'px' }">
 					<view class="footer-btn cancel-btn" @click="closeModal">
 						<text>取消</text>
 					</view>
@@ -233,11 +233,13 @@ export default {
 		const templateStore = useTemplateStore()
 		const categoryStore = useCategoryStore()
 
-		// 状态栏高度：用 JS 读 env() 在小程序不可靠
+		// 状态栏高度 + 底部安全区：用 JS 读 env() 在小程序不可靠
 		const statusBarH = ref(20)
+		const safeBottom = ref(0)
 		try {
 			const info = uni.getSystemInfoSync()
 			statusBarH.value = info.statusBarHeight || 20
+			safeBottom.value = info.safeAreaInsets?.bottom || info.safeArea?.bottom || 0
 		} catch (e) {}
 
 		const showModal = ref(false)
@@ -391,6 +393,7 @@ export default {
 
 		return {
 			statusBarH,
+			safeBottom,
 			templates,
 			visibleLimit,
 			iconPool: ICON_POOL,
@@ -718,11 +721,12 @@ export default {
 .modal-content {
 	position: relative;
 	width: 100%;
-	max-height: 80vh;
+	max-height: 75vh;
 	background-color: #ffffff;
 	border-radius: 24rpx 24rpx 0 0;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 }
 
 .modal-header {
@@ -753,7 +757,7 @@ export default {
 .modal-body {
 	flex: 1;
 	padding: 20rpx 30rpx;
-	max-height: calc(80vh - 200rpx);
+	overflow-y: auto;
 }
 
 .form-row {
@@ -911,14 +915,15 @@ export default {
 .modal-footer {
 	display: flex;
 	border-top: 1rpx solid #F0F0F0;
-	padding-bottom: env(safe-area-inset-bottom);
+	background-color: #ffffff;
 }
 
 .footer-btn {
 	flex: 1;
 	text-align: center;
-	padding: 28rpx;
-	font-size: 32rpx;
+	padding: 32rpx;
+	font-size: 34rpx;
+	min-height: 56rpx;
 }
 
 .cancel-btn {
