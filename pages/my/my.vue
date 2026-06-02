@@ -500,6 +500,13 @@ export default {
 	width: 56rpx;
 	height: 56rpx;
 }
+.tab-item .tab-icon {
+	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tab-item.active .tab-icon {
+	transform: scale(1.2);
+}
+
 </style>
 
 		const onExportExcel = () => {
