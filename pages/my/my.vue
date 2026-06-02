@@ -51,7 +51,7 @@
 			<!-- 预算设置 -->
 			<view class="menu-item" @click="goToBudget">
 				<view class="menu-left">
-					<image src="/static/icon/icon-wallet-white.svg" class="menu-icon-svg" />
+					<image src="/static/icon/icon-wallet.svg" class="menu-icon-svg" />
 					<text class="menu-text">预算设置</text>
 				</view>
 				<image src="/static/icon/icon-arrow-right.svg" class="menu-arrow-icon" />
