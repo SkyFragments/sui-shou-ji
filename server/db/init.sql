@@ -67,10 +67,10 @@ CREATE TABLE IF NOT EXISTS accounts (
 CREATE TABLE IF NOT EXISTS budgets (
   id VARCHAR(32) NOT NULL,
   openid VARCHAR(64) NOT NULL,
-  year_month VARCHAR(7) NOT NULL,
+  `year_month` VARCHAR(7) NOT NULL,
   total_budget DECIMAL(10,2) NOT NULL,
   create_time BIGINT,
   update_time BIGINT,
   PRIMARY KEY (openid, id),
-  UNIQUE INDEX idx_openid_month (openid, year_month)
+  UNIQUE INDEX idx_openid_month (openid, `year_month`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
