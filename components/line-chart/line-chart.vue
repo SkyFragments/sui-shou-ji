@@ -1,30 +1,30 @@
+<!--
+	周聚合柱状图
+	输入：data = [d1, d2, ..., dN] 每日金额；xLabels 与 data 等长（如 ['1日','','3日',...]）
+	内部按 7 天一组聚合，输出 4~5 根周柱，柱顶直接显示周金额。
+-->
 <template>
 	<view class="line-chart">
 		<view class="chart-header">
 			<text class="title">{{ title }}</text>
+			<text class="total">合计 ¥{{ total.toFixed(2) }}</text>
 		</view>
-		<view class="chart-body" @touchstart="onTouch">
-			<view class="chart-area">
-				<view v-for="(p, i) in points" :key="i" class="bar-wrap" :style="p.wrap">
-					<view class="bar" :style="p.bar"></view>
+		<view class="chart-area">
+			<view v-for="(b, i) in bars" :key="i" class="bar-col">
+				<view class="bar-value">¥{{ b.value.toFixed(0) }}</view>
+				<view class="bar-track">
+					<view class="bar" :style="{ height: b.heightPct + '%' }"></view>
 				</view>
-				<view v-for="(p, i) in points" :key="'d' + i" class="dot" :style="p.dot"></view>
-				<view v-for="(p, i) in points" :key="'l' + i" class="link" :style="p.link"></view>
-				<view v-if="hover.visible" class="tooltip" :style="hover.style">
-					<text class="tooltip-day">{{ hover.day }}</text>
-					<text class="tooltip-val">¥{{ hover.value }}</text>
-				</view>
+				<view class="bar-label">{{ b.label }}</view>
 			</view>
-			<view class="x-axis">
-				<text v-for="label in xLabels" :key="label" class="x-label">{{ label }}</text>
+			<view v-if="bars.length === 0" class="empty">
+				<text>暂无支出</text>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-let __chartUid = 0
-
 export default {
 	name: 'LineChart',
 	props: {
@@ -32,59 +32,37 @@ export default {
 		data: { type: Array, default: () => [] },
 		xLabels: { type: Array, default: () => [] }
 	},
-	data() {
-		return {
-			uid: 'line-chart-' + (++__chartUid),
-			hover: { visible: false, day: '', value: '', style: {} }
-		}
-	},
 	computed: {
-		points() {
-			if (this.data.length === 0) return []
-			const max = Math.max(...this.data, 1)
-			const n = this.data.length
-			const slot = 100 / Math.max(n - 1, 1)
-			return this.data.map((value, i) => {
-				const xPct = i * slot
-				const yPct = 100 - (value / max) * 80 - 10
+		// 把每日数组按 7 天一组求和
+		weeks() {
+			const days = this.data
+			if (!days.length) return []
+			const groups = []
+			for (let i = 0; i < days.length; i += 7) {
+				const slice = days.slice(i, i + 7)
+				groups.push(slice.reduce((s, v) => s + (v || 0), 0))
+			}
+			return groups
+		},
+		total() {
+			return this.weeks.reduce((s, v) => s + v, 0)
+		},
+		max() {
+			return Math.max(...this.weeks, 1)
+		},
+		bars() {
+			const weeks = this.weeks
+			if (!weeks.length) return []
+			// 找出每天对应原始日期标签，找该周第一天的"1日"/"10日"等作为标签
+			// xLabels 多为空字符串，简单地用 "第N周"+起始日
+			return weeks.map((val, i) => {
+				const startDay = i * 7 + 1
 				return {
-					value,
-					wrap: { left: (xPct - slot / 2) + '%', width: slot + '%' },
-					bar: { height: (100 - yPct) + '%' },
-					dot: { left: xPct + '%', top: yPct + '%' },
-					link: i < n - 1
-						? { left: xPct + '%', top: yPct + '%', width: slot + '%', transform: 'rotate(' + Math.atan2(this.data[i + 1] / Math.max(...this.data, 1) * 80 - value / max * 80, slot) * 180 / Math.PI + 'deg)' }
-						: null
+					value: val,
+					label: '第' + (i + 1) + '周',
+					heightPct: (val / this.max) * 90  // 90% 留顶给金额标签
 				}
 			})
-		}
-	},
-	methods: {
-		onTouch(e) {
-			const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0])
-			if (!touch || !this.points.length) return
-			const query = uni.createSelectorQuery().in(this)
-			query.select('.chart-area').boundingClientRect(rect => {
-				if (!rect) return
-				const tx = touch.x - rect.left
-				const innerW = rect.width * 0.88
-				const padX = rect.width * 0.06
-				const relX = (tx - padX) / innerW * 100
-				let best = 0, bestDist = Infinity
-				for (let i = 0; i < this.points.length; i++) {
-					const d = Math.abs(this.points[i].dot.left.replace('%', '') * 1 - relX)
-					if (d < bestDist) { bestDist = d; best = i }
-				}
-				const p = this.points[best]
-				const val = (this.data[best] || 0).toFixed(2)
-				const day = this.xLabels[best] || (best + 1) + '日'
-				this.hover = {
-					visible: true,
-					day,
-					value: val,
-					style: { left: p.dot.left, top: p.dot.top, transform: 'translate(-50%, -100%)' }
-				}
-			}).exec()
 		}
 	}
 }
@@ -96,87 +74,83 @@ export default {
 	background-color: #ffffff;
 	border-radius: 12rpx;
 }
+
 .chart-header {
-	margin-bottom: 16rpx;
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 24rpx;
 }
+
 .title {
 	font-size: 34rpx;
 	color: #333333;
 	font-weight: bold;
 }
-.chart-body {
-	position: relative;
+
+.total {
+	font-size: 26rpx;
+	color: #666666;
 }
+
 .chart-area {
-	position: relative;
-	height: 240rpx;
-	margin: 0 20rpx 20rpx;
-	border-left: 1rpx solid #f0f0f0;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-around;
+	height: 320rpx;
+	padding: 0 8rpx;
 	border-bottom: 1rpx solid #f0f0f0;
 }
-.bar-wrap {
-	position: absolute;
-	bottom: 0;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-}
-.bar {
-	width: 60%;
-	margin: 0 auto;
-	background: linear-gradient(to top, rgba(7, 193, 96, 0.18), rgba(7, 193, 96, 0.55));
-	border-radius: 4rpx;
-}
-.dot {
-	position: absolute;
-	width: 18rpx;
-	height: 18rpx;
-	border-radius: 50%;
-	background-color: #ffffff;
-	border: 4rpx solid #07c160;
-	transform: translate(-50%, -50%);
-	box-sizing: border-box;
-	z-index: 2;
-	pointer-events: none;
-}
-.link {
-	position: absolute;
-	height: 2rpx;
-	background: #07c160;
-	transform-origin: 0 0;
-	z-index: 1;
-	pointer-events: none;
-}
-.tooltip {
-	position: absolute;
-	background: rgba(50, 50, 50, 0.85);
-	color: #fff;
-	padding: 6rpx 14rpx;
-	border-radius: 8rpx;
-	font-size: 24rpx;
+
+.bar-col {
+	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	white-space: nowrap;
-	pointer-events: none;
-	z-index: 10;
+	justify-content: flex-end;
+	height: 100%;
+	margin: 0 6rpx;
 }
-.tooltip-day {
+
+.bar-value {
 	font-size: 22rpx;
-	opacity: 0.85;
+	color: #333333;
+	font-weight: 500;
+	margin-bottom: 6rpx;
+	min-height: 28rpx;
 }
-.tooltip-val {
-	font-size: 26rpx;
-	font-weight: bold;
-}
-.x-axis {
+
+.bar-track {
+	width: 100%;
+	max-width: 80rpx;
+	height: 220rpx;
 	display: flex;
-	justify-content: space-between;
-	padding: 0 20rpx;
+	align-items: flex-end;
+	justify-content: center;
 }
-.x-label {
-	font-size: 28rpx;
+
+.bar {
+	width: 100%;
+	background: linear-gradient(to top, rgba(7, 193, 96, 0.55), rgba(7, 193, 96, 0.85));
+	border-radius: 8rpx 8rpx 0 0;
+	min-height: 4rpx;
+	transition: height 0.3s ease;
+}
+
+.bar-label {
+	font-size: 24rpx;
 	color: #666666;
+	margin-top: 10rpx;
+}
+
+.empty {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	text-align: center;
+	color: #999;
+	font-size: 30rpx;
 }
 </style>
