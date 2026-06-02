@@ -7,13 +7,13 @@
 		<!-- 月份选择器 -->
 		<view class="month-selector animate-slide-up">
 			<view class="month-nav" @click="prevMonth">
-				<text class="nav-btn">‹</text>
+				<image src="/static/icon/icon-arrow-left.svg" class="nav-btn-icon" />
 			</view>
 			<view class="month-display">
 				<text class="month-text">{{ displayMonth }}</text>
 			</view>
 			<view class="month-nav" @click="nextMonth">
-				<text class="nav-btn">›</text>
+				<image src="/static/icon/icon-arrow-right.svg" class="nav-btn-icon" />
 			</view>
 		</view>
 
@@ -302,8 +302,9 @@ function getCurrentYearMonth() {
 	padding: 10rpx 20rpx;
 }
 
-.nav-btn {
-	font-size: 34rpx;
+.nav-btn-icon {
+	width: 32rpx;
+	height: 32rpx;
 	color: #666666;
 }
 
