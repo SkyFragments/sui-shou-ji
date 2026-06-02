@@ -3,12 +3,12 @@
 * 管理支出和收入分类
  */
 <template>
-	<view class="category-page">
+	<view class="category-page" :style="{ paddingTop: statusBarH + 'px' }">
 		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
 		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
 
 		<!-- 类型切换 -->
-		<view class="type-tabs animate-slide-up">
+		<view class="type-tabs animate-slide-up" :style="{ top: statusBarH + 'px' }">
 			<view
 				class="type-tab"
 				:class="{ active: currentType === 1 }"
@@ -322,20 +322,29 @@ export default {
 <style scoped>
 .category-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 120rpx;
 }
 
 .status-bar-placeholder {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
 	width: 100%;
 	background-color: #ffffff;
+	z-index: 99;
 }
 
 .type-tabs {
+	position: sticky;
+	top: 0;
+	z-index: 101;
 	display: flex;
 	background-color: #ffffff;
 	padding: 20rpx;
 	gap: 20rpx;
+	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
 .type-tab {

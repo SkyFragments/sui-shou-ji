@@ -4,14 +4,14 @@
  * 支持编辑模式：通过 url 参数传入 recordId
  */
 <template>
-	<view class="add-page">
+	<view class="add-page" :style="{ paddingTop: (statusBarH + 88) + 'px' }">
 		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
 		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
 
 		<!-- 顶部导航栏 -->
 		<view class="navbar" :style="{ top: statusBarH + 'px' }">
 			<view class="navbar-left" @click="goBack">
-				<text class="navbar-back">‹</text>
+				<image src="/static/icon/icon-arrow-left.svg" class="navbar-back-icon" />
 			</view>
 			<text class="navbar-title">{{ isEdit ? '编辑账单' : '记一笔' }}</text>
 			<view class="navbar-right">
@@ -22,6 +22,8 @@
 				>删除</text>
 			</view>
 		</view>
+
+		<!-- 高度补偿 spacer 已合并到 .add-page 的 paddingTop，此处删除 -->
 
 		<!-- 金额显示 -->
 		<view class="amount-display">
@@ -154,10 +156,11 @@ export default {
 		const accountStore = useAccountStore()
 
 		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
+		// 取 statusBarHeight 即可；safeAreaInsets.top 在 iOS 上与 statusBarHeight 重叠，相加会双倍
 		const statusBarH = ref(20)
 		try {
 			const info = uni.getSystemInfoSync()
-			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
+			statusBarH.value = info.statusBarHeight || 20
 		} catch (e) {}
 
 		// 初始化 stores
@@ -412,7 +415,7 @@ function getToday() {
 <style scoped>
 .add-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 240rpx;
 }
 
@@ -425,15 +428,24 @@ function getToday() {
 	box-sizing: border-box;
 	background-color: #ffffff;
 	border-bottom: 1rpx solid #f0f0f0;
-	position: sticky;
+	position: fixed;
+	left: 0;
+	right: 0;
 	top: 0;
-	z-index: 10;
+	z-index: 100;
 }
 
 .status-bar-placeholder {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
 	width: 100%;
 	background-color: #ffffff;
+	z-index: 99;
 }
+
+/* spacer 已合并到 .add-page paddingTop，此处删除 .navbar-spacer */
 
 .navbar-left,
 .navbar-right {
@@ -446,11 +458,9 @@ function getToday() {
 	justify-content: flex-end;
 }
 
-.navbar-back {
-	font-size: 68rpx;
-	line-height: 1;
-	color: #333333;
-	font-weight: 300;
+.navbar-back-icon {
+	width: 40rpx;
+	height: 40rpx;
 	padding: 0 8rpx;
 }
 

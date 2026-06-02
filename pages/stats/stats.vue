@@ -86,14 +86,14 @@
 			</view>
 		</view>
 
-		<!-- 日支出趋势 -->
+		<!-- 周支出趋势 -->
 		<view class="chart-section animate-slide-up delay-2">
-			<view class="section-title">日支出趋势</view>
+			<view class="section-title">周支出趋势</view>
 			<line-chart
 				v-if="dailyExpense.length > 0"
 				:data="dailyExpense"
 				:xLabels="xLabels"
-				title="日支出"
+				title="周支出"
 			/>
 			<view class="empty-chart" v-else>
 				<text>暂无数据</text>
@@ -298,7 +298,7 @@ function getCurrentYearMonth() {
 <style scoped>
 .stats-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 120rpx;
 }
 

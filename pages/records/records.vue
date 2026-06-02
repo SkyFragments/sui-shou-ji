@@ -300,7 +300,7 @@ function getCurrentYearMonth() {
 <style scoped>
 .records-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 120rpx;
 }
 

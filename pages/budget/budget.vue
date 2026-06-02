@@ -3,7 +3,7 @@
  * 设置月预算并查看执行进度
  */
 <template>
-	<view class="budget-page">
+	<view class="budget-page" :style="{ paddingTop: statusBarH + 'px' }">
 		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
 		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
 
@@ -129,6 +129,13 @@ export default {
 		const budgetStore = useBudgetStore()
 		const billStore = useBillStore()
 
+		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
+		const statusBarH = ref(20)
+		try {
+			const info = uni.getSystemInfoSync()
+			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
+		} catch (e) {}
+
 		const currentYearMonth = ref(getCurrentYearMonth())
 		const budgetAmount = ref(3000)
 
@@ -253,6 +260,7 @@ export default {
 		}
 
 		return {
+			statusBarH,
 			currentYearMonth,
 			displayMonth,
 			budgetAmount,
@@ -289,8 +297,18 @@ function getCurrentYearMonth() {
 <style scoped>
 .budget-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
+	background: transparent;
 	padding-bottom: 120rpx;
+}
+
+.status-bar-placeholder {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	background-color: #ffffff;
+	z-index: 99;
 }
 
 .month-selector {
@@ -299,7 +317,6 @@ function getCurrentYearMonth() {
 	justify-content: space-between;
 	background-color: #ffffff;
 	padding: 20rpx 30rpx;
-	padding-top: calc(20rpx + env(safe-area-inset-top));
 }
 
 .month-nav {
