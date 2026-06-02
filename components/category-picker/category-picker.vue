@@ -165,7 +165,9 @@ export default {
 }
 
 .category-item.selected .category-icon {
-	border-color: #333333;
+	border-color: #07c160;
+	transform: scale(1.1);
+	box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.4);
 }
 
 .category-name {
@@ -173,5 +175,10 @@ export default {
 	color: #666666;
 	margin-top: 8rpx;
 	text-align: center;
+}
+
+.category-name.selected {
+	color: #07c160;
+	font-weight: 600;
 }
 </style>
