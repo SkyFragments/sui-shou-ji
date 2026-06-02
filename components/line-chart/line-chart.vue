@@ -13,7 +13,7 @@
 		</view>
 		<view class="chart-container">
 			<view class="line-canvas-wrap" :style="canvasWrapStyle">
-				<canvas class="real-canvas" :canvas-id="canvasId" :id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
+				<canvas class="real-canvas" :canvas-id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
 				<view v-for="(p, i) in points" :key="i" class="point" :style="getPointStyle(p)"></view>
 			</view>
 			<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
