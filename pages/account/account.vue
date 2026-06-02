@@ -3,7 +3,19 @@
  * 查看、添加、编辑、删除账户
  */
 <template>
-	<view class="account-page">
+	<view class="account-page" :style="{ paddingTop: statusBarH + 'px' }">
+		<!-- 顶部安全区占位（兼容小程序/低版 webview，env() 不可靠） -->
+		<view class="status-bar-placeholder" :style="{ height: statusBarH + 'px' }"></view>
+
+		<!-- 页面标题栏：吸收状态栏/刘海区域，提供返回 -->
+		<view class="page-header">
+			<view class="header-btn back-btn" @click="goBack" aria-label="返回">
+				<image src="/static/icon/icon-arrow-left.svg" class="header-btn-icon" />
+			</view>
+			<text class="header-title">账户管理</text>
+			<view class="header-btn placeholder" aria-hidden="true"></view>
+		</view>
+
 		<!-- 账户列表 -->
 		<view class="account-list animate-slide-up">
 			<view
@@ -36,6 +48,12 @@
 			</view>
 		</view>
 
+		<!-- 空状态 -->
+		<view class="empty-state animate-fade-in" v-if="accounts.length === 0">
+			<text class="empty-text">暂无账户</text>
+			<text class="empty-hint">点击下方按钮添加第一个账户</text>
+		</view>
+
 		<!-- 添加账户按钮 -->
 		<view class="add-account-btn" @click="showAddModal = true">
 			<text class="add-icon">+</text>
@@ -48,6 +66,9 @@
 			<view class="modal-content">
 				<view class="modal-header">
 					<text class="modal-title">{{ editingAccount ? '编辑账户' : '添加账户' }}</text>
+					<view class="modal-close" @click="closeModal" aria-label="关闭">
+						<text class="modal-close-icon">×</text>
+					</view>
 				</view>
 				<view class="modal-body">
 					<view class="form-item">
@@ -67,7 +88,8 @@
 							@change="onAccountTypeChange"
 						>
 							<view class="picker-value">
-								{{ formData.type ? getAccountTypeName(formData.type) : '请选择' }}
+								<text>{{ formData.type ? getAccountTypeName(formData.type) : '请选择' }}</text>
+								<image src="/static/icon/icon-arrow-right.svg" class="picker-chevron" />
 							</view>
 						</picker>
 					</view>
@@ -115,14 +137,23 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useAccountStore } from '@/store/account'
+import { useBillStore } from '@/store/bill'
 
 export default {
 	setup() {
 		const accountStore = useAccountStore()
+		const billStore = useBillStore()
 
 		const showAddModal = ref(false)
 		const editingAccount = ref(null)
 		const accountTypeIndex = ref(0)
+
+		// 状态栏高度：env() 在小程序/低版 webview 不可靠，用 JS 读出来
+		const statusBarH = ref(20)
+		try {
+			const info = uni.getSystemInfoSync()
+			statusBarH.value = (info.statusBarHeight || 20) + (info.safeAreaInsets?.top || 0)
+		} catch (e) {}
 
 		const formData = ref({
 			name: '',
@@ -134,6 +165,10 @@ export default {
 
 		onMounted(() => {
 			accountStore.loadAccounts()
+			// 确保账单已加载，删除提示中的"关联账单数"才准确
+			if (!billStore.records || billStore.records.length === 0) {
+				billStore.loadRecords()
+			}
 		})
 
 		const accounts = computed(() => accountStore.allAccounts)
@@ -195,9 +230,15 @@ export default {
 		}
 
 		const deleteAccount = (account) => {
+			const relatedCount = billStore.records.filter(r => r.account_code === account.code).length
+			const content = relatedCount > 0
+				? `确定要删除账户"${account.name}"吗？\n该账户下有 ${relatedCount} 条账单记录，删除后这些账单将失去账户关联。`
+				: `确定要删除账户"${account.name}"吗？`
 			uni.showModal({
 				title: '确认删除',
-				content: `确定要删除账户"${account.name}"吗？`,
+				content,
+				confirmText: '删除',
+				confirmColor: '#dd524d',
 				success: (res) => {
 					if (res.confirm) {
 						const success = accountStore.deleteAccount(account.code)
@@ -275,7 +316,17 @@ export default {
 			uni.reLaunch({ url: '/pages/my/my' })
 		}
 
+		const goBack = () => {
+			const pages = getCurrentPages()
+			if (pages && pages.length > 1) {
+				uni.navigateBack({ delta: 1 })
+			} else {
+				uni.reLaunch({ url: '/pages/my/my' })
+			}
+		}
+
 		return {
+			statusBarH,
 			accounts,
 			showAddModal,
 			editingAccount,
@@ -296,7 +347,8 @@ export default {
 			goToRecords,
 			goToAdd,
 			goToStats,
-			goToMy
+			goToMy,
+			goBack
 		}
 	}
 }
@@ -305,9 +357,66 @@ export default {
 <style scoped>
 .account-page {
 	min-height: 100vh;
-	background-color: #FDF4E9;
-	padding-top: env(safe-area-inset-top);
+	background: transparent;
 	padding-bottom: 120rpx;
+}
+
+/* 状态栏占位：固定顶部，明确占用摄像头/刘海区域 */
+.status-bar-placeholder {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	background-color: #ffffff;
+	z-index: 99;
+}
+
+/* 页面标题栏：粘性吸顶，被状态栏占位保护，下方滚动时内容不会冲到摄像头下 */
+.page-header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 88rpx;
+	padding: 0 16rpx;
+	background-color: #ffffff;
+	border-bottom: 1rpx solid #f0f0f0;
+	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.header-btn {
+	width: 72rpx;
+	height: 72rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	transition: background-color 0.15s ease-out;
+}
+
+.header-btn:active {
+	background-color: #F0EBE3;
+}
+
+.header-btn.placeholder {
+	background: transparent;
+	pointer-events: none;
+}
+
+.header-btn-icon {
+	width: 44rpx;
+	height: 44rpx;
+}
+
+.header-title {
+	flex: 1;
+	text-align: center;
+	font-size: 36rpx;
+	font-weight: 600;
+	color: #333333;
 }
 
 .account-list {
@@ -367,22 +476,67 @@ export default {
 }
 
 .default-badge {
-	font-size: 26rpx;
+	font-size: 24rpx;
 	color: #07c160;
-	padding: 4rpx 12rpx;
+	padding: 4rpx 14rpx;
+	background-color: #EAF6EE;
 	border: 1rpx solid #07c160;
 	border-radius: 20rpx;
 	margin-right: 16rpx;
+	line-height: 1.4;
 }
 
 .action-btn {
-	font-size: 32rpx;
+	font-size: 30rpx;
 	color: #666666;
-	padding: 8rpx 16rpx;
+	padding: 20rpx 22rpx;
+	min-height: 72rpx;
+	min-width: 96rpx;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12rpx;
+	transition: background-color 0.15s ease-out;
+}
+
+.action-btn:active {
+	background-color: #F0EBE3;
 }
 
 .delete-btn {
 	color: #dd524d;
+}
+
+.delete-btn:active {
+	background-color: #FDEBE7;
+}
+
+/* 空状态 */
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 160rpx 40rpx;
+}
+
+.empty-text {
+	font-size: 34rpx;
+	color: #999999;
+	margin-bottom: 12rpx;
+}
+
+.empty-hint {
+	font-size: 28rpx;
+	color: #BBBBBB;
+}
+
+/* Picker 下拉箭头指示 */
+.picker-chevron {
+	width: 28rpx;
+	height: 28rpx;
+	opacity: 0.5;
+	transform: rotate(90deg);
 }
 
 .add-account-btn {
@@ -436,6 +590,9 @@ export default {
 }
 
 .modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	padding: 30rpx;
 	border-bottom: 1rpx solid #f0f0f0;
 }
@@ -444,6 +601,27 @@ export default {
 	font-size: 38rpx;
 	font-weight: bold;
 	color: #333333;
+}
+
+.modal-close {
+	width: 88rpx;
+	height: 88rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	transition: background-color 0.15s ease-out;
+}
+
+.modal-close:active {
+	background-color: #F0EBE3;
+}
+
+.modal-close-icon {
+	font-size: 48rpx;
+	color: #999999;
+	line-height: 1;
+	font-weight: 300;
 }
 
 .modal-body {
@@ -477,6 +655,10 @@ export default {
 .picker-value {
 	font-size: 34rpx;
 	color: #666666;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12rpx;
 }
 
 .modal-footer {
@@ -556,11 +738,6 @@ export default {
 	color: #ffffff;
 	font-weight: 300;
 	line-height: 1;
-}
-
-.add-tab-icon {
-	font-size: 48rpx;
-	color: #07c160;
 }
 .tab-item .tab-icon {
 	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
