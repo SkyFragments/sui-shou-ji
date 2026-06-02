@@ -103,6 +103,41 @@
 			/>
 		</view>
 
+		<!-- 视觉覆盖：图标 + 颜色（编辑时改这两个字段） -->
+		<view class="section visual-section">
+			<view class="visual-header">
+				<text class="visual-title">图标与颜色</text>
+				<text
+					v-if="selectedIcon || selectedColor"
+					class="visual-reset"
+					@click="resetVisual"
+				>使用分类默认</text>
+			</view>
+			<view class="icon-grid">
+				<view
+					v-for="icon in iconItems"
+					:key="icon.name"
+					class="icon-item"
+					:class="{ selected: icon.selected }"
+					@click="selectIcon(icon.name)"
+				>
+					<image :src="icon.path" class="icon-option-svg" />
+				</view>
+			</view>
+			<view class="color-grid">
+				<view
+					v-for="color in colorOptions"
+					:key="color"
+					class="color-item"
+					:class="{ selected: selectedColor === color }"
+					:style="{ backgroundColor: color }"
+					@click="selectColor(color)"
+				>
+					<text v-if="selectedColor === color" class="color-check">✓</text>
+				</view>
+			</view>
+		</view>
+
 		<!-- 键盘 -->
 		<view class="keyboard-wrapper">
 			<amount-keyboard
@@ -182,6 +217,29 @@ export default {
 		const selectedAccountCode = ref(accountStore.defaultAccount?.code || '')
 		const recordDate = ref(getToday())
 		const remark = ref('')
+		// 视觉覆盖：与 record.icon / record.color 对应；null 表示跟随 category
+		const selectedIcon = ref(null)
+		const selectedColor = ref(null)
+
+		// 图标 / 颜色选项池（与 category.vue 一致，确保 SVG 文件存在）
+		const iconOptions = [
+			'meal', 'food', 'shopping', 'home', 'car', 'bus', 'travel', 'health',
+			'movie', 'game', 'phone', 'wallet', 'gift', 'drink', 'fruit', 'clothes'
+		]
+		const colorOptions = [
+			'#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+			'#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+			'#BB8FCE', '#85C1E9', '#F8B500', '#07c160'
+		]
+
+		// 预计算图标项：path 提前算好，避免 v-for 内调 method 编译后 src 为 undefined
+		const iconItems = computed(() =>
+			iconOptions.map(name => ({
+				name,
+				path: `/static/icon/icon-${name}.svg`,
+				selected: selectedIcon.value === name
+			}))
+		)
 
 		// 页面加载时检查是否编辑模式
 		onLoad((options) => {
@@ -203,6 +261,9 @@ export default {
 				selectedAccountCode.value = record.account_code
 				recordDate.value = record.record_date
 				remark.value = record.remark || ''
+				// 视觉覆盖：编辑时还原原值
+				selectedIcon.value = record.icon || null
+				selectedColor.value = record.color || null
 			}
 		}
 
@@ -267,6 +328,9 @@ export default {
 			}
 			selectedCategoryCode.value = category.code
 			selectedCategory.value = category
+			// 切分类：把视觉覆盖重置为新分类默认，让用户能区分"跟随分类"vs"自定义"
+			selectedIcon.value = category.icon || null
+			selectedColor.value = category.color || null
 		}
 
 		const onAccountChange = (e) => {
@@ -275,6 +339,22 @@ export default {
 				selectedAccountCode.value = accountStore.accounts[index].code
 			}
 		}
+
+		const selectIcon = (icon) => {
+			selectedIcon.value = icon
+		}
+
+		const selectColor = (color) => {
+			selectedColor.value = color
+		}
+
+		// 重置为分类默认（清空覆盖，渲染层自动回退 category）
+		const resetVisual = () => {
+			selectedIcon.value = null
+			selectedColor.value = null
+		}
+
+		const getIconPath = (iconName) => `/static/icon/icon-${iconName}.svg`
 
 		const onDateChange = (e) => {
 			// multiSelector: e.detail.value = [yearIdx, monthIdx, dayIdx]
@@ -370,7 +450,10 @@ export default {
 				category_name: selectedCategory.value?.name || '',
 				account_code: selectedAccountCode.value,
 				remark: remark.value,
-				record_date: recordDate.value
+				record_date: recordDate.value,
+				// 视觉覆盖：null 表示"跟随分类"；用户选了就存用户值
+				icon: selectedIcon.value,
+				color: selectedColor.value
 			}
 
 			try {
@@ -425,9 +508,15 @@ export default {
 			amount,
 			displayAmount,
 			selectedCategoryCode,
+			selectedCategory,
 			selectedAccountCode,
 			recordDate,
 			remark,
+			selectedIcon,
+			selectedColor,
+			iconOptions,
+			iconItems,
+			colorOptions,
 			accountOptions,
 			accountIndex,
 			selectedAccount,
@@ -447,7 +536,11 @@ export default {
 			goToIndex,
 			goToRecords,
 			goToStats,
-			goToMy
+			goToMy,
+			selectIcon,
+			selectColor,
+			resetVisual,
+			getIconPath
 		}
 	}
 }
@@ -641,6 +734,100 @@ function getToday() {
 	font-size: 34rpx;
 	box-sizing: border-box;
 	min-height: 88rpx;
+}
+
+/* 视觉覆盖区：图标 + 颜色选择 */
+.visual-section {
+	padding: 24rpx 20rpx;
+}
+
+.visual-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16rpx;
+}
+
+.visual-title {
+	font-size: 28rpx;
+	color: #666666;
+	font-weight: 500;
+}
+
+.visual-reset {
+	font-size: 26rpx;
+	color: #07c160;
+	padding: 8rpx 16rpx;
+	border-radius: 8rpx;
+}
+
+.visual-reset:active {
+	background-color: #EAF6EE;
+}
+
+.icon-grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	gap: 16rpx;
+	margin-bottom: 20rpx;
+}
+
+.icon-item {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 16rpx;
+	background-color: #FDF4E9;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.icon-item:active {
+	transform: scale(0.92);
+}
+
+.icon-item.selected {
+	background-color: #EAF6EE;
+	border: 2rpx solid #07c160;
+	transform: scale(1.05);
+}
+
+.icon-option-svg {
+	width: 56rpx;
+	height: 56rpx;
+}
+
+.color-grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	gap: 16rpx;
+}
+
+.color-item {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.15s ease-out;
+}
+
+.color-item:active {
+	transform: scale(0.92);
+}
+
+.color-item.selected {
+	border: 3rpx solid #333333;
+	transform: scale(1.05);
+}
+
+.color-check {
+	color: #ffffff;
+	font-size: 36rpx;
+	font-weight: bold;
+	text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
 }
 
 .keyboard-wrapper {
