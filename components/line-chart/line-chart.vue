@@ -1,24 +1,19 @@
-/**
- * 折线图组件
- * 显示日支出趋势
- *
- * 实现：<canvas> + uni.createCanvasContext 2D 绘制。
- * 不用 SVG（微信小程序不渲染内联 svg），
- * 不用纯 CSS 旋转线段（viewBox 与容器非正方形时角度会失真）。
- */
 <template>
 	<view class="line-chart">
 		<view class="chart-header">
 			<text class="title">{{ title }}</text>
 		</view>
-		<view class="chart-container">
-			<view class="line-canvas-wrap" :style="canvasWrapStyle">
-				<canvas class="real-canvas" :canvas-id="canvasId" :style="canvasStyle" @touchstart="onTouch"></canvas>
-				<view v-for="(p, i) in points" :key="i" class="point" :style="getPointStyle(p)"></view>
-			</view>
-			<view v-if="hoverInfo.visible" class="tooltip" :style="hoverInfo.style">
-				<text class="tooltip-day">{{ hoverInfo.day }}</text>
-				<text class="tooltip-val">¥{{ hoverInfo.value }}</text>
+		<view class="chart-body" @touchstart="onTouch">
+			<view class="chart-area">
+				<view v-for="(p, i) in points" :key="i" class="bar-wrap" :style="p.wrap">
+					<view class="bar" :style="p.bar"></view>
+				</view>
+				<view v-for="(p, i) in points" :key="'d' + i" class="dot" :style="p.dot"></view>
+				<view v-for="(p, i) in points" :key="'l' + i" class="link" :style="p.link"></view>
+				<view v-if="hover.visible" class="tooltip" :style="hover.style">
+					<text class="tooltip-day">{{ hover.day }}</text>
+					<text class="tooltip-val">¥{{ hover.value }}</text>
+				</view>
 			</view>
 			<view class="x-axis">
 				<text v-for="label in xLabels" :key="label" class="x-label">{{ label }}</text>
@@ -33,25 +28,13 @@ let __chartUid = 0
 export default {
 	name: 'LineChart',
 	props: {
-		title: {
-			type: String,
-			default: '支出趋势'
-		},
-		data: {
-			type: Array,
-			default: () => []
-		},
-		xLabels: {
-			type: Array,
-			default: () => []
-		}
+		title: { type: String, default: '支出趋势' },
+		data: { type: Array, default: () => [] },
+		xLabels: { type: Array, default: () => [] }
 	},
 	data() {
 		return {
-			canvasId: 'line-chart-' + (++__chartUid),
-			canvasW: 0,
-			canvasH: 0,
-			touchIndex: -1,
+			uid: 'line-chart-' + (++__chartUid),
 			hover: { visible: false, day: '', value: '', style: {} }
 		}
 	},
@@ -59,158 +42,49 @@ export default {
 		points() {
 			if (this.data.length === 0) return []
 			const max = Math.max(...this.data, 1)
-			return this.data.map((value, index) => ({
-				value,
-				x: (index / Math.max(this.data.length - 1, 1)) * 100,
-				y: 100 - (value / max) * 80
-			}))
-		},
-		canvasWrapStyle() {
-			return { position: 'relative' }
-		},
-		canvasStyle() {
-			return {
-				width: this.canvasW + 'px',
-				height: this.canvasH + 'px'
-			}
-		},
-		hoverInfo() {
-			return this.hover
+			const n = this.data.length
+			const slot = 100 / Math.max(n - 1, 1)
+			return this.data.map((value, i) => {
+				const xPct = i * slot
+				const yPct = 100 - (value / max) * 80 - 10
+				return {
+					value,
+					wrap: { left: (xPct - slot / 2) + '%', width: slot + '%' },
+					bar: { height: (100 - yPct) + '%' },
+					dot: { left: xPct + '%', top: yPct + '%' },
+					link: i < n - 1
+						? { left: xPct + '%', top: yPct + '%', width: slot + '%', transform: 'rotate(' + Math.atan2(this.data[i + 1] / Math.max(...this.data, 1) * 80 - value / max * 80, slot) * 180 / Math.PI + 'deg)' }
+						: null
+				}
+			})
 		}
-	},
-	watch: {
-		data: {
-			handler() {
-				this.$nextTick(() => this.measureAndDraw())
-			},
-			deep: true
-		}
-	},
-	mounted() {
-		this.$nextTick(() => this.measureAndDraw())
 	},
 	methods: {
-		measureAndDraw() {
-			const query = uni.createSelectorQuery().in(this)
-			query.select('.line-canvas').boundingClientRect(rect => {
-				if (!rect || !rect.width) {
-					// 容器未就绪，再来一次
-					setTimeout(() => this.measureAndDraw(), 50)
-					return
-				}
-				this.canvasW = Math.floor(rect.width)
-				this.canvasH = Math.floor(rect.height)
-				this.$nextTick(() => this.drawLine())
-			}).exec()
-		},
-		drawLine() {
-			if (this.canvasW === 0 || this.canvasH === 0) return
-			const ctx = uni.createCanvasContext(this.canvasId, this)
-			const W = this.canvasW
-			const H = this.canvasH
-			const padX = 8
-			const padTop = 8
-			const padBottom = 4
-			const innerW = W - padX * 2
-			const innerH = H - padTop - padBottom
-
-			// 背景
-			ctx.setFillStyle('#ffffff')
-			ctx.fillRect(0, 0, W, H)
-
-			const pts = this.points
-			if (pts.length < 2) {
-				ctx.draw()
-				return
-			}
-
-			// 计算每点像素坐标
-			const px = (p) => padX + (p.x / 100) * innerW
-			const py = (p) => padTop + (p.y / 100) * innerH
-
-			// 渐变填充（线下面积）
-			const grad = ctx.createLinearGradient ? ctx.createLinearGradient(0, padTop, 0, padTop + innerH) : null
-			if (grad) {
-				grad.addColorStop(0, 'rgba(7, 193, 96, 0.28)')
-				grad.addColorStop(1, 'rgba(7, 193, 96, 0)')
-			}
-			ctx.setFillStyle(grad || 'rgba(7, 193, 96, 0.18)')
-
-			ctx.beginPath()
-			ctx.moveTo(px(pts[0]), padTop + innerH)
-			for (const p of pts) {
-				ctx.lineTo(px(p), py(p))
-			}
-			ctx.lineTo(px(pts[pts.length - 1]), padTop + innerH)
-			ctx.closePath()
-			ctx.fill()
-
-			// 折线
-			ctx.setStrokeStyle('#07c160')
-			ctx.setLineWidth(2)
-			ctx.setLineCap('round')
-			ctx.setLineJoin('round')
-			ctx.beginPath()
-			ctx.moveTo(px(pts[0]), py(pts[0]))
-			for (let i = 1; i < pts.length; i++) {
-				ctx.lineTo(px(pts[i]), py(pts[i]))
-			}
-			ctx.stroke()
-
-			ctx.draw()
-		},
-		getPointStyle(p) {
-			// 等 canvas 画好后，圆点叠在折线上做装饰
-			const W = this.canvasW
-			const H = this.canvasH
-			if (!W || !H) return { display: 'none' }
-			const padX = 8
-			const padTop = 8
-			const padBottom = 4
-			const innerW = W - padX * 2
-			const innerH = H - padTop - padBottom
-			const x = padX + (p.x / 100) * innerW
-			const y = padTop + (p.y / 100) * innerH
-			return {
-				left: x + 'px',
-				top: y + 'px',
-				width: W + 'px',
-				height: H + 'px',
-				pointerEvents: 'none'
-			}
-		},
 		onTouch(e) {
-			// 简易触摸：找最近的点显示 tooltip
-			if (this.points.length === 0) return
-			const touch = (e.touches && e.touches[0]) || e.changedTouches && e.changedTouches[0]
-			if (!touch) return
-			const tx = touch.x
-			const W = this.canvasW
-			const padX = 8
-			const innerW = W - padX * 2
-			// 反推最近 index
-			let best = 0
-			let bestDist = Infinity
-			for (let i = 0; i < this.points.length; i++) {
-				const px = padX + (this.points[i].x / 100) * innerW
-				const d = Math.abs(px - tx)
-				if (d < bestDist) { bestDist = d; best = i }
-			}
-			const p = this.points[best]
-			const val = (this.data[best] || 0).toFixed(2)
-			const dayLabel = this.xLabels[best] || `${best + 1}日`
-			const tipX = padX + (p.x / 100) * innerW
-			const tipY = 8 + (p.y / 100) * (this.canvasH - 12)
-			this.hover = {
-				visible: true,
-				day: dayLabel,
-				value: val,
-				style: {
-					left: tipX + 'px',
-					top: (tipY - 12) + 'px',
-					transform: 'translate(-50%, -100%)'
+			const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0])
+			if (!touch || !this.points.length) return
+			const query = uni.createSelectorQuery().in(this)
+			query.select('.chart-area').boundingClientRect(rect => {
+				if (!rect) return
+				const tx = touch.x - rect.left
+				const innerW = rect.width * 0.88
+				const padX = rect.width * 0.06
+				const relX = (tx - padX) / innerW * 100
+				let best = 0, bestDist = Infinity
+				for (let i = 0; i < this.points.length; i++) {
+					const d = Math.abs(this.points[i].dot.left.replace('%', '') * 1 - relX)
+					if (d < bestDist) { bestDist = d; best = i }
 				}
-			}
+				const p = this.points[best]
+				const val = (this.data[best] || 0).toFixed(2)
+				const day = this.xLabels[best] || (best + 1) + '日'
+				this.hover = {
+					visible: true,
+					day,
+					value: val,
+					style: { left: p.dot.left, top: p.dot.top, transform: 'translate(-50%, -100%)' }
+				}
+			}).exec()
 		}
 	}
 }
@@ -222,51 +96,58 @@ export default {
 	background-color: #ffffff;
 	border-radius: 12rpx;
 }
-
 .chart-header {
-	margin-bottom: 20rpx;
+	margin-bottom: 16rpx;
 }
-
 .title {
 	font-size: 34rpx;
 	color: #333333;
 	font-weight: bold;
 }
-
-.chart-container {
+.chart-body {
 	position: relative;
-	height: 300rpx;
 }
-
-.line-canvas {
+.chart-area {
 	position: relative;
-	height: 250rpx;
+	height: 240rpx;
+	margin: 0 20rpx 20rpx;
 	border-left: 1rpx solid #f0f0f0;
 	border-bottom: 1rpx solid #f0f0f0;
-	margin: 0 20rpx;
 }
-
-.real-canvas {
+.bar-wrap {
 	position: absolute;
-	left: 0;
-	top: 0;
+	bottom: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
 }
-
-.point {
-	position: absolute;
-	pointer-events: none;
-	transform: translate(-50%, -50%);
+.bar {
+	width: 60%;
+	margin: 0 auto;
+	background: linear-gradient(to top, rgba(7, 193, 96, 0.18), rgba(7, 193, 96, 0.55));
+	border-radius: 4rpx;
 }
-
 .dot {
-	width: 14rpx;
-	height: 14rpx;
+	position: absolute;
+	width: 18rpx;
+	height: 18rpx;
 	border-radius: 50%;
 	background-color: #ffffff;
 	border: 4rpx solid #07c160;
+	transform: translate(-50%, -50%);
 	box-sizing: border-box;
+	z-index: 2;
+	pointer-events: none;
 }
-
+.link {
+	position: absolute;
+	height: 2rpx;
+	background: #07c160;
+	transform-origin: 0 0;
+	z-index: 1;
+	pointer-events: none;
+}
 .tooltip {
 	position: absolute;
 	background: rgba(50, 50, 50, 0.85);
@@ -281,23 +162,19 @@ export default {
 	pointer-events: none;
 	z-index: 10;
 }
-
 .tooltip-day {
 	font-size: 22rpx;
 	opacity: 0.85;
 }
-
 .tooltip-val {
 	font-size: 26rpx;
 	font-weight: bold;
 }
-
 .x-axis {
 	display: flex;
 	justify-content: space-between;
-	padding: 10rpx 20rpx 0;
+	padding: 0 20rpx;
 }
-
 .x-label {
 	font-size: 28rpx;
 	color: #666666;
