@@ -17,6 +17,24 @@ function initRecords() {
   return []
 }
 
+// 记录字段校验
+function validateRecordFields(record) {
+  const requiredFields = ['id', 'type', 'amount', 'category_code', 'record_date', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (record[field] === undefined || record[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 记录字段缺失: id=${record.id || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
 export const useBillStore = defineStore('bill', {
   state: () => ({
     records: []
@@ -61,6 +79,18 @@ export const useBillStore = defineStore('bill', {
     loadRecords() {
       const data = getStorage(STORAGE_KEY)
       this.records = data || initRecords()
+      
+      // 加载时检查字段完整性
+      let invalidCount = 0
+      for (const record of this.records) {
+        if (!validateRecordFields(record)) {
+          invalidCount++
+        }
+      }
+      if (invalidCount > 0) {
+        console.warn(`[sync] 本地存储中有 ${invalidCount} 条记录字段不完整`)
+      }
+      
       return this.records
     },
 
@@ -126,9 +156,17 @@ export const useBillStore = defineStore('bill', {
 
     // 更新云端记录：调真实 REST，失败抛错让外层 .catch 排队
     async syncUpdateInCloud(record) {
+      // 字段校验
+      validateRecordFields(record)
+      
       const { id, ...rest } = record
-      await putRecord(id, rest)
-      return { success: true }
+      try {
+        await putRecord(id, rest)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 更新记录失败: id=${record.id}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 删除账单
@@ -154,8 +192,13 @@ export const useBillStore = defineStore('bill', {
 
     // 从云端删除记录：调真实 REST，失败抛错让外层 .catch 排队
     async syncDeleteFromCloud(id) {
-      await deleteRecord(id)
-      return { success: true }
+      try {
+        await deleteRecord(id)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 删除记录失败: id=${id}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 保存到本地存储
@@ -206,8 +249,16 @@ export const useBillStore = defineStore('bill', {
 
     // 同步到云端（添加记录后调用）：真实调 REST，失败抛错让外层 .catch 排队
     async syncToCloudAfterAdd(record) {
-      await postRecord(record)
-      return { success: true }
+      // 字段校验
+      validateRecordFields(record)
+      
+      try {
+        await postRecord(record)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 添加记录失败: id=${record.id}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 从云端同步数据

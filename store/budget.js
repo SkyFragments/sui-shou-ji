@@ -8,13 +8,31 @@ import { getStorage, setStorage } from '@/utils/storage'
 import { useBillStore } from './bill'
 import { useSyncStore } from '@/store/sync'
 import { generateId } from '@/utils/db'
-import { postBudget, putBudget, deleteBudget } from '@/utils/api'
+import { postBudget, putBudget, deleteBudget, upsertByPutPost } from '@/utils/api'
 
 // 存储键名
 const STORAGE_KEY = 'ssj_budgets'
 
 // 默认预算
 const DEFAULT_BUDGET = 3000
+
+// 预算字段校验
+function validateBudgetFields(budget) {
+  const requiredFields = ['id', 'year_month', 'total_budget', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (budget[field] === undefined || budget[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 预算字段缺失: year_month=${budget.year_month || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
 
 export const useBudgetStore = defineStore('budget', {
   state: () => ({
@@ -138,17 +156,48 @@ export const useBudgetStore = defineStore('budget', {
 
     // 同步单个预算到云端：调真实 REST，失败抛错让外层 .catch 排队
     async syncBudget(budget) {
-      await postBudget(budget)
-      return { success: true }
+      // 字段校验
+      validateBudgetFields(budget)
+      
+      try {
+        await upsertByPutPost(putBudget, postBudget, budget)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 同步预算失败: year_month=${budget.year_month}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 同步所有预算到云端：失败抛错让外层 .catch 处理
     async syncToCloud() {
       const budgetsArray = Object.values(this.budgets)
+      let allOk = true
+      const sync = useSyncStore()
+      
+      console.log(`[sync] 开始同步预算，共 ${budgetsArray.length} 条`)
+      
       for (const budget of budgetsArray) {
-        await postBudget(budget)
+        try {
+          // 字段校验
+          if (!validateBudgetFields(budget)) {
+            console.warn(`[sync] 跳过字段不完整的预算: year_month=${budget.year_month}`)
+            allOk = false
+            continue
+          }
+          
+          await this.syncBudget(budget)
+          console.debug(`[sync] 预算同步成功: year_month=${budget.year_month}`)
+        } catch (e) {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (e && e.statusCode === 401) continue
+          allOk = false
+          console.error(`[sync] 预算同步失败入队: year_month=${budget.year_month}`)
+          sync.addPendingSync('budget_upsert', budget)
+        }
       }
-      return { success: true }
+      
+      console.log(`[sync] 预算同步完成，成功 ${allOk ? '全部' : '部分'}`)
+      return { success: allOk }
     }
   }
 })

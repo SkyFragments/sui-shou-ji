@@ -31,6 +31,24 @@ function initAccounts() {
   }))
 }
 
+// 账户字段校验
+function validateAccountFields(account) {
+  const requiredFields = ['id', 'code', 'name', 'type', 'balance', 'sort', 'is_default', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (account[field] === undefined || account[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 账户字段缺失: id=${account.id || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
 export const useAccountStore = defineStore('account', {
   state: () => ({
     accounts: []
@@ -212,25 +230,47 @@ export const useAccountStore = defineStore('account', {
 
     // 同步单个账户到云端
     async syncAccount(account) {
+      // 字段校验
+      validateAccountFields(account)
+      
       try {
         await upsertByPutPost(putAccount, postAccount, account)
         return { success: true }
       } catch (e) {
-        return { success: false, error: e }
+        console.error(`[sync] 同步账户失败: id=${account.id}, name=${account.name}, error=${e.message}`)
+        throw e  // 抛出异常让调用方处理
       }
     },
 
     // 同步所有账户到云端
     async syncToCloud() {
-      try {
-        for (const acc of this.accounts) {
-          await postAccount(acc)
+      let allOk = true
+      const sync = useSyncStore()
+      
+      console.log(`[sync] 开始同步账户，共 ${this.accounts.length} 条`)
+      
+      for (const acc of this.accounts) {
+        try {
+          // 字段校验
+          if (!validateAccountFields(acc)) {
+            console.warn(`[sync] 跳过字段不完整的账户: id=${acc.id}`)
+            allOk = false
+            continue
+          }
+          
+          await this.syncAccount(acc)
+          console.debug(`[sync] 账户同步成功: id=${acc.id}, name=${acc.name}`)
+        } catch (e) {
+          // 401：api.js 已清队列 + token + user；不再入队
+          if (e && e.statusCode === 401) continue
+          allOk = false
+          console.error(`[sync] 账户同步失败入队: id=${acc.id}, name=${acc.name}`)
+          sync.addPendingSync('account_upsert', acc)
         }
-        return { success: true }
-      } catch (e) {
-        console.error('Sync accounts failed:', e)
-        return { success: false, error: e }
       }
+      
+      console.log(`[sync] 账户同步完成，成功 ${allOk ? '全部' : '部分'}`)
+      return { success: allOk }
     }
   }
 })

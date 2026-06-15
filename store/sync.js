@@ -50,6 +50,58 @@ export const SYNC_STATUS = {
   ERROR: 'error'
 }
 
+// 字段校验工具函数
+function validateRecordFields(record) {
+  const requiredFields = ['id', 'type', 'amount', 'category_code', 'record_date', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (record[field] === undefined || record[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 记录字段缺失: id=${record.id || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
+function validateCategoryFields(category) {
+  const requiredFields = ['id', 'code', 'name', 'type', 'sort', 'is_default', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (category[field] === undefined || category[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 分类字段缺失: id=${category.id || 'unknown'}, code=${category.code || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
+function validateTemplateFields(template) {
+  const requiredFields = ['id', 'name', 'amount', 'type', 'category_code', 'sort', 'is_default', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (template[field] === undefined || template[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 模板字段缺失: id=${template.id || 'unknown'}, name=${template.name || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
 export const useSyncStore = defineStore('sync', {
   state: () => ({
     syncStatus: SYNC_STATUS.IDLE,
@@ -226,6 +278,40 @@ export const useSyncStore = defineStore('sync', {
           if (truncated) {
             console.warn(`[sync] pullFromCloud 达到 MAX_PAGES=${MAX_PAGES} 上限，可能仍有未拉取数据；不更新 lastSyncTime 以便下次续拉`)
           }
+          
+          // 字段校验：拉取数据后检查
+          console.log(`[sync] 开始校验拉取数据：记录 ${allCloudData.records.length} 条, 分类 ${allCloudData.categories.length} 条, 账户 ${allCloudData.accounts.length} 条, 预算 ${allCloudData.budgets.length} 条, 模板 ${allCloudData.templates.length} 条`)
+          
+          let invalidRecordCount = 0
+          for (const record of allCloudData.records) {
+            if (!validateRecordFields(record)) {
+              invalidRecordCount++
+            }
+          }
+          if (invalidRecordCount > 0) {
+            console.warn(`[sync] 拉取数据中有 ${invalidRecordCount} 条记录字段不完整`)
+          }
+          
+          let invalidCatCount = 0
+          for (const cat of allCloudData.categories) {
+            if (!validateCategoryFields(cat)) {
+              invalidCatCount++
+            }
+          }
+          if (invalidCatCount > 0) {
+            console.warn(`[sync] 拉取数据中有 ${invalidCatCount} 条分类字段不完整`)
+          }
+          
+          let invalidTplCount = 0
+          for (const tpl of allCloudData.templates) {
+            if (!validateTemplateFields(tpl)) {
+              invalidTplCount++
+            }
+          }
+          if (invalidTplCount > 0) {
+            console.warn(`[sync] 拉取数据中有 ${invalidTplCount} 条模板字段不完整`)
+          }
+          
           // 全部分页拉完后再合并，确保原子
           this.mergeFromCloud(allCloudData)
           // 用实际拉到的最后一条记录的 update_time 作游标，而非响应的 server_time
@@ -323,6 +409,15 @@ export const useSyncStore = defineStore('sync', {
 
     // 添加待同步项
     addPendingSync(type, data) {
+      // 字段校验日志
+      if (type.startsWith('record_')) {
+        validateRecordFields(data)
+      } else if (type.startsWith('category_')) {
+        validateCategoryFields(data)
+      } else if (type.startsWith('template_')) {
+        validateTemplateFields(data)
+      }
+      
       // 同一 type 只保留最新一条（full_sync 之类幂等性高的去重）
       // 其它类型仍按事件顺序排队，但同 type 累积到 MAX_PENDING_PER_TYPE 上限后丢最早的
       if (type === 'full_sync') {
@@ -366,6 +461,8 @@ export const useSyncStore = defineStore('sync', {
     async syncPendingData() {
       if (this.pendingSync.length === 0) return { success: true }
 
+      console.log(`[sync] 开始同步待同步队列，共 ${this.pendingSync.length} 条`)
+      
       const failedItems = []
 
       try {
@@ -378,6 +475,31 @@ export const useSyncStore = defineStore('sync', {
 
         for (const item of this.pendingSync) {
           try {
+            // 字段校验
+            if (item.type === 'record_add' || item.type === 'record_update') {
+              if (!validateRecordFields(item.data)) {
+                console.warn(`[sync] 跳过字段不完整的待同步项: type=${item.type}, id=${item.data.id}`)
+                failedItems.push(item)
+                continue
+              }
+            }
+            
+            if (item.type === 'category_upsert') {
+              if (!validateCategoryFields(item.data)) {
+                console.warn(`[sync] 跳过字段不完整的待同步项: type=${item.type}, id=${item.data.id}`)
+                failedItems.push(item)
+                continue
+              }
+            }
+            
+            if (item.type === 'template_upsert') {
+              if (!validateTemplateFields(item.data)) {
+                console.warn(`[sync] 跳过字段不完整的待同步项: type=${item.type}, id=${item.data.id}`)
+                failedItems.push(item)
+                continue
+              }
+            }
+            
             if (item.type === 'record_add') {
               await postRecord(item.data)
             } else if (item.type === 'record_update') {
@@ -427,9 +549,11 @@ export const useSyncStore = defineStore('sync', {
         this.saveSyncStatus()
 
         if (failedItems.length > 0) {
+          console.warn(`[sync] 待同步队列处理完成，${failedItems.length} 条失败`)
           return { success: false, error: '部分同步失败', failedCount: failedItems.length, failedItems }
         }
 
+        console.log('[sync] 待同步队列全部处理成功')
         return { success: true }
       } catch (error) {
         console.error('Sync pending data failed:', error)

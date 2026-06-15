@@ -42,6 +42,24 @@ function initCategories() {
   return [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES]
 }
 
+// 分类字段校验
+function validateCategoryFields(category) {
+  const requiredFields = ['id', 'code', 'name', 'type', 'sort', 'is_default', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (category[field] === undefined || category[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 分类字段缺失: id=${category.id || 'unknown'}, code=${category.code || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
 export const useCategoryStore = defineStore('category', {
   state: () => ({
     categories: []
@@ -80,7 +98,13 @@ export const useCategoryStore = defineStore('category', {
       const data = getStorage(STORAGE_KEY)
       if (data === null || data === undefined) {
         // 初始化默认分类，必须带 id 才能上行到 (openid,id) 复合主键的表
-        this.categories = initCategories().map(cat => ({ ...cat, id: cat.id || generateId() }))
+        const now = Date.now()
+        this.categories = initCategories().map(cat => ({ 
+          ...cat, 
+          id: cat.id || generateId(),
+          create_time: now,
+          update_time: now
+        }))
         this.saveCategories()
       } else {
         // 迁移旧数据：把 emoji 图标替换为 SVG 名称，并补 id
@@ -90,9 +114,12 @@ export const useCategoryStore = defineStore('category', {
           '📦': 'box', '💰': 'wallet', '💼': 'gift', '📈': 'box',
           '💵': 'box'
         }
+        const now = Date.now()
         this.categories = data.map(cat => {
           const newCat = { ...cat }
           if (!newCat.id) newCat.id = generateId()
+          if (!newCat.create_time) newCat.create_time = now
+          if (!newCat.update_time) newCat.update_time = now
           if (emojiToIcon[newCat.icon]) {
             newCat.icon = emojiToIcon[newCat.icon]
           }
@@ -100,11 +127,24 @@ export const useCategoryStore = defineStore('category', {
         })
         this.saveCategories()
       }
+      
+      // 加载时检查字段完整性
+      let invalidCount = 0
+      for (const cat of this.categories) {
+        if (!validateCategoryFields(cat)) {
+          invalidCount++
+        }
+      }
+      if (invalidCount > 0) {
+        console.warn(`[sync] 本地存储中有 ${invalidCount} 条分类字段不完整`)
+      }
+      
       return this.categories
     },
 
     // 添加分类
     addCategory(category) {
+      const now = Date.now()
       const newCategory = {
         id: generateId(),
         code: category.code || '',
@@ -113,7 +153,9 @@ export const useCategoryStore = defineStore('category', {
         color: category.color || '#999999',
         type: category.type || 1,
         sort: category.sort || 0,
-        is_default: 0
+        is_default: 0,
+        create_time: now,
+        update_time: now
       }
       this.categories.push(newCategory)
       this.saveCategories()
@@ -134,7 +176,8 @@ export const useCategoryStore = defineStore('category', {
       if (index !== -1) {
         this.categories[index] = {
           ...this.categories[index],
-          ...updates
+          ...updates,
+          update_time: Date.now()
         }
         this.saveCategories()
 
@@ -178,8 +221,13 @@ export const useCategoryStore = defineStore('category', {
     // 从云端删除分类
     // 关键：不 try/catch 吞异常，让 Promise reject 真正传播到调用方的 .catch
     async syncDeleteFromCloud(id) {
-      await deleteCategory(id)
-      return { success: true }
+      try {
+        await deleteCategory(id)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 删除分类失败: id=${id}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 保存到本地存储
@@ -189,15 +237,29 @@ export const useCategoryStore = defineStore('category', {
 
     // 重置分类为默认
     resetCategories() {
-      this.categories = initCategories()
+      const now = Date.now()
+      this.categories = initCategories().map(cat => ({ 
+        ...cat, 
+        id: cat.id || generateId(),
+        create_time: now,
+        update_time: now
+      }))
       this.saveCategories()
     },
 
     // 同步单个分类到云端
     // 关键：不 try/catch 吞异常，让 .catch 真正触发 addPendingSync
     async syncCategory(category) {
-      await upsertByPutPost(putCategory, postCategory, category)
-      return { success: true }
+      // 字段校验
+      validateCategoryFields(category)
+      
+      try {
+        await upsertByPutPost(putCategory, postCategory, category)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 同步分类失败: id=${category.id}, code=${category.code}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 同步所有分类到云端
@@ -205,16 +267,30 @@ export const useCategoryStore = defineStore('category', {
     async syncToCloud() {
       let allOk = true
       const sync = useSyncStore()
+      
+      console.log(`[sync] 开始同步分类，共 ${this.categories.length} 条`)
+      
       for (const cat of this.categories) {
         try {
+          // 字段校验
+          if (!validateCategoryFields(cat)) {
+            console.warn(`[sync] 跳过字段不完整的分类: id=${cat.id}, code=${cat.code}`)
+            allOk = false
+            continue
+          }
+          
           await this.syncCategory(cat)
+          console.debug(`[sync] 分类同步成功: id=${cat.id}, code=${cat.code}`)
         } catch (e) {
           // 401：api.js 已清队列 + token + user；不再入队
           if (e && e.statusCode === 401) continue
           allOk = false
+          console.error(`[sync] 分类同步失败入队: id=${cat.id}, code=${cat.code}`)
           sync.addPendingSync('category_upsert', cat)
         }
       }
+      
+      console.log(`[sync] 分类同步完成，成功 ${allOk ? '全部' : '部分'}`)
       return { success: allOk }
     }
   }

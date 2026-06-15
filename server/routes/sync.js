@@ -115,7 +115,7 @@ router.post('/', verifyToken, wrap(async (req, res) => {
       if (toUpsert.length > 0) {
         const rows = toUpsert.map(r => [
           r.id, openid, r.type, r.amount, r.category_code, r.category_name, r.account_code,
-          r.remark, r.record_date, r.icon || null, r.color || null, r.create_time, r.update_time, 1
+          r.remark, r.record_date, r.icon || null, r.color || null, r.create_time || now, r.update_time || now, 1
         ])
         await conn.query(
           `INSERT INTO records (id, openid, type, amount, category_code, category_name, account_code, remark, record_date, icon, color, create_time, update_time, sync_status)
@@ -163,7 +163,7 @@ router.post('/', verifyToken, wrap(async (req, res) => {
     // 唯一键 (openid, year_month) 在 ON DUPLICATE KEY UPDATE 下被同表覆盖，自然支持跨设备合并
     if (budgets.length > 0) {
       const budRows = budgets.map(bud => [
-        bud.id, openid, bud.year_month, bud.total_budget, bud.create_time, bud.update_time
+        bud.id, openid, bud.year_month, bud.total_budget || 0, bud.create_time || now, bud.update_time || now
       ])
       await conn.query(
         `INSERT INTO budgets (id, openid, year_month, total_budget, create_time, update_time)

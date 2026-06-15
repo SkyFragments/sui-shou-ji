@@ -28,6 +28,24 @@ const getSyncStore = () => {
 
 const STORAGE_KEY = TABLE_NAMES.TEMPLATE
 
+// 模板字段校验
+function validateTemplateFields(template) {
+  const requiredFields = ['id', 'name', 'amount', 'type', 'category_code', 'sort', 'is_default', 'create_time', 'update_time']
+  const missingFields = []
+  
+  for (const field of requiredFields) {
+    if (template[field] === undefined || template[field] === null) {
+      missingFields.push(field)
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.warn(`[sync] 模板字段缺失: id=${template.id || 'unknown'}, name=${template.name || 'unknown'}, 缺失字段: ${missingFields.join(', ')}`)
+  }
+  
+  return missingFields.length === 0
+}
+
 export const useTemplateStore = defineStore('template', {
   state: () => ({
     templates: []
@@ -62,16 +80,37 @@ export const useTemplateStore = defineStore('template', {
       const data = getStorage(STORAGE_KEY)
       if (data === null || data === undefined) {
         // 首次进入：注入默认
-        this.templates = initTemplates().map(t => ({ ...t, id: t.id || generateId() }))
+        const now = Date.now()
+        this.templates = initTemplates().map(t => ({ 
+          ...t, 
+          id: t.id || generateId(),
+          create_time: now,
+          update_time: now
+        }))
         this.saveTemplates()
       } else {
         // 旧数据迁移：补 id / type 字段；空数组保持空（用户已全删）
+        const now = Date.now()
         this.templates = data.map(t => ({
           ...t,
           id: t.id || generateId(),
-          type: t.type || 1
+          type: t.type || 1,
+          create_time: t.create_time || now,
+          update_time: t.update_time || now
         }))
       }
+      
+      // 加载时检查字段完整性
+      let invalidCount = 0
+      for (const tpl of this.templates) {
+        if (!validateTemplateFields(tpl)) {
+          invalidCount++
+        }
+      }
+      if (invalidCount > 0) {
+        console.warn(`[sync] 本地存储中有 ${invalidCount} 条模板字段不完整`)
+      }
+      
       return this.templates
     },
 
@@ -207,15 +246,28 @@ export const useTemplateStore = defineStore('template', {
     // 同步单个模板到云端（PUT→POST 兜底）
     // 关键：不 try/catch 吞异常，让 Promise reject 真正传播到调用方的 .catch
     async syncTemplate(template) {
-      await upsertByPutPost(putTemplate, postTemplate, template)
-      return { success: true }
+      // 字段校验
+      validateTemplateFields(template)
+      
+      try {
+        await upsertByPutPost(putTemplate, postTemplate, template)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 同步模板失败: id=${template.id}, name=${template.name}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 删除单个云端模板
     // 同上：不 catch，让调用方的 .catch 能挂到 addPendingSync
     async syncDeleteFromCloud(id) {
-      await deleteTemplate(id)
-      return { success: true }
+      try {
+        await deleteTemplate(id)
+        return { success: true }
+      } catch (e) {
+        console.error(`[sync] 删除模板失败: id=${id}, error=${e.message}`)
+        throw e
+      }
     },
 
     // 全量同步（被 syncStore.syncToCloud 并发触发）
@@ -223,17 +275,31 @@ export const useTemplateStore = defineStore('template', {
     async syncToCloud() {
       let allOk = true
       const sync = getSyncStore()
+      
+      console.log(`[sync] 开始同步模板，共 ${this.templates.length} 条`)
+      
       for (const tpl of this.templates) {
         try {
+          // 字段校验
+          if (!validateTemplateFields(tpl)) {
+            console.warn(`[sync] 跳过字段不完整的模板: id=${tpl.id}, name=${tpl.name}`)
+            allOk = false
+            continue
+          }
+          
           await this.syncTemplate(tpl)
+          console.debug(`[sync] 模板同步成功: id=${tpl.id}, name=${tpl.name}`)
         } catch (e) {
           // 401：api.js 已清队列 + token + user；不再入队
           if (e && e.statusCode === 401) continue
           allOk = false
+          console.error(`[sync] 模板同步失败入队: id=${tpl.id}, name=${tpl.name}`)
           // 失败者入 pendingSync，下次网络恢复时重试
           sync.addPendingSync('template_upsert', tpl)
         }
       }
+      
+      console.log(`[sync] 模板同步完成，成功 ${allOk ? '全部' : '部分'}`)
       return { success: allOk }
     }
   }
