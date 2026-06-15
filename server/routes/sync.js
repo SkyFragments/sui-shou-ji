@@ -43,7 +43,7 @@ router.get('/', verifyToken, wrap(async (req, res) => {
     [openid]
   )
   const [budgets] = await pool.execute(
-    'SELECT * FROM budgets WHERE openid = ? ORDER BY year_month ASC',
+    'SELECT * FROM budgets WHERE openid = ? ORDER BY `year_month` ASC',
     [openid]
   )
   // templates 整表返回；量小（默认 8，用户自定义上限通常 < 50）

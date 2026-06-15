@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.get('/', verifyToken, wrap(async (req, res) => {
   const openid = req.user.openid
-  const [rows] = await pool.execute('SELECT * FROM budgets WHERE openid = ? ORDER BY year_month DESC', [openid])
+  const [rows] = await pool.execute('SELECT * FROM budgets WHERE openid = ? ORDER BY `year_month` DESC', [openid])
   res.json({ success: true, data: rows })
 }))
 
